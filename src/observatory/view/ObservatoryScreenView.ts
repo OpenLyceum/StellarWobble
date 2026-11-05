@@ -1,44 +1,61 @@
 /**
  * ObservatoryScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * The Observatory screen: find a planet in noisy radial-velocity data.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. StellarWobbleControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ *  - Top left: the measurements (ObservatoryChartNode).
+ *  - Bottom left: the user's model (period, amplitude, phase), fold and show
+ *    options, and the scatter about the model.
+ *  - Right: the target, the spectrograph, the observing buttons, and the result
+ *    (minimum mass, reveal answer).
  */
 
+import { DerivedProperty, PatternStringProperty, type TReadOnlyProperty } from "scenerystack/axon";
+import { Range } from "scenerystack/dot";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
+import { HBox, Node, RichText, Text, VBox } from "scenerystack/scenery";
 import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
-import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/StellarWobbleButtonOptions.js";
+import { AquaRadioButtonGroup, ComboBox, TextPushButton } from "scenerystack/sun";
+import {
+  FLAT_PANEL_PUSH_BUTTON_OPTIONS,
+  FLAT_RESET_ALL_BUTTON_OPTIONS,
+  LIGHT_SURFACE_TEXT_FILL,
+  STELLAR_WOBBLE_COMBO_BOX_OPTIONS,
+} from "../../common/StellarWobbleButtonOptions.js";
+import { StellarWobblePanel } from "../../common/StellarWobblePanel.js";
+import { formatSignificant } from "../../common/view/chartUtils.js";
+import {
+  createCheckbox,
+  createEquationNode,
+  createExplanationButton,
+  createNumberControl,
+} from "../../common/view/controls.js";
+import { formatPlanetMass, unitsDependencies } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../StellarWobbleConstants.js";
+import {
+  CADENCE_RANGE_DAYS,
+  CONTROL_PANEL_WIDTH,
+  FIT_AMPLITUDE_RANGE_MS,
+  FIT_PERIOD_RANGE_DAYS,
+  FONTS,
+  INSTRUMENT_PRECISIONS_MS,
+  SCREEN_VIEW_MARGIN,
+} from "../../StellarWobbleConstants.js";
 import type { ObservatoryModel } from "../model/ObservatoryModel.js";
+import { ObservatoryTarget } from "../model/ObservatoryTarget.js";
+import { signalMinimumMass } from "../model/PlanetSignal.js";
+import { ObservatoryChartNode } from "./ObservatoryChartNode.js";
 import { ObservatoryScreenSummaryContent } from "./ObservatoryScreenSummaryContent.js";
 
 export type ObservatoryScreenViewOptions = ScreenViewOptions;
 
+const CHART_WIDTH = 610;
+const CHART_HEIGHT = 330;
+
 export class ObservatoryScreenView extends ScreenView {
   public constructor(model: ObservatoryModel, providedOptions?: ObservatoryScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See ObservatoryScreenSummaryContent for the four content regions.
     const options = optionize<ObservatoryScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new ObservatoryScreenSummaryContent(model),
@@ -47,114 +64,273 @@ export class ObservatoryScreenView extends ScreenView {
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: StellarWobbleColors.backgroundColorProperty,
+    const stringManager = StringManager.getInstance();
+    const strings = stringManager.getObservatoryStrings();
+    const common = stringManager.getCommonStrings();
+    const units = stringManager.getUnits();
+    const a11y = stringManager.getObservatoryA11yStrings();
+    const bounds = this.layoutBounds;
+
+    const label = (text: TReadOnlyProperty<string>, maxWidth = CONTROL_PANEL_WIDTH): Text =>
+      new Text(text, { font: FONTS.LABEL, fill: StellarWobbleColors.textColorProperty, maxWidth: maxWidth });
+    const pushButton = (text: TReadOnlyProperty<string>, listener: () => void): TextPushButton =>
+      new TextPushButton(text, {
+        ...FLAT_PANEL_PUSH_BUTTON_OPTIONS,
+        font: FONTS.LABEL,
+        textFill: LIGHT_SURFACE_TEXT_FILL,
+        maxTextWidth: CONTROL_PANEL_WIDTH / 2 - 16,
+        listener: listener,
+      });
+
+    // ── Chart ─────────────────────────────────────────────────────────────────
+    const chart = new ObservatoryChartNode(model, CHART_WIDTH, CHART_HEIGHT);
+    chart.left = bounds.minX + SCREEN_VIEW_MARGIN + 50;
+    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
+
+    // ── Observing panel ───────────────────────────────────────────────────────
+    const targetItems = [
+      { value: ObservatoryTarget.MYSTERY, string: strings.mysteryStarStringProperty },
+      { value: ObservatoryTarget.FIFTY_ONE_PEG, string: strings.fiftyOnePegStringProperty },
+      { value: ObservatoryTarget.SUN_JUPITER, string: strings.sunJupiterStringProperty },
+      { value: ObservatoryTarget.SUN_EARTH, string: strings.sunEarthStringProperty },
+    ].map((item) => ({
+      value: item.value,
+      createNode: () =>
+        new Text(item.string, { font: FONTS.LABEL, fill: LIGHT_SURFACE_TEXT_FILL, maxWidth: CONTROL_PANEL_WIDTH - 60 }),
+    }));
+    const comboListParent = new Node();
+    const targetComboBox = new ComboBox(model.targetProperty, targetItems, comboListParent, {
+      ...STELLAR_WOBBLE_COMBO_BOX_OPTIONS,
+      accessibleName: a11y.controls.targetStringProperty,
     });
-    this.addChild(backgroundRect);
+    const newMysteryButton = pushButton(strings.newMysteryStringProperty, () => model.newMysteryStar());
+    const starMassText = new RichText(
+      new PatternStringProperty(strings.starMassPatternStringProperty, {
+        value: new DerivedProperty([model.signalProperty], (signal) => formatSignificant(signal.starMass, 3)),
+      }),
+      { font: FONTS.SMALL, fill: StellarWobbleColors.mutedTextColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
+    );
 
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text(StringManager.getInstance().getScreenNames().observatoryStringProperty, {
-      font: "bold 36px sans-serif",
-      fill: StellarWobbleColors.textColorProperty,
-      center: this.layoutBounds.center,
+    const precisionRadios = new AquaRadioButtonGroup(
+      model.precisionProperty,
+      INSTRUMENT_PRECISIONS_MS.map((precision) => ({
+        value: precision,
+        createNode: () =>
+          new Text(new PatternStringProperty(strings.precisionPatternStringProperty, { value: precision }), {
+            font: FONTS.LABEL,
+            fill: StellarWobbleColors.textColorProperty,
+            maxWidth: 60,
+          }),
+      })),
+      {
+        orientation: "horizontal",
+        spacing: 12,
+        radioButtonOptions: { radius: 7 },
+        accessibleName: a11y.controls.precisionStringProperty,
+      },
+    );
+    const cadenceControl = createNumberControl(
+      strings.cadenceStringProperty,
+      model.cadenceProperty,
+      CADENCE_RANGE_DAYS,
+      {
+        unitsProperty: units.dayAbbreviationStringProperty,
+        logarithmic: true,
+        significantFigures: 2,
+        accessibleName: a11y.controls.cadenceStringProperty,
+      },
+    );
+    const observeOneButton = pushButton(strings.observeOneStringProperty, () => model.observe(1));
+    const observeTenButton = pushButton(strings.observeTenStringProperty, () => model.observe(10));
+    const clearButton = pushButton(strings.clearDataStringProperty, () => model.clearData());
+    const measurementsText = new Text(
+      new PatternStringProperty(strings.measurementsPatternStringProperty, {
+        count: model.measurementCountProperty,
+        span: new DerivedProperty([model.measurementCountProperty], () => {
+          const last = model.measurements[model.measurements.length - 1];
+          return formatSignificant(last ? last.time : 0, 3);
+        }),
+      }),
+      { font: FONTS.SMALL, fill: StellarWobbleColors.mutedTextColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
+    );
+
+    const observingPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 8,
+        align: "left",
+        children: [
+          label(strings.targetStringProperty),
+          targetComboBox,
+          newMysteryButton,
+          starMassText,
+          label(strings.precisionStringProperty),
+          precisionRadios,
+          cadenceControl,
+          new HBox({ spacing: 8, children: [observeOneButton, observeTenButton] }),
+          clearButton,
+          measurementsText,
+        ],
+      }),
+      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+    );
+    observingPanel.right = bounds.maxX - SCREEN_VIEW_MARGIN;
+    observingPanel.top = bounds.minY + SCREEN_VIEW_MARGIN;
+    model.targetProperty.link((target) => {
+      newMysteryButton.enabled = target === ObservatoryTarget.MYSTERY;
     });
-    this.addChild(placeholderText);
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getObservatoryA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    // ── Fit panel ─────────────────────────────────────────────────────────────
+    const periodControl = createNumberControl(
+      strings.fitPeriodStringProperty,
+      model.fitPeriodProperty,
+      FIT_PERIOD_RANGE_DAYS,
+      {
+        unitsProperty: units.daysStringProperty,
+        logarithmic: true,
+        significantFigures: 4,
+        delta: 0.002,
+        accessibleName: a11y.controls.fitPeriodStringProperty,
+      },
+    );
+    const amplitudeControl = createNumberControl(
+      strings.fitAmplitudeStringProperty,
+      model.fitAmplitudeProperty,
+      FIT_AMPLITUDE_RANGE_MS,
+      {
+        unitsProperty: units.metersPerSecondStringProperty,
+        delta: 0.5,
+        accessibleName: a11y.controls.fitAmplitudeStringProperty,
+      },
+    );
+    const phaseControl = createNumberControl(strings.fitPhaseStringProperty, model.fitPhaseProperty, new Range(0, 1), {
+      significantFigures: 2,
+      delta: 0.01,
+      accessibleName: a11y.controls.fitPhaseStringProperty,
+    });
+    const foldCheckbox = createCheckbox(model.foldProperty, strings.foldDataStringProperty);
+    const showModelCheckbox = createCheckbox(model.showModelProperty, strings.showModelStringProperty);
+    const residualText = new Text(
+      new PatternStringProperty(strings.residualPatternStringProperty, {
+        value: new DerivedProperty([model.residualProperty], (residual) =>
+          residual === null ? "—" : formatSignificant(residual, 3),
+        ),
+      }),
+      { font: FONTS.READOUT, fill: StellarWobbleColors.fitCurveColorProperty, maxWidth: 260 },
+    );
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    const fitPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 8,
+        align: "left",
+        children: [
+          new Text(strings.fitTitleStringProperty, {
+            font: FONTS.TITLE,
+            fill: StellarWobbleColors.fitCurveColorProperty,
+            maxWidth: 300,
+          }),
+          new HBox({ spacing: 18, align: "top", children: [periodControl, amplitudeControl, phaseControl] }),
+          new HBox({ spacing: 18, children: [foldCheckbox, showModelCheckbox, residualText] }),
+        ],
+      }),
+    );
+    fitPanel.left = bounds.minX + SCREEN_VIEW_MARGIN;
+    fitPanel.bottom = bounds.maxY - SCREEN_VIEW_MARGIN;
+
+    // ── Result panel ──────────────────────────────────────────────────────────
+    const inferredMassText = new RichText(
+      new PatternStringProperty(strings.inferredMassPatternStringProperty, {
+        value: DerivedProperty.deriveAny([model.inferredMassProperty, ...unitsDependencies()], () =>
+          formatPlanetMass(model.inferredMassProperty.value),
+        ),
+      }),
+      { font: FONTS.READOUT, fill: StellarWobbleColors.fitCurveColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
+    );
+    const equation = createEquationNode(strings.equationStringProperty, CONTROL_PANEL_WIDTH);
+    const revealButton = pushButton(strings.revealStringProperty, () => {
+      model.revealProperty.value = true;
+    });
+    const answerStringProperty = DerivedProperty.deriveAny(
+      [
+        model.signalProperty,
+        model.precisionProperty,
+        strings.answerPatternStringProperty,
+        strings.noPlanetAnswerStringProperty,
+        ...unitsDependencies(),
+      ],
+      () => {
+        const signal = model.signalProperty.value;
+        const answer = strings.answerPatternStringProperty.value
+          .replace("{{period}}", formatSignificant(signal.period, 4))
+          .replace("{{amplitude}}", formatSignificant(signal.amplitude, 3))
+          .replace("{{mass}}", formatPlanetMass(signalMinimumMass(signal)));
+        return signal.amplitude < model.precisionProperty.value / 3
+          ? `${answer}<br>${strings.noPlanetAnswerStringProperty.value}`
+          : answer;
+      },
+    );
+    const answerText = new RichText(answerStringProperty, {
+      font: FONTS.SMALL,
+      fill: StellarWobbleColors.answerCurveColorProperty,
+      lineWrap: CONTROL_PANEL_WIDTH,
+      visibleProperty: model.revealProperty,
+    });
+    const explanationButton = createExplanationButton(
+      strings.explanationTitleStringProperty,
+      [
+        strings.explanation1StringProperty,
+        strings.explanation2StringProperty,
+        strings.explanation3StringProperty,
+        strings.explanation4StringProperty,
+      ],
+      a11y.controls.explanationStringProperty,
+    );
+    const resultPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 7,
+        align: "left",
+        children: [
+          inferredMassText,
+          equation,
+          revealButton,
+          answerText,
+          new HBox({ spacing: 8, children: [explanationButton, label(common.explanationButtonStringProperty, 150)] }),
+        ],
+      }),
+      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+    );
+    resultPanel.right = observingPanel.right;
+    resultPanel.top = observingPanel.bottom + 8;
+
+    // ── Reset All ─────────────────────────────────────────────────────────────
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
-      listener: () => {
-        model.reset();
-        this.reset();
-      },
-      right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
-      bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
+      listener: () => model.reset(),
+      right: bounds.maxX - SCREEN_VIEW_MARGIN,
+      bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [chart, fitPanel, observingPanel, resultPanel, resetAllButton, comboListParent];
+
     this.addChild(
       new Node({
         pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
+          targetComboBox,
+          newMysteryButton,
+          precisionRadios,
+          cadenceControl,
+          observeOneButton,
+          observeTenButton,
+          clearButton,
+          periodControl,
+          amplitudeControl,
+          phaseControl,
+          foldCheckbox,
+          showModelCheckbox,
+          revealButton,
+          explanationButton,
           resetAllButton,
         ],
       }),
     );
   }
-
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
-  public reset(): void {
-    // TODO: reset any view-side state here
-  }
-
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
-  public override step(_dt: number): void {
-    // TODO: implement animation updates here
-  }
-
-  // ── Accessibility / listeners: dispose ─────────────────────────────────────
-  // ScreenView is `isDisposable: false` and lives for the whole sim, so this
-  // class rarely needs dispose(). Child Nodes (and a live currentDetails
-  // DerivedProperty you own on a short-lived object) do. When you add
-  // DerivedProperty / Multilink / Property.link against model state, keep the
-  // references and tear them down — forks copy what they see. Pattern:
-  //
-  // private readonly disposeObservatoryScreenView: () => void;
-  //
-  // // in the constructor, after creating the listeners:
-  // const statusMultilink = Multilink.multilink(
-  //   [model.someProperty, model.otherProperty],
-  //   (a, b) => { /* update view from model */ },
-  // );
-  // const detailsProperty = new DerivedProperty(
-  //   [model.stateProperty],
-  //   (state) => `State: ${state}`,
-  // ); // → pass as currentDetailsContent in ObservatoryScreenSummaryContent
-  // const onExternal = (v: number) => { /* … */ };
-  // model.externalProperty.link(onExternal); // Property you do NOT own
-  //
-  // this.disposeObservatoryScreenView = () => {
-  //   statusMultilink.dispose();                 // Multilink you created
-  //   detailsProperty.dispose();                 // DerivedProperty you created
-  //   model.externalProperty.unlink(onExternal); // undo external link
-  // };
-  //
-  // public override dispose(): void {
-  //   this.disposeObservatoryScreenView();
-  //   super.dispose();
-  // }
 }

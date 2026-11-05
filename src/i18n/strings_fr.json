@@ -12,6 +12,7 @@
     "metersPerSecond": "m/s",
     "kilometersPerSecond": "km/s",
     "days": "days",
+    "dayAbbreviation": "d",
     "years": "years",
     "au": "AU",
     "degrees": "°",
