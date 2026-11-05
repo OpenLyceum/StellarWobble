@@ -1,40 +1,35 @@
 /**
  * WobbleScreenSummaryContent.ts
  *
- * The accessible screen summary read by screen readers (SceneryStack's
- * Interactive Description). It appears at the top of the parallel DOM and gives
- * a non-visual user a way to orient themselves and to re-read the simulation's
- * current state at any time.
- *
- * A summary has four regions (all optional, but provide at least the first
- * three in every sim for consistency across OpenLyceum):
- *   - playAreaContent       — what the play area contains
- *   - controlAreaContent    — what the controls do
- *   - currentDetailsContent — a LIVE paragraph describing current state
- *   - interactionHintContent — a short hint on how to get started
- *
- * ── Making "current details" live ─────────────────────────────────────────────
- * The template has no model state, so currentDetails is a static string. In a
- * real sim, build a DerivedProperty over the relevant model Properties and pass
- * it as `currentDetailsContent` so the paragraph updates as the sim runs.
- * See LunarLander/src/.../LunarLanderScreenSummaryContent.ts for the pattern.
- * If that DerivedProperty (or any Multilink) is owned by a short-lived object,
- * dispose it on teardown — see the commented dispose() stub in WobbleScreenView.
+ * The accessible screen summary for the Wobble screen. Its current-details
+ * paragraph stays live: planet mass, distance, star mass, period, and the size
+ * of the star's radial-velocity swing.
  */
+import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { ScreenSummaryContent } from "scenerystack/sim";
+import { formatSignificant, toPlainText } from "../../common/view/chartUtils.js";
+import { formatPeriod, unitsDependencies } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { WobbleModel } from "../model/WobbleModel.js";
 
 export class WobbleScreenSummaryContent extends ScreenSummaryContent {
-  // `model` is unused in the template but kept in the signature so real sims can
-  // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: WobbleModel) {
+  public constructor(model: WobbleModel) {
     const a11y = StringManager.getInstance().getWobbleA11yStrings();
+    const system = model.system;
+    const plain = (value: number, digits = 3) => toPlainText(formatSignificant(value, digits));
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.screenSummary.interactionHintStringProperty,
+      currentDetailsContent: new PatternStringProperty(a11y.currentDetailsPatternStringProperty, {
+        planetMass: new DerivedProperty([system.planetMassProperty], (mass) => plain(mass)),
+        distance: new DerivedProperty([system.distanceProperty], (distance) => plain(distance)),
+        starMass: new DerivedProperty([system.starMassProperty], (mass) => plain(mass, 2)),
+        period: DerivedProperty.deriveAny([system.periodProperty, ...unitsDependencies()], () =>
+          toPlainText(formatPeriod(system.periodProperty.value)),
+        ),
+        amplitude: new DerivedProperty([system.semiAmplitudeProperty], (amplitude) => plain(amplitude)),
+      }),
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }

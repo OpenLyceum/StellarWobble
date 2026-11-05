@@ -1,43 +1,24 @@
 /**
  * WobbleModel.ts
  *
- * The top-level model for the simulation screen.
- *
- * Add your simulation's state here using reactive Property objects from
- * scenerystack/axon. The view observes these properties and updates automatically.
- *
- * ── Example ──────────────────────────────────────────────────────────────────
- *   import { BooleanProperty, NumberProperty } from "scenerystack/axon";
- *
- *   public readonly isRunningProperty = new BooleanProperty(false);
- *   public readonly timeProperty = new NumberProperty(0);    // seconds
- *
- * ── Step cycle ────────────────────────────────────────────────────────────────
- * The Sim calls step(dt) on every animation frame. Advance your model state
- * in that method (e.g. integrate equations, update positions).
- *
- * ── Reset ─────────────────────────────────────────────────────────────────────
- * reset() is called when the user presses Reset All. Call .reset() on every
- * Property declared here.
+ * Model for the Wobble screen: one star–planet system seen exactly edge-on,
+ * with Earth toward the bottom of the top view. The user changes the planet's
+ * mass, its distance, and the star's mass, and watches the star's radial
+ * velocity swing.
  */
+
 import type { TModel } from "scenerystack/joist";
+import { OrbitalSystem } from "../../common/model/OrbitalSystem.js";
+import { WOBBLE_EARTH_AZIMUTH } from "../../StellarWobbleConstants.js";
 
 export class WobbleModel implements TModel {
-  /**
-   * Resets all model state to initial values.
-   * Called when the user presses the Reset All button.
-   */
+  public readonly system = new OrbitalSystem({ inclination: 90, earthAzimuth: WOBBLE_EARTH_AZIMUTH });
+
   public reset(): void {
-    // TODO: call .reset() on every Property declared in this model
+    this.system.reset();
   }
 
-  /**
-   * Steps the model forward by dt seconds.
-   * Called every animation frame by the Sim framework.
-   *
-   * @param _dt - elapsed time in seconds since the last frame
-   */
-  public step(_dt: number): void {
-    // TODO: advance simulation state here
+  public step(dt: number): void {
+    this.system.step(dt);
   }
 }

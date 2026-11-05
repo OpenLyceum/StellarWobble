@@ -286,7 +286,7 @@ export class DopplerScreenView extends ScreenView {
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
     timeControlNode.right = resetAllButton.left - 30;
-    timeControlNode.centerY = resetAllButton.centerY;
+    timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.waveView, fullSpectrum, zooms, rightColumn, timeControlNode, resetAllButton];
 

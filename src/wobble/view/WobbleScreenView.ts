@@ -1,44 +1,63 @@
 /**
  * WobbleScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * The Wobble screen: a planet makes its star move in a small circle about their
+ * centre of mass, and the star's spectral lines shift back and forth.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. StellarWobbleControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ *  - Left: the view from above (TopViewNode), with a telescope-view option that
+ *    hides what an astronomer cannot see, and the Hα zoom window below it.
+ *  - Middle: the live radial-velocity chart and the readouts.
+ *  - Right: the orbit sliders and display checkboxes.
  */
 
+import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
-import { ResetAllButton } from "scenerystack/scenery-phet";
+import { HBox, Node, RichText, Text, VBox } from "scenerystack/scenery";
+import { ResetAllButton, TimeControlNode, TimeSpeed } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
-import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/StellarWobbleButtonOptions.js";
+import { dopplerShift, H_ALPHA, shiftMagnification } from "../../common/model/stellarSpectrum.js";
+import {
+  FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+  FLAT_RESET_ALL_BUTTON_OPTIONS,
+  TIME_CONTROL_SPEED_RADIO_OPTIONS,
+} from "../../common/StellarWobbleButtonOptions.js";
+import { StellarWobblePanel } from "../../common/StellarWobblePanel.js";
+import {
+  createCheckbox,
+  createEquationNode,
+  createExplanationButton,
+  createNumberControl,
+} from "../../common/view/controls.js";
+import { formatPeriod, formatSpeed, unitsDependencies } from "../../common/view/formatters.js";
+import { SpectralLineZoomNode } from "../../common/view/SpectralLineZoomNode.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../StellarWobbleConstants.js";
+import {
+  CONTROL_PANEL_WIDTH,
+  DISTANCE_RANGE,
+  FONTS,
+  PLANET_MASS_RANGE,
+  SCREEN_VIEW_MARGIN,
+  STAR_MASS_RANGE,
+  ZOOM_HALF_WIDTH_NM,
+  ZOOM_MAX_SHIFT_FRACTION,
+} from "../../StellarWobbleConstants.js";
 import type { WobbleModel } from "../model/WobbleModel.js";
+import { LiveRVChartNode } from "./LiveRVChartNode.js";
+import { TopViewNode } from "./TopViewNode.js";
 import { WobbleScreenSummaryContent } from "./WobbleScreenSummaryContent.js";
 
 export type WobbleScreenViewOptions = ScreenViewOptions;
 
+const TOP_VIEW_SIZE = 340;
+const CHART_WIDTH = 260;
+const CHART_HEIGHT = 250;
+const ZOOM_WIDTH = 290;
+
 export class WobbleScreenView extends ScreenView {
+  private readonly topView: TopViewNode;
+
   public constructor(model: WobbleModel, providedOptions?: WobbleScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See WobbleScreenSummaryContent for the four content regions.
     const options = optionize<WobbleScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new WobbleScreenSummaryContent(model),
@@ -47,114 +66,174 @@ export class WobbleScreenView extends ScreenView {
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: StellarWobbleColors.backgroundColorProperty,
+    const stringManager = StringManager.getInstance();
+    const strings = stringManager.getWobbleStrings();
+    const common = stringManager.getCommonStrings();
+    const units = stringManager.getUnits();
+    const a11y = stringManager.getWobbleA11yStrings();
+    const system = model.system;
+    const bounds = this.layoutBounds;
+
+    // ── Top view and spectrum ─────────────────────────────────────────────────
+    this.topView = new TopViewNode(system, TOP_VIEW_SIZE);
+    this.topView.left = bounds.minX + SCREEN_VIEW_MARGIN;
+    this.topView.top = bounds.minY + SCREEN_VIEW_MARGIN;
+
+    const magnificationProperty = new DerivedProperty([system.semiAmplitudeProperty], (amplitude) =>
+      shiftMagnification(dopplerShift(H_ALPHA.restWavelength, amplitude), ZOOM_MAX_SHIFT_FRACTION * ZOOM_HALF_WIDTH_NM),
+    );
+    const zoom = new SpectralLineZoomNode(H_ALPHA, system.radialVelocityProperty, magnificationProperty, {
+      width: ZOOM_WIDTH,
     });
-    this.addChild(backgroundRect);
+    zoom.left = this.topView.left;
+    zoom.top = this.topView.bottom + 10;
 
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text(StringManager.getInstance().getScreenNames().wobbleStringProperty, {
-      font: "bold 36px sans-serif",
-      fill: StellarWobbleColors.textColorProperty,
-      center: this.layoutBounds.center,
+    // ── Chart ─────────────────────────────────────────────────────────────────
+    const chart = new LiveRVChartNode(system, CHART_WIDTH, CHART_HEIGHT, strings.chartTitleStringProperty);
+    chart.left = this.topView.right + 20;
+    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
+
+    // ── Readouts ──────────────────────────────────────────────────────────────
+    const readout = (pattern: typeof strings.periodPatternStringProperty, format: () => string): RichText =>
+      new RichText(
+        new PatternStringProperty(pattern, {
+          value: DerivedProperty.deriveAny(
+            [system.periodProperty, system.starSpeedProperty, system.planetSpeedProperty, ...unitsDependencies()],
+            format,
+          ),
+        }),
+        { font: FONTS.READOUT, fill: StellarWobbleColors.textColorProperty, maxWidth: CHART_WIDTH },
+      );
+    const periodReadout = readout(strings.periodPatternStringProperty, () => formatPeriod(system.periodProperty.value));
+    const planetSpeedReadout = readout(strings.planetSpeedPatternStringProperty, () =>
+      formatSpeed(system.planetSpeedProperty.value),
+    );
+    const starSpeedReadout = readout(strings.starSpeedPatternStringProperty, () =>
+      formatSpeed(system.starSpeedProperty.value),
+    );
+    const equation = createEquationNode(strings.equationStringProperty, CHART_WIDTH);
+    const explanationButton = createExplanationButton(
+      strings.explanationTitleStringProperty,
+      [
+        strings.explanation1StringProperty,
+        strings.explanation2StringProperty,
+        strings.explanation3StringProperty,
+        strings.explanation4StringProperty,
+      ],
+      a11y.controls.explanationStringProperty,
+    );
+    const explanationRow = new HBox({
+      spacing: 8,
+      children: [
+        explanationButton,
+        new Text(common.explanationButtonStringProperty, {
+          font: FONTS.LABEL,
+          fill: StellarWobbleColors.textColorProperty,
+          maxWidth: CHART_WIDTH - 40,
+        }),
+      ],
     });
-    this.addChild(placeholderText);
+    const readoutPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 6,
+        align: "left",
+        children: [periodReadout, planetSpeedReadout, starSpeedReadout, equation, explanationRow],
+      }),
+      { minWidth: CHART_WIDTH + 70 },
+    );
+    readoutPanel.left = this.topView.right + 20;
+    readoutPanel.top = chart.bottom + 20;
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getWobbleA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    // ── Controls ──────────────────────────────────────────────────────────────
+    const planetMassControl = createNumberControl(
+      common.planetMassStringProperty,
+      system.planetMassProperty,
+      PLANET_MASS_RANGE,
+      {
+        unitsProperty: units.jupiterMassesStringProperty,
+        logarithmic: true,
+        accessibleName: a11y.controls.planetMassStringProperty,
+      },
+    );
+    const distanceControl = createNumberControl(
+      common.distanceStringProperty,
+      system.distanceProperty,
+      DISTANCE_RANGE,
+      {
+        unitsProperty: units.auStringProperty,
+        logarithmic: true,
+        accessibleName: a11y.controls.distanceStringProperty,
+      },
+    );
+    const starMassControl = createNumberControl(
+      common.starMassStringProperty,
+      system.starMassProperty,
+      STAR_MASS_RANGE,
+      {
+        unitsProperty: units.solarMassesStringProperty,
+        significantFigures: 2,
+        delta: 0.05,
+        accessibleName: a11y.controls.starMassStringProperty,
+      },
+    );
+    const telescopeCheckbox = createCheckbox(this.topView.telescopeViewProperty, strings.telescopeViewStringProperty);
+    const velocityCheckbox = createCheckbox(this.topView.showVelocityProperty, strings.showVelocityStringProperty);
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    const controlPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 12,
+        align: "left",
+        children: [planetMassControl, distanceControl, starMassControl, telescopeCheckbox, velocityCheckbox],
+      }),
+      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+    );
+    controlPanel.right = bounds.maxX - SCREEN_VIEW_MARGIN;
+    controlPanel.top = bounds.minY + SCREEN_VIEW_MARGIN;
+
+    // ── Time controls and Reset All ──────────────────────────────────────────
+    const timeControlNode = new TimeControlNode(system.timer.isPlayingProperty, {
+      timeSpeedProperty: system.timeSpeedProperty,
+      timeSpeeds: [TimeSpeed.FAST, TimeSpeed.NORMAL, TimeSpeed.SLOW],
+      ...TIME_CONTROL_SPEED_RADIO_OPTIONS,
+      playPauseStepButtonOptions: {
+        ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+        stepForwardButtonOptions: {
+          ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS.stepForwardButtonOptions,
+          listener: () => system.advance(0.1),
+        },
+      },
+    });
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
         model.reset();
         this.reset();
       },
-      right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
-      bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
+      right: bounds.maxX - SCREEN_VIEW_MARGIN,
+      bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
+    timeControlNode.right = resetAllButton.left - 30;
+    timeControlNode.bottom = resetAllButton.bottom;
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [this.topView, zoom, chart, readoutPanel, controlPanel, timeControlNode, resetAllButton];
+
     this.addChild(
       new Node({
         pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
+          planetMassControl,
+          distanceControl,
+          starMassControl,
+          telescopeCheckbox,
+          velocityCheckbox,
+          explanationButton,
+          timeControlNode,
           resetAllButton,
         ],
       }),
     );
   }
 
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
   public reset(): void {
-    // TODO: reset any view-side state here
+    this.topView.reset();
   }
-
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
-  public override step(_dt: number): void {
-    // TODO: implement animation updates here
-  }
-
-  // ── Accessibility / listeners: dispose ─────────────────────────────────────
-  // ScreenView is `isDisposable: false` and lives for the whole sim, so this
-  // class rarely needs dispose(). Child Nodes (and a live currentDetails
-  // DerivedProperty you own on a short-lived object) do. When you add
-  // DerivedProperty / Multilink / Property.link against model state, keep the
-  // references and tear them down — forks copy what they see. Pattern:
-  //
-  // private readonly disposeWobbleScreenView: () => void;
-  //
-  // // in the constructor, after creating the listeners:
-  // const statusMultilink = Multilink.multilink(
-  //   [model.someProperty, model.otherProperty],
-  //   (a, b) => { /* update view from model */ },
-  // );
-  // const detailsProperty = new DerivedProperty(
-  //   [model.stateProperty],
-  //   (state) => `State: ${state}`,
-  // ); // → pass as currentDetailsContent in WobbleScreenSummaryContent
-  // const onExternal = (v: number) => { /* … */ };
-  // model.externalProperty.link(onExternal); // Property you do NOT own
-  //
-  // this.disposeWobbleScreenView = () => {
-  //   statusMultilink.dispose();                 // Multilink you created
-  //   detailsProperty.dispose();                 // DerivedProperty you created
-  //   model.externalProperty.unlink(onExternal); // undo external link
-  // };
-  //
-  // public override dispose(): void {
-  //   this.disposeWobbleScreenView();
-  //   super.dispose();
-  // }
 }

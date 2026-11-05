@@ -41,7 +41,9 @@
     "distance": "Star–planet distance",
     "massBothPattern": "{{jupiter}} M<sub>J</sub> = {{earth}} M<sub>⊕</sub>",
     "explanationButton": "How does it work?",
-    "equationsTitle": "Equations"
+    "equationsTitle": "Equations",
+    "movingAway": "moving away",
+    "movingToward": "moving toward us"
   },
   "doppler": {
     "radialVelocity": "Radial velocity",
@@ -70,13 +72,13 @@
     "chartTitle": "Star's radial velocity",
     "periodPattern": "Orbital period: {{value}}",
     "starSpeedPattern": "Star's speed: {{value}}",
-    "amplitudePattern": "Largest radial velocity: {{value}}",
     "equation": "M<sub>★</sub> v<sub>★</sub> = M<sub>p</sub> v<sub>p</sub>",
     "explanationTitle": "A planet makes its star wobble",
     "explanation1": "A star and its planet both orbit their common center of mass. The star is much heavier, so the center of mass sits very close to the star (often inside it), and the star moves in a tiny circle.",
     "explanation2": "As the star circles, it moves toward us for half the orbit and away for the other half. Its spectral lines shift blue, then red, then blue again, once per orbit.",
     "explanation3": "We never see the planet. We measure the star's radial velocity night after night: the repeating pattern reveals the planet. The time for one cycle is the planet's orbital period, and the size of the swing tells us its mass.",
-    "explanation4": "Heavier planets and closer planets give bigger, faster wobbles, which is why the first planets found this way were giant planets very close to their stars (\"hot Jupiters\")."
+    "explanation4": "Heavier planets and closer planets give bigger, faster wobbles, which is why the first planets found this way were giant planets very close to their stars (\"hot Jupiters\").",
+    "planetSpeedPattern": "Planet's speed: {{value}}"
   },
   "viewingAngle": {
     "view3DTitle": "Orbit in 3D (drag to rotate)",
