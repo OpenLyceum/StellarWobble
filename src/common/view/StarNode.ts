@@ -18,7 +18,8 @@ export class StarNode extends Node {
    */
   public constructor(starMassProperty: TReadOnlyProperty<number> | number, radius: number, options?: NodeOptions) {
     const glow = new Circle(radius * 1.9);
-    const disc = new Circle(radius);
+    // A thin darker rim keeps the pale disc visible on the light projector background.
+    const disc = new Circle(radius, { lineWidth: radius * 0.08 });
     super({ children: [glow, disc], ...options });
 
     const update = (mass: number): void => {
@@ -27,6 +28,7 @@ export class StarNode extends Node {
         .addColorStop(0, Color.WHITE)
         .addColorStop(0.45, color.colorUtilsBrighter(0.25))
         .addColorStop(1, color);
+      disc.stroke = color.colorUtilsDarker(0.4);
       glow.fill = new RadialGradient(0, 0, radius * 0.8, 0, 0, radius * 1.9)
         .addColorStop(0, color.withAlpha(0.45))
         .addColorStop(1, color.withAlpha(0));
