@@ -7,7 +7,8 @@ how a star's speed toward or away from us is measured from the shift of its spec
 planet pull its star around their common center of mass, discover why the signal depends on where
 Earth stands (and vanishes for a face-on orbit), and fit noisy measurements to find the planet's
 period and minimum mass. Throughout, the planet itself is never seen: everything comes from the
-star's light. Written for introductory astronomy. Built with
+star's light. Written for introductory astronomy. Companion to
+[Transit Hunter](https://github.com/OpenLyceum/TransitHunter) (the transit method). Built with
 [SceneryStack](https://scenerystack.org/); runs offline as a Progressive Web App.
 
 ## Features

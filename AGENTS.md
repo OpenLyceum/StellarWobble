@@ -7,7 +7,8 @@ Sim-specific context for AI assistants. General SceneryStack guidance: [OpenLyce
 This sim teaches exoplanet detection by the **radial-velocity (Doppler wobble) method** to an
 introductory astronomy audience. It is original work, not a port, and was forked from
 `SceneryStackTemplate` on 5 Nov 2026. It complements `ExtrasolarPlanets`, a NAAP port whose Radial
-Velocity screen has no spectrum and no Doppler explanation. Four screens:
+Velocity screen has no spectrum and no Doppler explanation. Its companion for the transit method is `TransitHunter`, whose
+Rock or Gas? screen turns these wobbles into true masses. Four screens:
 
 | Screen | Folder | Content |
 |---|---|---|
