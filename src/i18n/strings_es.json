@@ -108,6 +108,12 @@
     "target": "Objetivo",
     "mysteryStar": "Estrella misteriosa",
     "fiftyOnePeg": "51 Pegasi",
+    "hd189733": "HD 189733",
+    "hd179949": "HD 179949",
+    "hd209458": "HD 209458",
+    "hd46375": "HD 46375",
+    "gliese436": "Gliese 436",
+    "proximaCentauri": "Próxima Centauri",
     "sunJupiter": "Sol + Júpiter",
     "sunEarth": "Sol + Tierra",
     "newMystery": "Nueva estrella misteriosa",
@@ -132,6 +138,8 @@
     "answerPattern": "Respuesta: P = {{period}} días, K = {{amplitude}} m/s, M<sub>p</sub> sen i = {{mass}}",
     "noPlanetAnswer": "Respuesta: el bamboleo de esta estrella está muy por debajo del ruido.",
     "chartTitle": "Mediciones de velocidad radial",
+    "showAll": "Mostrar todo",
+    "chartHint": "Arrastra el gráfico para desplazarte en el tiempo; usa la rueda del ratón para hacer zoom.",
     "phaseAxis": "Fase (con tu período)",
     "equation": "M<sub>p</sub> sen i ≈ K (P / 2πG)<sup>1/3</sup> M<sub>★</sub><sup>2/3</sup>",
     "explanationTitle": "Encontrar un planeta en los datos",
@@ -185,7 +193,7 @@
     "observatory": {
       "screenSummary": {
         "playArea": "El área de juego muestra un gráfico de las mediciones de velocidad radial de la estrella objetivo, con barras de error, y la curva de tu modelo.",
-        "controlArea": "El área de control tiene el selector de objetivo, la precisión del espectrógrafo, botones para observar una o diez noches, deslizadores para el período, la amplitud y la fase de tu modelo, una casilla para plegar los datos, un botón para revelar la respuesta y un botón Restablecer todo.",
+        "controlArea": "El área de control tiene el selector de objetivo, la precisión del espectrógrafo, botones para observar una o diez noches, botones para acercar y desplazar el eje del tiempo del gráfico, deslizadores para el período, la amplitud y la fase de tu modelo, una casilla para plegar los datos, un botón para revelar la respuesta y un botón Restablecer todo.",
         "interactionHint": "Observa varias noches y luego ajusta el modelo hasta que pase por las mediciones."
       },
       "currentDetailsPattern": "{{count}} mediciones. Tu modelo: período {{period}} días, amplitud {{amplitude}} metros por segundo; dispersión {{residual}} metros por segundo.",
@@ -196,6 +204,11 @@
         "fitPeriod": "Período del modelo",
         "fitAmplitude": "Amplitud del modelo",
         "fitPhase": "Fase del modelo",
+        "zoomIn": "Acercar en el tiempo",
+        "zoomOut": "Alejar en el tiempo",
+        "scrollEarlier": "Desplazar a días anteriores",
+        "scrollLater": "Desplazar a días posteriores",
+        "showAll": "Mostrar todos los días",
         "explanation": "Explicación"
       }
     }

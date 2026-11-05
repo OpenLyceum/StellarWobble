@@ -108,6 +108,12 @@
     "target": "Cible",
     "mysteryStar": "Étoile mystère",
     "fiftyOnePeg": "51 Pégase",
+    "hd189733": "HD 189733",
+    "hd179949": "HD 179949",
+    "hd209458": "HD 209458",
+    "hd46375": "HD 46375",
+    "gliese436": "Gliese 436",
+    "proximaCentauri": "Proxima du Centaure",
     "sunJupiter": "Soleil + Jupiter",
     "sunEarth": "Soleil + Terre",
     "newMystery": "Nouvelle étoile mystère",
@@ -132,6 +138,8 @@
     "answerPattern": "Réponse : P = {{period}} jours, K = {{amplitude}} m/s, M<sub>p</sub> sin i = {{mass}}",
     "noPlanetAnswer": "Réponse : l'oscillation de cette étoile est bien en dessous du bruit.",
     "chartTitle": "Mesures de vitesse radiale",
+    "showAll": "Tout afficher",
+    "chartHint": "Faites glisser le graphique pour défiler dans le temps; la molette de la souris zoome.",
     "phaseAxis": "Phase (avec votre période)",
     "equation": "M<sub>p</sub> sin i ≈ K (P / 2πG)<sup>1/3</sup> M<sub>★</sub><sup>2/3</sup>",
     "explanationTitle": "Trouver une planète dans les données",
@@ -185,7 +193,7 @@
     "observatory": {
       "screenSummary": {
         "playArea": "La zone de jeu montre un graphique des mesures de vitesse radiale de l'étoile cible, avec leurs barres d'erreur, et la courbe de votre modèle.",
-        "controlArea": "La zone de contrôle contient le choix de la cible, la précision du spectrographe, des boutons pour observer une ou dix nuits, des curseurs pour la période, l'amplitude et la phase de votre modèle, une case pour replier les données, un bouton pour révéler la réponse et un bouton Tout réinitialiser.",
+        "controlArea": "La zone de contrôle contient le choix de la cible, la précision du spectrographe, des boutons pour observer une ou dix nuits, des boutons pour zoomer et défiler sur l'axe du temps du graphique, des curseurs pour la période, l'amplitude et la phase de votre modèle, une case pour replier les données, un bouton pour révéler la réponse et un bouton Tout réinitialiser.",
         "interactionHint": "Observez plusieurs nuits, puis ajustez le modèle jusqu'à ce qu'il passe par les mesures."
       },
       "currentDetailsPattern": "{{count}} mesures. Votre modèle : période {{period}} jours, amplitude {{amplitude}} mètres par seconde ; écart {{residual}} mètres par seconde.",
@@ -196,6 +204,11 @@
         "fitPeriod": "Période du modèle",
         "fitAmplitude": "Amplitude du modèle",
         "fitPhase": "Phase du modèle",
+        "zoomIn": "Zoomer sur le temps",
+        "zoomOut": "Dézoomer dans le temps",
+        "scrollEarlier": "Défiler vers les jours précédents",
+        "scrollLater": "Défiler vers les jours suivants",
+        "showAll": "Afficher tous les jours",
         "explanation": "Explication"
       }
     }

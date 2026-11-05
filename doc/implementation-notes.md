@@ -54,7 +54,8 @@ src/
   systems.
 - `tests/OrbitalSystem.test.ts` checks momentum balance, sin i scaling, the clock and the trace
   sweep.
-- `tests/ObservatoryModel.test.ts` checks 51 Peg's minimum mass, the noise statistics and resets.
+- `tests/timeWindow.test.ts` checks the Observatory chart's zoom and scroll limits.
+- `tests/ObservatoryModel.test.ts` checks the real targets' minimum masses against the archive, the noise statistics and resets.
 - `tests/memory-leak.test.ts` covers the shared model and the spectrum and star nodes.
 
 Fuzz with `npm run test:fuzz`. In the dev console the screen models are

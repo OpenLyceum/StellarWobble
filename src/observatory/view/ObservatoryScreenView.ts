@@ -91,6 +91,12 @@ export class ObservatoryScreenView extends ScreenView {
     const targetItems = [
       { value: ObservatoryTarget.MYSTERY, string: strings.mysteryStarStringProperty },
       { value: ObservatoryTarget.FIFTY_ONE_PEG, string: strings.fiftyOnePegStringProperty },
+      { value: ObservatoryTarget.HD_189733, string: strings.hd189733StringProperty },
+      { value: ObservatoryTarget.HD_179949, string: strings.hd179949StringProperty },
+      { value: ObservatoryTarget.HD_209458, string: strings.hd209458StringProperty },
+      { value: ObservatoryTarget.HD_46375, string: strings.hd46375StringProperty },
+      { value: ObservatoryTarget.GLIESE_436, string: strings.gliese436StringProperty },
+      { value: ObservatoryTarget.PROXIMA_CENTAURI, string: strings.proximaCentauriStringProperty },
       { value: ObservatoryTarget.SUN_JUPITER, string: strings.sunJupiterStringProperty },
       { value: ObservatoryTarget.SUN_EARTH, string: strings.sunEarthStringProperty },
     ].map((item) => ({
@@ -304,7 +310,10 @@ export class ObservatoryScreenView extends ScreenView {
     // ── Reset All ─────────────────────────────────────────────────────────────
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
-      listener: () => model.reset(),
+      listener: () => {
+        model.reset();
+        chart.reset();
+      },
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
@@ -321,6 +330,7 @@ export class ObservatoryScreenView extends ScreenView {
           observeOneButton,
           observeTenButton,
           clearButton,
+          ...chart.timeControls,
           periodControl,
           amplitudeControl,
           phaseControl,

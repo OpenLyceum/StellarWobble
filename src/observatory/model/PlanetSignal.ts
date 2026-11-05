@@ -69,15 +69,33 @@ export function randomMysterySignal(): PlanetSignal {
   return { starMass: 1, period: 30, amplitude: 40, phase: 0.3 };
 }
 
+/**
+ * The real targets, from the NASA Exoplanet Archive's composite parameters
+ * (exoplanetarchive.ipac.caltech.edu, table pscomppars, November 2026), with
+ * the orbits made circular. Except for Proxima Centauri, whose second planet
+ * (K ≈ 0.4 m/s) is far below the noise, these stars have one known planet, so
+ * the single sine is the whole signal. The phases are arbitrary.
+ */
+const REFERENCE_SIGNALS = new Map<ObservatoryTarget, PlanetSignal>([
+  // Mayor & Queloz (1995), refined: P = 4.2308 d, K = 55.9 m/s, M★ = 1.11 M☉.
+  [ObservatoryTarget.FIFTY_ONE_PEG, { starMass: 1.11, period: 4.2308, amplitude: 55.9, phase: 0.2 }],
+  [ObservatoryTarget.HD_189733, { starMass: 0.79, period: 2.21858, amplitude: 205, phase: 0.45 }],
+  [ObservatoryTarget.HD_179949, { starMass: 1.21, period: 3.09251, amplitude: 112.6, phase: 0.7 }],
+  [ObservatoryTarget.HD_209458, { starMass: 1.23, period: 3.52475, amplitude: 84.7, phase: 0.35 }],
+  [ObservatoryTarget.HD_46375, { starMass: 0.92, period: 3.02357, amplitude: 33.65, phase: 0.85 }],
+  // Eccentricity 0.14 in reality.
+  [ObservatoryTarget.GLIESE_436, { starMass: 0.47, period: 2.64388, amplitude: 17.09, phase: 0.55 }],
+  [ObservatoryTarget.PROXIMA_CENTAURI, { starMass: 0.122, period: 11.18465, amplitude: 1.226, phase: 0.15 }],
+  // The Sun seen edge-on from afar.
+  [ObservatoryTarget.SUN_JUPITER, { starMass: 1, period: 4332.6, amplitude: 12.5, phase: 0.6 }],
+  [ObservatoryTarget.SUN_EARTH, { starMass: 1, period: 365.25, amplitude: 0.0895, phase: 0.1 }],
+]);
+
 /** The signal of a reference target (not the mystery star). */
 export function referenceSignal(target: ObservatoryTarget): PlanetSignal {
-  if (target === ObservatoryTarget.FIFTY_ONE_PEG) {
-    // Mayor & Queloz (1995), refined: P = 4.2308 d, K = 55.9 m/s, M★ = 1.11 M☉.
-    return { starMass: 1.11, period: 4.2308, amplitude: 55.9, phase: 0.2 };
+  const signal = REFERENCE_SIGNALS.get(target);
+  if (!signal) {
+    throw new Error("The mystery star has no reference signal.");
   }
-  if (target === ObservatoryTarget.SUN_JUPITER) {
-    return { starMass: 1, period: 4332.6, amplitude: 12.5, phase: 0.6 };
-  }
-  // Sun + Earth.
-  return { starMass: 1, period: 365.25, amplitude: 0.0895, phase: 0.1 };
+  return signal;
 }

@@ -6,13 +6,21 @@
  * user's model curve is drawn over the data, and the true signal once revealed
  * (in time mode only, because folding the true curve on a wrong period is not a
  * single curve).
+ *
+ * In time mode the user can zoom in on the time axis and scroll along it: drag
+ * the chart sideways, turn the mouse wheel over it (sideways scrolling or
+ * shift+wheel scrolls), or use the buttons below it. "Show all" (or zooming all
+ * the way out) returns to the whole run, which then grows with the data again.
  */
 
-import { DerivedProperty, Multilink } from "scenerystack/axon";
+import { DerivedProperty, Multilink, NumberProperty, Property } from "scenerystack/axon";
 import { LinePlot } from "scenerystack/bamboo";
 import { Range, Vector2 } from "scenerystack/dot";
 import { Shape } from "scenerystack/kite";
-import { Line, Node, Path, Text } from "scenerystack/scenery";
+import { DragListener, HBox, Line, Node, Path, Rectangle, type SceneryEvent, Text, VBox } from "scenerystack/scenery";
+import { ZoomButton } from "scenerystack/scenery-phet";
+import { ArrowButton, TextPushButton } from "scenerystack/sun";
+import { FLAT_PANEL_PUSH_BUTTON_OPTIONS, LIGHT_SURFACE_TEXT_FILL } from "../../common/StellarWobbleButtonOptions.js";
 import { ChartFrameNode } from "../../common/view/ChartFrameNode.js";
 import { niceStep } from "../../common/view/chartUtils.js";
 import { niceCeil } from "../../common/view/formatters.js";
@@ -21,6 +29,7 @@ import StellarWobbleColors from "../../StellarWobbleColors.js";
 import { FONTS } from "../../StellarWobbleConstants.js";
 import type { ObservatoryModel } from "../model/ObservatoryModel.js";
 import { signalVelocity } from "../model/PlanetSignal.js";
+import { panTimeWindow, zoomTimeWindow } from "./timeWindow.js";
 
 /** Smallest time span shown, days. */
 const MIN_TIME_SPAN = 10;
@@ -36,11 +45,39 @@ const SAMPLES_PER_CYCLE = 40;
 const MIN_SAMPLES = 200;
 const MAX_SAMPLES = 5000;
 
+/** Narrowest time window the user can zoom in to, days. */
+const MIN_WINDOW_SPAN = 1;
+
+/** Zoom factor of one press of a zoom button. */
+const BUTTON_ZOOM_FACTOR = 2;
+
+/** Fraction of the window that one press of a scroll button moves it (the buttons repeat when held). */
+const BUTTON_SCROLL_FRACTION = 0.2;
+
+/** Zoom per pixel of vertical wheel motion: the window scales by exp(deltaY × this). */
+const WHEEL_ZOOM_PER_PIXEL = 0.002;
+
+/** Wheel deltas in lines (Firefox) are converted to pixels with this factor. */
+const PIXELS_PER_WHEEL_LINE = 25;
+
+/** Height of the zoom and scroll buttons. */
+const BUTTON_SIZE = 26;
+
 export class ObservatoryChartNode extends Node {
+  /** The zoom and scroll buttons, in focus order, for the screen's pdomOrder. */
+  public readonly timeControls: readonly Node[];
+
+  /** Days shown on the time axis; null shows the whole run (from day 0 to the latest night). */
+  private readonly timeWindowProperty = new Property<Range | null>(null);
+
   public constructor(model: ObservatoryModel, width: number, height: number) {
     super();
     const common = StringManager.getInstance().getCommonStrings();
     const strings = StringManager.getInstance().getObservatoryStrings();
+    const a11y = StringManager.getInstance().getObservatoryA11yStrings();
+
+    /** End of the whole run on the time axis, days (the right edge when nothing is zoomed). */
+    const fullTimeMaxProperty = new NumberProperty(MIN_TIME_SPAN);
 
     const xAxisLabelProperty = new DerivedProperty(
       [model.foldProperty, common.timeAxisStringProperty, strings.phaseAxisStringProperty],
@@ -97,16 +134,16 @@ export class ObservatoryChartNode extends Node {
       title.bottom = -6;
     });
 
-    /** Sets the ranges to fit the data and curves; returns the x maximum (days, or 1 when folded). */
-    const updateRanges = (): number => {
+    /** Sets the ranges to fit the data and curves; returns the x range (days, or phase 0–1 when folded). */
+    const updateRanges = (): Range => {
       const measurements = model.measurements;
       const lastTime = measurements[measurements.length - 1]?.time ?? 0;
-      let xMax = 1;
-      if (!model.foldProperty.value) {
-        const span = Math.max(MIN_TIME_SPAN, lastTime * 1.05);
-        const step = niceStep(span, 5);
-        xMax = Math.ceil(span / step) * step;
-      }
+      const fullSpan = Math.max(MIN_TIME_SPAN, lastTime * 1.05);
+      const fullStep = niceStep(fullSpan, 5);
+      fullTimeMaxProperty.value = Math.ceil(fullSpan / fullStep) * fullStep;
+      const xRange = model.foldProperty.value
+        ? new Range(0, 1)
+        : (this.timeWindowProperty.value ?? new Range(0, fullTimeMaxProperty.value));
       let extent = Math.max(MIN_HALF_RANGE, model.showModelProperty.value ? model.fitAmplitudeProperty.value : 0);
       if (model.revealProperty.value) {
         extent = Math.max(extent, model.signalProperty.value.amplitude);
@@ -115,8 +152,8 @@ export class ObservatoryChartNode extends Node {
         extent = Math.max(extent, Math.abs(measurement.velocity) + measurement.uncertainty);
       }
       const yMax = niceCeil(extent * 1.1);
-      chart.setRanges(new Range(0, xMax), new Range(-yMax, yMax));
-      return xMax;
+      chart.setRanges(xRange, new Range(-yMax, yMax));
+      return xRange;
     };
 
     /** Draws each measurement as a point with its error bar. */
@@ -141,11 +178,11 @@ export class ObservatoryChartNode extends Node {
       noData.visible = model.measurements.length === 0;
     };
 
-    /** Samples a velocity curve over [0, xMax] with enough points per cycle. */
-    const sampleCurve = (xMax: number, cycles: number, velocityAt: (x: number) => number): Vector2[] => {
+    /** Samples a velocity curve over the x range with enough points per cycle. */
+    const sampleCurve = (xRange: Range, cycles: number, velocityAt: (x: number) => number): Vector2[] => {
       const count = Math.min(MAX_SAMPLES, Math.max(MIN_SAMPLES, Math.ceil(cycles * SAMPLES_PER_CYCLE)));
       return Array.from({ length: count + 1 }, (_, i) => {
-        const x = (i / count) * xMax;
+        const x = xRange.min + (i / count) * xRange.getLength();
         return new Vector2(x, velocityAt(x));
       });
     };
@@ -154,20 +191,24 @@ export class ObservatoryChartNode extends Node {
       const fold = model.foldProperty.value;
       const fitPeriod = model.fitPeriodProperty.value;
       const signal = model.signalProperty.value;
-      const xMax = updateRanges();
+      const xRange = updateRanges();
       updateData();
 
       fitPlot.visible = model.showModelProperty.value;
       if (fitPlot.visible) {
         fitPlot.setDataSet(
-          sampleCurve(xMax, fold ? 1 : xMax / fitPeriod, (x) => model.fitVelocity(fold ? x * fitPeriod : x)),
+          sampleCurve(xRange, fold ? 1 : xRange.getLength() / fitPeriod, (x) =>
+            model.fitVelocity(fold ? x * fitPeriod : x),
+          ),
         );
       }
 
       // The true signal (time mode only).
       answerPlot.visible = model.revealProperty.value && !fold;
       if (answerPlot.visible) {
-        answerPlot.setDataSet(sampleCurve(xMax, xMax / signal.period, (time) => signalVelocity(signal, time)));
+        answerPlot.setDataSet(
+          sampleCurve(xRange, xRange.getLength() / signal.period, (time) => signalVelocity(signal, time)),
+        );
       }
     };
 
@@ -180,16 +221,169 @@ export class ObservatoryChartNode extends Node {
         model.fitAmplitudeProperty,
         model.fitPhaseProperty,
         model.signalProperty,
+        this.timeWindowProperty,
       ],
       update,
     );
-    model.measurementsChangedEmitter.addListener(update);
+    // New target or cleared data: go back to the whole run.
+    const onMeasurementsChanged = (): void => {
+      if (model.measurements.length === 0) {
+        this.timeWindowProperty.value = null;
+      }
+      update();
+    };
+    model.measurementsChangedEmitter.addListener(onMeasurementsChanged);
 
-    this.children = [chart, title];
+    // ── Zooming and scrolling the time axis ───────────────────────────────────
+    const fullTimeRange = (): Range => new Range(0, fullTimeMaxProperty.value);
+    const shownTimeRange = (): Range => this.timeWindowProperty.value ?? fullTimeRange();
+    const zoom = (factor: number, anchor = shownTimeRange().getCenter()): void => {
+      if (!model.foldProperty.value) {
+        this.timeWindowProperty.value = zoomTimeWindow(
+          shownTimeRange(),
+          factor,
+          anchor,
+          fullTimeRange(),
+          MIN_WINDOW_SPAN,
+        );
+      }
+    };
+    const scroll = (delta: number): void => {
+      const timeWindow = this.timeWindowProperty.value;
+      if (timeWindow && !model.foldProperty.value) {
+        this.timeWindowProperty.value = panTimeWindow(timeWindow, delta, fullTimeRange());
+      }
+    };
+
+    // Drag and wheel over the plot. The wheel is handled here so it does not also pan the whole sim.
+    const dragArea = new Rectangle(0, 0, width, height, { fill: "rgba(0,0,0,0)", cursor: "ew-resize" });
+    let lastDragX = 0;
+    dragArea.addInputListener(
+      new DragListener({
+        start: (event) => {
+          lastDragX = dragArea.globalToLocalPoint(event.pointer.point).x;
+        },
+        drag: (event) => {
+          const x = dragArea.globalToLocalPoint(event.pointer.point).x;
+          scroll(((lastDragX - x) / width) * shownTimeRange().getLength());
+          lastDragX = x;
+        },
+      }),
+    );
+    dragArea.addInputListener({
+      wheel: (event: SceneryEvent<WheelEvent>) => {
+        const domEvent = event.domEvent;
+        if (!domEvent || model.foldProperty.value) {
+          return;
+        }
+        domEvent.preventDefault();
+        event.handle();
+        const scale = domEvent.deltaMode === WheelEvent.DOM_DELTA_LINE ? PIXELS_PER_WHEEL_LINE : 1;
+        const sideways = domEvent.shiftKey ? domEvent.deltaY : domEvent.deltaX;
+        if (Math.abs(sideways) > Math.abs(domEvent.deltaY) || domEvent.shiftKey) {
+          scroll(((sideways * scale) / width) * shownTimeRange().getLength());
+        } else {
+          const x = dragArea.globalToLocalPoint(event.pointer.point).x;
+          zoom(Math.exp(domEvent.deltaY * scale * WHEEL_ZOOM_PER_PIXEL), transform.viewToModelX(x));
+        }
+      },
+    });
+    chart.addChild(dragArea);
+    noData.moveToFront();
+
+    // Buttons below the chart.
+    const buttonOptions = { ...FLAT_PANEL_PUSH_BUTTON_OPTIONS, minHeight: BUTTON_SIZE, minWidth: BUTTON_SIZE };
+    const scrollEarlierButton = new ArrowButton(
+      "left",
+      () => scroll(-BUTTON_SCROLL_FRACTION * shownTimeRange().getLength()),
+      {
+        ...buttonOptions,
+        arrowHeight: 12,
+        arrowWidth: 12,
+        accessibleName: a11y.controls.scrollEarlierStringProperty,
+      },
+    );
+    const scrollLaterButton = new ArrowButton(
+      "right",
+      () => scroll(BUTTON_SCROLL_FRACTION * shownTimeRange().getLength()),
+      {
+        ...buttonOptions,
+        arrowHeight: 12,
+        arrowWidth: 12,
+        accessibleName: a11y.controls.scrollLaterStringProperty,
+      },
+    );
+    const zoomOutButton = new ZoomButton({
+      ...buttonOptions,
+      in: false,
+      magnifyingGlassOptions: { glassRadius: 7 },
+      listener: () => zoom(BUTTON_ZOOM_FACTOR),
+      accessibleName: a11y.controls.zoomOutStringProperty,
+    });
+    const zoomInButton = new ZoomButton({
+      ...buttonOptions,
+      in: true,
+      magnifyingGlassOptions: { glassRadius: 7 },
+      listener: () => zoom(1 / BUTTON_ZOOM_FACTOR),
+      accessibleName: a11y.controls.zoomInStringProperty,
+    });
+    const showAllButton = new TextPushButton(strings.showAllStringProperty, {
+      ...FLAT_PANEL_PUSH_BUTTON_OPTIONS,
+      font: FONTS.LABEL,
+      textFill: LIGHT_SURFACE_TEXT_FILL,
+      maxTextWidth: 110,
+      minHeight: BUTTON_SIZE,
+      listener: () => {
+        this.timeWindowProperty.value = null;
+      },
+      accessibleName: a11y.controls.showAllStringProperty,
+    });
+    const hint = new Text(strings.chartHintStringProperty, {
+      font: FONTS.SMALL,
+      fill: StellarWobbleColors.mutedTextColorProperty,
+      maxWidth: width,
+    });
+    const controls = new VBox({
+      spacing: 4,
+      children: [
+        new HBox({
+          spacing: 6,
+          children: [scrollEarlierButton, zoomOutButton, zoomInButton, scrollLaterButton, showAllButton],
+        }),
+        hint,
+      ],
+    });
+    controls.boundsProperty.link(() => {
+      controls.centerX = width / 2;
+      controls.top = chart.bottom + 6;
+    });
+    this.timeControls = [scrollEarlierButton, zoomOutButton, zoomInButton, scrollLaterButton, showAllButton];
+
+    const enabledMultilink = Multilink.multilink(
+      [model.foldProperty, this.timeWindowProperty, fullTimeMaxProperty],
+      (fold, timeWindow, fullTimeMax) => {
+        const zoomed = !fold && timeWindow !== null;
+        zoomInButton.enabled = !fold && (timeWindow ?? new Range(0, fullTimeMax)).getLength() > MIN_WINDOW_SPAN * 1.001;
+        zoomOutButton.enabled = zoomed;
+        showAllButton.enabled = zoomed;
+        scrollEarlierButton.enabled = zoomed && timeWindow.min > 0;
+        scrollLaterButton.enabled = zoomed && timeWindow.max < fullTimeMax;
+        dragArea.pickable = !fold;
+        hint.visible = !fold;
+      },
+    );
+
+    this.children = [chart, title, controls];
     this.disposeEmitter.addListener(() => {
       multilink.dispose();
-      model.measurementsChangedEmitter.removeListener(update);
+      enabledMultilink.dispose();
+      model.measurementsChangedEmitter.removeListener(onMeasurementsChanged);
       xAxisLabelProperty.dispose();
     });
+  }
+
+  /** Shows the whole run again. */
+  public reset(): void {
+    this.timeWindowProperty.reset();
   }
 }

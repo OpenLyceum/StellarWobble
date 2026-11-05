@@ -14,7 +14,7 @@ Velocity screen has no spectrum and no Doppler explanation. Four screens:
 | Doppler | `src/doppler/` | A star with radial + sideways velocity; wavefronts; lab vs star spectrum; Hβ/Hα zoom windows with Δλ; fast-star (km/s) or planet-sized (m/s) speeds |
 | Wobble | `src/wobble/` | Star + planet about the barycentre, top view, Earth at the bottom; live RV chart; Hα zoom; telescope view hides the planet |
 | Viewing Angle | `src/viewing-angle/` | 3-D orbit with a movable To Earth arrow (inclination, Earth direction), orbit seen from Earth, RV over one orbit vs edge-on ghost, true vs minimum mass |
-| Observatory | `src/observatory/` | Observe a target nightly with noise; fit period/amplitude/phase; fold; infer minimum mass; reveal |
+| Observatory | `src/observatory/` | Observe a target nightly with noise; zoom/scroll the time axis; fit period/amplitude/phase; fold; infer minimum mass; reveal |
 
 Physics and data: [`doc/model.md`](doc/model.md). Architecture and decisions:
 [`doc/implementation-notes.md`](doc/implementation-notes.md).
@@ -45,7 +45,8 @@ Physics and data: [`doc/model.md`](doc/model.md). Architecture and decisions:
 | `src/common/model/OrbitalSystem.ts` | Shared model of Wobble and Viewing Angle |
 | `src/common/view/SpectralLineZoomNode.ts` | The zoom window that makes the shift visible |
 | `src/common/view/controls.ts` | Number controls (log scale), checkboxes, explanation dialog button, equation node |
-| `src/observatory/model/PlanetSignal.ts` | Target signals (51 Peg, Sun + Jupiter, Sun + Earth, random mystery) |
+| `src/observatory/model/PlanetSignal.ts` | Target signals (seven real short-period planets from the NASA Exoplanet Archive, Sun + Jupiter, Sun + Earth, random mystery) |
+| `src/observatory/view/timeWindow.ts` | Zoom and scroll limits of the Observatory chart's time axis (view state lives in `ObservatoryChartNode`, null = show all) |
 | `src/preferences/StellarWobblePreferencesModel.ts` | `stellarWobblePreferences` singleton: Show equations (`?showEquations`) |
 
 ## Accessibility

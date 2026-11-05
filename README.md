@@ -26,10 +26,12 @@ star's light. Written for introductory astronomy. Built with
   seen from Earth. The radial-velocity curve shrinks as K = v<sub>★</sub> sin i against the edge-on
   ghost, down to nothing face-on. Readouts compare the true planet mass with the minimum mass
   M<sub>p</sub> sin i that an observer would infer.
-- **Observatory.** Observe a mystery star, 51 Pegasi, or the Sun as Jupiter or Earth would make it
-  wobble. You get one noisy measurement per night, at a precision and cadence you choose, with
-  cloudy nights. Fit a period, an amplitude and a phase, fold the data on your period, and read off
-  the planet's minimum mass, then reveal the answer.
+- **Observatory.** Observe a mystery star, one of seven real stars with short-period planets
+  (51 Pegasi, HD 209458, Gliese 436, Proxima Centauri and others, from the NASA Exoplanet Archive),
+  or the Sun as Jupiter or Earth would make it wobble. You get one noisy measurement per night, at a
+  precision and cadence you choose, with cloudy nights. Zoom in on the time axis and scroll along it
+  (drag, mouse wheel or buttons), fit a period, an amplitude and a phase, fold the data on your
+  period, and read off the planet's minimum mass, then reveal the answer.
 - **Accessible:**
   - Every control works from the keyboard.
   - Each screen has a live screen summary and a keyboard-help dialog.

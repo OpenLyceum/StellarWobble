@@ -97,9 +97,21 @@ The true signal is v<sub>r</sub>(t) = K sin(2π(t/P − φ)), with t in days. Th
 | Target | M★ (M☉) | P (d) | K (m/s) | M<sub>p</sub> sin i |
 |---|---|---|---|---|
 | 51 Pegasi | 1.11 | 4.2308 | 55.9 | 0.47 M<sub>J</sub> |
+| HD 189733 | 0.79 | 2.21858 | 205 | 1.16 M<sub>J</sub> |
+| HD 179949 | 1.21 | 3.09251 | 112.6 | 0.92 M<sub>J</sub> |
+| HD 209458 | 1.23 | 3.52475 | 84.7 | 0.70 M<sub>J</sub> |
+| HD 46375 | 0.92 | 3.02357 | 33.65 | 0.23 M<sub>J</sub> |
+| Gliese 436 | 0.47 | 2.64388 | 17.09 | 0.067 M<sub>J</sub> (21 M<sub>⊕</sub>) |
+| Proxima Centauri | 0.122 | 11.18465 | 1.226 | 0.0033 M<sub>J</sub> (1.06 M<sub>⊕</sub>) |
 | Sun + Jupiter | 1 | 4332.6 | 12.5 | 1 M<sub>J</sub> |
 | Sun + Earth | 1 | 365.25 | 0.0895 | 1 M<sub>⊕</sub> |
 | Mystery | 0.7–1.3 | 2–400 (log-uniform) | 8–200 | 0.1–10 M<sub>J</sub> true mass (log-uniform), cos i uniform |
+
+The real stars after 51 Pegasi come from the NASA Exoplanet Archive's composite parameters
+(`pscomppars`, November 2026). They were picked for periods of a few days, so a couple of weeks of
+nightly data covers several orbits, and for amplitudes from 205 m/s down to 1.2 m/s, so the
+spectrograph precision matters. All but Proxima Centauri have one known planet; Proxima's second
+planet (K ≈ 0.4 m/s) is left out. The orbits are made circular (Gliese 436 b really has e ≈ 0.14).
 
 Observing rules:
 

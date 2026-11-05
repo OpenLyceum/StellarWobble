@@ -18,6 +18,30 @@ describe("PlanetSignal", () => {
     expect(signalMinimumMass(referenceSignal(ObservatoryTarget.FIFTY_ONE_PEG))).toBeCloseTo(0.47, 1);
   });
 
+  it.each([
+    // NASA Exoplanet Archive (pscomppars) minimum masses, Jupiter masses.
+    [ObservatoryTarget.HD_189733, 1.16],
+    [ObservatoryTarget.HD_179949, 0.916],
+    [ObservatoryTarget.HD_209458, 0.699],
+    [ObservatoryTarget.HD_46375, 0.226],
+    [ObservatoryTarget.GLIESE_436, 0.0672],
+    [ObservatoryTarget.PROXIMA_CENTAURI, 0.00332],
+  ])("gives %s its published minimum mass (%f M_J) within 5 %%", (target, published) => {
+    expect(signalMinimumMass(referenceSignal(target)) / published).toBeCloseTo(1, 1);
+  });
+
+  it("gives every real target a period short enough to cover several orbits in a few weeks", () => {
+    for (const target of ObservatoryTarget.enumeration.values) {
+      if (
+        target !== ObservatoryTarget.MYSTERY &&
+        target !== ObservatoryTarget.SUN_JUPITER &&
+        target !== ObservatoryTarget.SUN_EARTH
+      ) {
+        expect(referenceSignal(target).period).toBeLessThan(12);
+      }
+    }
+  });
+
   it("gives the Sun's wobble from Jupiter one Jupiter mass, and from Earth one Earth mass", () => {
     expect(signalMinimumMass(referenceSignal(ObservatoryTarget.SUN_JUPITER))).toBeCloseTo(1, 1);
     expect(signalMinimumMass(referenceSignal(ObservatoryTarget.SUN_EARTH)) * 317.8).toBeCloseTo(1, 1);
