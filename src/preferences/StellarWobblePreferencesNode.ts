@@ -1,9 +1,9 @@
 /**
- * SimPreferencesNode.ts
+ * StellarWobblePreferencesNode.ts
  *
  * Custom preferences UI shown in Preferences → Simulation. Controls are bound
- * to SimPreferencesModel Properties (whose initial values come from
- * simQueryParameters).
+ * to StellarWobblePreferencesModel Properties (whose initial values come from
+ * stellarWobbleQueryParameters).
  */
 
 import { Text, VBox } from "scenerystack/scenery";
@@ -11,12 +11,12 @@ import { PhetFont } from "scenerystack/scenery-phet";
 import { Checkbox } from "scenerystack/sun";
 import type { Tandem } from "scenerystack/tandem";
 import { StringManager } from "../i18n/StringManager.js";
-import SimColors from "../SimColors.js";
-import SimNamespace from "../SimNamespace.js";
-import type { SimPreferencesModel } from "./SimPreferencesModel.js";
+import StellarWobbleColors from "../StellarWobbleColors.js";
+import StellarWobbleNamespace from "../StellarWobbleNamespace.js";
+import type { StellarWobblePreferencesModel } from "./StellarWobblePreferencesModel.js";
 
-export class SimPreferencesNode extends VBox {
-  public constructor(preferencesModel: SimPreferencesModel, tandem?: Tandem) {
+export class StellarWobblePreferencesNode extends VBox {
+  public constructor(preferencesModel: StellarWobblePreferencesModel, tandem?: Tandem) {
     const prefStrings = StringManager.getInstance().getPreferences();
 
     // The Preferences dialog is always white, so use the dark "light control surface"
@@ -24,18 +24,18 @@ export class SimPreferencesNode extends VBox {
     // (which is near-white in default mode and would be invisible on the white dialog).
     const header = new Text(prefStrings.titleStringProperty, {
       font: new PhetFont({ size: 18, weight: "bold" }),
-      fill: SimColors.controlSurfaceTextColorProperty,
+      fill: StellarWobbleColors.controlSurfaceTextColorProperty,
     });
 
     const exampleToggleCheckbox = new Checkbox(
       preferencesModel.exampleToggleProperty,
       new Text(prefStrings.exampleToggleStringProperty, {
         font: new PhetFont(14),
-        fill: SimColors.controlSurfaceTextColorProperty,
+        fill: StellarWobbleColors.controlSurfaceTextColorProperty,
       }),
       {
-        checkboxColor: SimColors.controlSurfaceTextColorProperty,
-        checkboxColorBackground: SimColors.controlSurfaceColorProperty,
+        checkboxColor: StellarWobbleColors.controlSurfaceTextColorProperty,
+        checkboxColorBackground: StellarWobbleColors.controlSurfaceColorProperty,
         spacing: 8,
         ...(tandem && { tandem: tandem.createTandem("exampleToggleCheckbox") }),
       },
@@ -49,4 +49,4 @@ export class SimPreferencesNode extends VBox {
   }
 }
 
-SimNamespace.register("SimPreferencesNode", SimPreferencesNode);
+StellarWobbleNamespace.register("StellarWobblePreferencesNode", StellarWobblePreferencesNode);

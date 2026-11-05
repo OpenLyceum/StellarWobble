@@ -1,17 +1,55 @@
 {
-  "title": "Modèle de Simulation",
+  "title": "Stellar Wobble",
   "screens": {
-    "sim": "Simulation"
+    "doppler": "Doppler",
+    "wobble": "Wobble",
+    "viewingAngle": "Viewing Angle",
+    "observatory": "Observatory"
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-      "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-      "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+    "doppler": {
+      "screenSummary": {
+        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
+        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+      },
+      "currentDetails": "La simulation est dans son état initial.",
+      "controls": {
+        "exampleControl": "Contrôle d'exemple"
+      }
     },
-    "currentDetails": "La simulation est dans son état initial.",
-    "controls": {
-      "exampleControl": "Contrôle d'exemple"
+    "wobble": {
+      "screenSummary": {
+        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
+        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+      },
+      "currentDetails": "La simulation est dans son état initial.",
+      "controls": {
+        "exampleControl": "Contrôle d'exemple"
+      }
+    },
+    "viewingAngle": {
+      "screenSummary": {
+        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
+        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+      },
+      "currentDetails": "La simulation est dans son état initial.",
+      "controls": {
+        "exampleControl": "Contrôle d'exemple"
+      }
+    },
+    "observatory": {
+      "screenSummary": {
+        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
+        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+      },
+      "currentDetails": "La simulation est dans son état initial.",
+      "controls": {
+        "exampleControl": "Contrôle d'exemple"
+      }
     }
   },
   "preferences": {

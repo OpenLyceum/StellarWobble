@@ -1,17 +1,55 @@
 {
-  "title": "Plantilla de Simulación",
+  "title": "Stellar Wobble",
   "screens": {
-    "sim": "Simulación"
+    "doppler": "Doppler",
+    "wobble": "Wobble",
+    "viewingAngle": "Viewing Angle",
+    "observatory": "Observatory"
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "El área de juego muestra el contenido principal de la simulación.",
-      "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-      "interactionHint": "Explora la simulación interactuando con sus controles."
+    "doppler": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
     },
-    "currentDetails": "La simulación está en su estado inicial.",
-    "controls": {
-      "exampleControl": "Control de ejemplo"
+    "wobble": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
+    },
+    "viewingAngle": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
+    },
+    "observatory": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
     }
   },
   "preferences": {

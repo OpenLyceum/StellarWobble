@@ -1,17 +1,55 @@
 {
-  "title": "SceneryStack Template",
+  "title": "Stellar Wobble",
   "screens": {
-    "sim": "Sim"
+    "doppler": "Doppler",
+    "wobble": "Wobble",
+    "viewingAngle": "Viewing Angle",
+    "observatory": "Observatory"
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "The play area shows the main simulation content.",
-      "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-      "interactionHint": "Explore the simulation by interacting with its controls."
+    "doppler": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
     },
-    "currentDetails": "The simulation is in its initial state.",
-    "controls": {
-      "exampleControl": "Example control"
+    "wobble": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
+    },
+    "viewingAngle": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
+    },
+    "observatory": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
     }
   },
   "preferences": {

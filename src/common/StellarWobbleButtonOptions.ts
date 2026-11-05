@@ -1,5 +1,5 @@
 /**
- * SimButtonOptions.ts
+ * StellarWobbleButtonOptions.ts
  *
  * Shared flat button appearance for the sim. Rectangular and round push buttons
  * default to SceneryStack's 3-D appearance; pass these options (or spread them
@@ -11,7 +11,7 @@
 
 import type { PlayPauseStepButtonGroupOptions, TimeControlNodeOptions } from "scenerystack/scenery-phet";
 import { ButtonNode, type ComboBoxOptions } from "scenerystack/sun";
-import SimColors from "../SimColors.js";
+import StellarWobbleColors from "../StellarWobbleColors.js";
 
 /** @public */
 export const FLAT_BUTTON_APPEARANCE_OPTIONS = {
@@ -19,19 +19,19 @@ export const FLAT_BUTTON_APPEARANCE_OPTIONS = {
 } as const;
 
 /** Text on flat push buttons and combo-box items (always on a light control surface). @public */
-export const LIGHT_SURFACE_TEXT_FILL = SimColors.controlSurfaceTextColorProperty;
+export const LIGHT_SURFACE_TEXT_FILL = StellarWobbleColors.controlSurfaceTextColorProperty;
 
 /**
  * Combo-box chrome for panels. Item labels must use {@link LIGHT_SURFACE_TEXT_FILL}, not
- * {@link SimColors.textColorProperty} — that color is for labels on the dark panel fill.
+ * {@link StellarWobbleColors.textColorProperty} — that color is for labels on the dark panel fill.
  *
  * @public
  */
-export const SIM_COMBO_BOX_OPTIONS = {
-  buttonFill: SimColors.controlSurfaceColorProperty,
-  listFill: SimColors.controlSurfaceColorProperty,
-  buttonStroke: SimColors.panelBorderColorProperty,
-  listStroke: SimColors.panelBorderColorProperty,
+export const STELLAR_WOBBLE_COMBO_BOX_OPTIONS = {
+  buttonFill: StellarWobbleColors.controlSurfaceColorProperty,
+  listFill: StellarWobbleColors.controlSurfaceColorProperty,
+  buttonStroke: StellarWobbleColors.panelBorderColorProperty,
+  listStroke: StellarWobbleColors.panelBorderColorProperty,
 } satisfies Pick<ComboBoxOptions, "buttonFill" | "listFill" | "buttonStroke" | "listStroke">;
 
 /** Options for RectangularPushButton and NumberControl arrow buttons. @public */
@@ -46,7 +46,7 @@ export const FLAT_RECTANGULAR_BUTTON_OPTIONS = { ...FLAT_BUTTON_APPEARANCE_OPTIO
  */
 export const FLAT_PANEL_PUSH_BUTTON_OPTIONS = {
   ...FLAT_BUTTON_APPEARANCE_OPTIONS,
-  baseColor: SimColors.controlSurfaceColorProperty,
+  baseColor: StellarWobbleColors.controlSurfaceColorProperty,
 } as const;
 
 /** Options for ResetAllButton (extends RoundPushButton). @public */
@@ -67,6 +67,6 @@ export const FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS = {
  */
 export const TIME_CONTROL_SPEED_RADIO_OPTIONS = {
   speedRadioButtonGroupOptions: {
-    labelOptions: { fill: SimColors.textColorProperty },
+    labelOptions: { fill: StellarWobbleColors.textColorProperty },
   },
 } satisfies Pick<TimeControlNodeOptions, "speedRadioButtonGroupOptions">;

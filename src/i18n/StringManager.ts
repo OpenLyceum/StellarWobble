@@ -50,7 +50,7 @@ const stringProperties = LocalizedString.getNestedStringProperties({
  * Keep this in sync with the `a11y` key in `strings_en.json` — a locale key
  * rename that is not mirrored here fails at the getter return (not silently).
  */
-export type SimA11yStrings = {
+export type StellarWobbleA11yStrings = {
   readonly screenSummary: {
     readonly playAreaStringProperty: ReadOnlyProperty<string>;
     readonly controlAreaStringProperty: ReadOnlyProperty<string>;
@@ -64,9 +64,9 @@ export type SimA11yStrings = {
 
 /**
  * Explicit Preferences → Simulation labels from {@link StringManager.getPreferences}.
- * Same sync rule as {@link SimA11yStrings}.
+ * Same sync rule as {@link StellarWobbleA11yStrings}.
  */
-export type SimPreferenceStrings = {
+export type StellarWobblePreferenceStrings = {
   readonly titleStringProperty: ReadOnlyProperty<string>;
   readonly exampleToggleStringProperty: ReadOnlyProperty<string>;
 };
@@ -103,34 +103,43 @@ export class StringManager {
    * Each property updates automatically when the locale changes.
    */
   public getScreenNames(): {
-    readonly simStringProperty: ReadOnlyProperty<string>;
+    readonly dopplerStringProperty: ReadOnlyProperty<string>;
+    readonly wobbleStringProperty: ReadOnlyProperty<string>;
+    readonly viewingAngleStringProperty: ReadOnlyProperty<string>;
+    readonly observatoryStringProperty: ReadOnlyProperty<string>;
   } {
     return {
-      simStringProperty: stringProperties.screens.simStringProperty,
+      dopplerStringProperty: stringProperties.screens.dopplerStringProperty,
+      wobbleStringProperty: stringProperties.screens.wobbleStringProperty,
+      viewingAngleStringProperty: stringProperties.screens.viewingAngleStringProperty,
+      observatoryStringProperty: stringProperties.screens.observatoryStringProperty,
     };
   }
 
-  /**
-   * Accessibility (Interactive Description) StringProperties.
-   *
-   * Returns the reactive `a11y` string tree used by the parallel DOM:
-   *   - `screenSummary.*` — play-area / control-area overview and an interaction
-   *     hint, read by `SimScreenSummaryContent`.
-   *   - `currentDetails` — a paragraph describing the simulation's current state.
-   *     In a real sim, derive a live version from model Properties (see
-   *     LunarLander's ScreenSummaryContent for the canonical pattern).
-   *
-   * Add `accessibleName` / `accessibleHelpText` strings for individual controls
-   * to the `a11y` group too, then read them through this same nested tree.
-   */
-  public getA11yStrings(): SimA11yStrings {
-    return stringProperties.a11y;
+  /** Accessibility strings for the Doppler screen. */
+  public getDopplerA11yStrings() {
+    return stringProperties.a11y.doppler;
+  }
+
+  /** Accessibility strings for the Wobble screen. */
+  public getWobbleA11yStrings() {
+    return stringProperties.a11y.wobble;
+  }
+
+  /** Accessibility strings for the Viewing Angle screen. */
+  public getViewingAngleA11yStrings() {
+    return stringProperties.a11y.viewingAngle;
+  }
+
+  /** Accessibility strings for the Observatory screen. */
+  public getObservatoryA11yStrings() {
+    return stringProperties.a11y.observatory;
   }
 
   /**
    * Simulation-specific preference labels shown in Preferences → Simulation.
    */
-  public getPreferences(): SimPreferenceStrings {
+  public getPreferences() {
     return stringProperties.preferences;
   }
 }

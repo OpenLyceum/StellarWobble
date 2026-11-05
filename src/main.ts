@@ -21,24 +21,41 @@ import "./brand.js";
 
 import { onReadyToLaunch, PreferencesModel, Sim } from "scenerystack/sim";
 import { Tandem } from "scenerystack/tandem";
+import { DopplerScreen } from "./doppler/DopplerScreen.js";
 import { StringManager } from "./i18n/StringManager.js";
-import { SimPreferencesModel } from "./preferences/SimPreferencesModel.js";
-import { SimPreferencesNode } from "./preferences/SimPreferencesNode.js";
-import SimColors from "./SimColors.js";
-import { SimScreen } from "./sim-screen/SimScreen.js";
+import { ObservatoryScreen } from "./observatory/ObservatoryScreen.js";
+import { StellarWobblePreferencesModel } from "./preferences/StellarWobblePreferencesModel.js";
+import { StellarWobblePreferencesNode } from "./preferences/StellarWobblePreferencesNode.js";
+import StellarWobbleColors from "./StellarWobbleColors.js";
+import { ViewingAngleScreen } from "./viewing-angle/ViewingAngleScreen.js";
+import { WobbleScreen } from "./wobble/WobbleScreen.js";
 
 onReadyToLaunch(() => {
   const stringManager = StringManager.getInstance();
 
-  // Simulation-specific preferences; initial values come from simQueryParameters.
-  const simPreferences = new SimPreferencesModel(Tandem.ROOT.createTandem("preferences"));
+  // Simulation-specific preferences; initial values come from stellarWobbleQueryParameters.
+  const simPreferences = new StellarWobblePreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
   const screens = [
-    new SimScreen({
-      // The screen name Property updates automatically when the locale changes
-      name: stringManager.getScreenNames().simStringProperty,
-      tandem: Tandem.ROOT.createTandem("simScreen"),
-      backgroundColorProperty: SimColors.backgroundColorProperty,
+    new DopplerScreen({
+      name: stringManager.getScreenNames().dopplerStringProperty,
+      tandem: Tandem.ROOT.createTandem("dopplerScreen"),
+      backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
+    }),
+    new WobbleScreen({
+      name: stringManager.getScreenNames().wobbleStringProperty,
+      tandem: Tandem.ROOT.createTandem("wobbleScreen"),
+      backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
+    }),
+    new ViewingAngleScreen({
+      name: stringManager.getScreenNames().viewingAngleStringProperty,
+      tandem: Tandem.ROOT.createTandem("viewingAngleScreen"),
+      backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
+    }),
+    new ObservatoryScreen({
+      name: stringManager.getScreenNames().observatoryStringProperty,
+      tandem: Tandem.ROOT.createTandem("observatoryScreen"),
+      backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
   ];
 
@@ -53,7 +70,7 @@ onReadyToLaunch(() => {
       simulationOptions: {
         customPreferences: [
           {
-            createContent: (tandem: Tandem) => new SimPreferencesNode(simPreferences, tandem),
+            createContent: (tandem: Tandem) => new StellarWobblePreferencesNode(simPreferences, tandem),
           },
         ],
       },
