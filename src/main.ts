@@ -24,7 +24,7 @@ import { Tandem } from "scenerystack/tandem";
 import { DopplerScreen } from "./doppler/DopplerScreen.js";
 import { StringManager } from "./i18n/StringManager.js";
 import { ObservatoryScreen } from "./observatory/ObservatoryScreen.js";
-import { StellarWobblePreferencesModel } from "./preferences/StellarWobblePreferencesModel.js";
+import { stellarWobblePreferences } from "./preferences/StellarWobblePreferencesModel.js";
 import { StellarWobblePreferencesNode } from "./preferences/StellarWobblePreferencesNode.js";
 import StellarWobbleColors from "./StellarWobbleColors.js";
 import { ViewingAngleScreen } from "./viewing-angle/ViewingAngleScreen.js";
@@ -32,9 +32,6 @@ import { WobbleScreen } from "./wobble/WobbleScreen.js";
 
 onReadyToLaunch(() => {
   const stringManager = StringManager.getInstance();
-
-  // Simulation-specific preferences; initial values come from stellarWobbleQueryParameters.
-  const simPreferences = new StellarWobblePreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
   const screens = [
     new DopplerScreen({
@@ -70,7 +67,7 @@ onReadyToLaunch(() => {
       simulationOptions: {
         customPreferences: [
           {
-            createContent: (tandem: Tandem) => new StellarWobblePreferencesNode(simPreferences, tandem),
+            createContent: (tandem: Tandem) => new StellarWobblePreferencesNode(stellarWobblePreferences, tandem),
           },
         ],
       },

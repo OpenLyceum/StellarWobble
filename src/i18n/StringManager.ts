@@ -16,7 +16,7 @@
  * 1. Add the key + English value to strings_en.json
  * 2. Add the same key + translated value to ALL other locale files
  *    (TypeScript will show an error here if any locale is missing a key)
- * 3. Expose the new StringProperty via a new getter method below
+ * 3. Read it through the matching getter below
  */
 
 import type { ReadOnlyProperty } from "scenerystack/axon";
@@ -27,8 +27,6 @@ import stringsFr from "./strings_fr.json";
 
 // ── Compile-time key-parity check ─────────────────────────────────────────────
 // English is the canonical shape; every other locale must match it exactly.
-// TypeScript errors here if any locale file is missing (or adds) a key relative to
-// English. Add one `satisfies` line per new locale so the check stays exhaustive.
 // biome-ignore lint/complexity/noVoid: intentional compile-time type assertion
 void (stringsFr satisfies typeof stringsEn);
 // biome-ignore lint/complexity/noVoid: intentional compile-time type assertion
@@ -44,32 +42,6 @@ const stringProperties = LocalizedString.getNestedStringProperties({
   fr: stringsFr,
   es: stringsEs,
 });
-
-/**
- * Explicit `a11y` shape exposed by {@link StringManager.getA11yStrings}.
- * Keep this in sync with the `a11y` key in `strings_en.json` — a locale key
- * rename that is not mirrored here fails at the getter return (not silently).
- */
-export type StellarWobbleA11yStrings = {
-  readonly screenSummary: {
-    readonly playAreaStringProperty: ReadOnlyProperty<string>;
-    readonly controlAreaStringProperty: ReadOnlyProperty<string>;
-    readonly interactionHintStringProperty: ReadOnlyProperty<string>;
-  };
-  readonly currentDetailsStringProperty: ReadOnlyProperty<string>;
-  readonly controls: {
-    readonly exampleControlStringProperty: ReadOnlyProperty<string>;
-  };
-};
-
-/**
- * Explicit Preferences → Simulation labels from {@link StringManager.getPreferences}.
- * Same sync rule as {@link StellarWobbleA11yStrings}.
- */
-export type StellarWobblePreferenceStrings = {
-  readonly titleStringProperty: ReadOnlyProperty<string>;
-  readonly exampleToggleStringProperty: ReadOnlyProperty<string>;
-};
 
 /**
  * StringManager is a singleton that provides typed access to all localized
@@ -90,18 +62,12 @@ export class StringManager {
     return StringManager.instance;
   }
 
-  /**
-   * The simulation title shown in the navigation bar and browser tab.
-   * Updates automatically when the locale changes.
-   */
+  /** The simulation title shown in the navigation bar and browser tab. */
   public getTitleStringProperty(): ReadOnlyProperty<string> {
     return stringProperties.titleStringProperty;
   }
 
-  /**
-   * Screen name StringProperties used when constructing Screen instances.
-   * Each property updates automatically when the locale changes.
-   */
+  /** Screen name StringProperties used when constructing Screen instances. */
   public getScreenNames(): {
     readonly dopplerStringProperty: ReadOnlyProperty<string>;
     readonly wobbleStringProperty: ReadOnlyProperty<string>;
@@ -114,6 +80,32 @@ export class StringManager {
       viewingAngleStringProperty: stringProperties.screens.viewingAngleStringProperty,
       observatoryStringProperty: stringProperties.screens.observatoryStringProperty,
     };
+  }
+
+  /** Unit symbols and the "value units" pattern. */
+  public getUnits() {
+    return stringProperties.units;
+  }
+
+  /** Labels shared by several screens (spectra, charts, orbit parameters). */
+  public getCommonStrings() {
+    return stringProperties.common;
+  }
+
+  public getDopplerStrings() {
+    return stringProperties.doppler;
+  }
+
+  public getWobbleStrings() {
+    return stringProperties.wobble;
+  }
+
+  public getViewingAngleStrings() {
+    return stringProperties.viewingAngle;
+  }
+
+  public getObservatoryStrings() {
+    return stringProperties.observatory;
   }
 
   /** Accessibility strings for the Doppler screen. */
@@ -136,9 +128,7 @@ export class StringManager {
     return stringProperties.a11y.observatory;
   }
 
-  /**
-   * Simulation-specific preference labels shown in Preferences → Simulation.
-   */
+  /** Simulation-specific preference labels shown in Preferences → Simulation. */
   public getPreferences() {
     return stringProperties.preferences;
   }

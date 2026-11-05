@@ -5,29 +5,31 @@
  * Simulation. Each preference Property takes its initial value from the
  * corresponding query parameter in stellarWobbleQueryParameters.
  *
- * Remove the example preference (and its query parameter / UI control) if the
- * sim has no sim-specific preferences.
+ * A single instance is shared by every screen (see {@link stellarWobblePreferences}).
  */
 
 import { BooleanProperty } from "scenerystack/axon";
-import type { Tandem } from "scenerystack/tandem";
+import { Tandem } from "scenerystack/tandem";
 import StellarWobbleNamespace from "../StellarWobbleNamespace.js";
 import stellarWobbleQueryParameters from "./stellarWobbleQueryParameters.js";
 
 export class StellarWobblePreferencesModel {
-  /** Example preference; initial value comes from the `exampleToggle` query parameter. */
-  public readonly exampleToggleProperty: BooleanProperty;
+  /** Show the equations beside the readouts (Δλ/λ = v_r/c, K, M sin i). */
+  public readonly showEquationsProperty: BooleanProperty;
 
   public constructor(tandem?: Tandem) {
-    this.exampleToggleProperty = new BooleanProperty(
-      stellarWobbleQueryParameters.exampleToggle,
-      tandem ? { tandem: tandem.createTandem("exampleToggleProperty") } : undefined,
+    this.showEquationsProperty = new BooleanProperty(
+      stellarWobbleQueryParameters.showEquations,
+      tandem ? { tandem: tandem.createTandem("showEquationsProperty") } : undefined,
     );
   }
 
   public reset(): void {
-    this.exampleToggleProperty.reset();
+    this.showEquationsProperty.reset();
   }
 }
+
+/** The sim-wide preferences, shared by main.ts (the Preferences dialog) and the screen views. */
+export const stellarWobblePreferences = new StellarWobblePreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
 StellarWobbleNamespace.register("StellarWobblePreferencesModel", StellarWobblePreferencesModel);

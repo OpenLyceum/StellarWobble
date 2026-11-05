@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "A SceneryStack simulation: Stellar Wobble.",
+  "description": "Find an unseen exoplanet the way astronomers do: measure the Doppler shift of its star's spectral lines, see how the wobble depends on our viewing angle, and fit real-looking radial-velocity data.",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
@@ -13,7 +13,10 @@
     "simulation",
     "SceneryStack",
     "interactive",
-    "physics",
+    "astronomy",
+    "exoplanets",
+    "radial-velocity",
+    "doppler-effect",
     "education",
     "pwa"
   ],

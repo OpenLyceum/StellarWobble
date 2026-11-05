@@ -1,44 +1,61 @@
 /**
  * DopplerScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * The Doppler screen: how a star's speed along our line of sight is measured
+ * from the shift of its spectral lines.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. StellarWobbleControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ *  - Top left: the wave picture (WaveViewNode), a star sending light toward
+ *    Earth, with velocity arrows.
+ *  - Bottom left: the star's full visible spectrum under the laboratory one,
+ *    and zoom windows on Hβ and Hα that show the shift.
+ *  - Right: velocity sliders, display checkboxes, readouts, and the
+ *    explanation button.
  */
 
+import { DerivedProperty, PatternStringProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
-import { ResetAllButton } from "scenerystack/scenery-phet";
+import { HBox, Node, RichText, Text, VBox } from "scenerystack/scenery";
+import { ResetAllButton, TimeControlNode } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
-import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/StellarWobbleButtonOptions.js";
+import { dopplerShift, H_ALPHA, H_BETA } from "../../common/model/stellarSpectrum.js";
+import {
+  FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+  FLAT_RESET_ALL_BUTTON_OPTIONS,
+} from "../../common/StellarWobbleButtonOptions.js";
+import { StellarWobblePanel } from "../../common/StellarWobblePanel.js";
+import { formatGrouped, formatSigned } from "../../common/view/chartUtils.js";
+import {
+  createCheckbox,
+  createEquationNode,
+  createExplanationButton,
+  createNumberControl,
+} from "../../common/view/controls.js";
+import { FullSpectrumNode } from "../../common/view/FullSpectrumNode.js";
+import { SpectralLineZoomNode } from "../../common/view/SpectralLineZoomNode.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../StellarWobbleConstants.js";
+import {
+  CONTROL_PANEL_WIDTH,
+  FONTS,
+  SCREEN_VIEW_MARGIN,
+  STAR_SPEED_RANGE_KMS,
+  WOBBLE_SPEED_RANGE_MS,
+} from "../../StellarWobbleConstants.js";
 import type { DopplerModel } from "../model/DopplerModel.js";
 import { DopplerScreenSummaryContent } from "./DopplerScreenSummaryContent.js";
+import { WaveViewNode } from "./WaveViewNode.js";
 
 export type DopplerScreenViewOptions = ScreenViewOptions;
 
+const WAVE_VIEW_WIDTH = 560;
+const WAVE_VIEW_HEIGHT = 250;
+const ZOOM_WIDTH = 230;
+const FRAME_DT = 1 / 30;
+
 export class DopplerScreenView extends ScreenView {
+  private readonly waveView: WaveViewNode;
+
   public constructor(model: DopplerModel, providedOptions?: DopplerScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See DopplerScreenSummaryContent for the four content regions.
     const options = optionize<DopplerScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new DopplerScreenSummaryContent(model),
@@ -47,114 +64,255 @@ export class DopplerScreenView extends ScreenView {
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: StellarWobbleColors.backgroundColorProperty,
-    });
-    this.addChild(backgroundRect);
+    const stringManager = StringManager.getInstance();
+    const strings = stringManager.getDopplerStrings();
+    const common = stringManager.getCommonStrings();
+    const units = stringManager.getUnits();
+    const a11y = stringManager.getDopplerA11yStrings();
+    const bounds = this.layoutBounds;
 
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text(StringManager.getInstance().getScreenNames().dopplerStringProperty, {
-      font: "bold 36px sans-serif",
+    // ── Wave picture ──────────────────────────────────────────────────────────
+    this.waveView = new WaveViewNode(model, WAVE_VIEW_WIDTH, WAVE_VIEW_HEIGHT);
+    this.waveView.left = bounds.minX + SCREEN_VIEW_MARGIN;
+    this.waveView.top = bounds.minY + SCREEN_VIEW_MARGIN;
+
+    // ── Spectra ───────────────────────────────────────────────────────────────
+    const fullSpectrum = new FullSpectrumNode(model.radialVelocityProperty, WAVE_VIEW_WIDTH - 36);
+    fullSpectrum.left = this.waveView.left;
+    fullSpectrum.top = this.waveView.bottom + 10;
+
+    const zoomBeta = new SpectralLineZoomNode(H_BETA, model.radialVelocityProperty, model.magnificationProperty, {
+      width: ZOOM_WIDTH,
+    });
+    const zoomAlpha = new SpectralLineZoomNode(H_ALPHA, model.radialVelocityProperty, model.magnificationProperty, {
+      width: ZOOM_WIDTH,
+    });
+    const zooms = new HBox({ spacing: 24, align: "top", children: [zoomBeta, zoomAlpha] });
+    zooms.left = this.waveView.left;
+    zooms.top = fullSpectrum.bottom + 8;
+
+    // ── Controls ──────────────────────────────────────────────────────────────
+    const kmsControlOptions = { unitsProperty: units.kilometersPerSecondStringProperty, delta: 10 };
+    const msControlOptions = { unitsProperty: units.metersPerSecondStringProperty, delta: 1 };
+    const radialKms = createNumberControl(
+      strings.radialVelocityStringProperty,
+      model.radialVelocityKmsProperty,
+      STAR_SPEED_RANGE_KMS,
+      { ...kmsControlOptions, accessibleName: a11y.controls.radialVelocityStringProperty },
+    );
+    const sidewaysKms = createNumberControl(
+      strings.sidewaysVelocityStringProperty,
+      model.sidewaysVelocityKmsProperty,
+      STAR_SPEED_RANGE_KMS,
+      { ...kmsControlOptions, accessibleName: a11y.controls.sidewaysVelocityStringProperty },
+    );
+    const radialMs = createNumberControl(
+      strings.radialVelocityStringProperty,
+      model.radialVelocityMsProperty,
+      WOBBLE_SPEED_RANGE_MS,
+      { ...msControlOptions, accessibleName: a11y.controls.radialVelocityStringProperty },
+    );
+    const sidewaysMs = createNumberControl(
+      strings.sidewaysVelocityStringProperty,
+      model.sidewaysVelocityMsProperty,
+      WOBBLE_SPEED_RANGE_MS,
+      { ...msControlOptions, accessibleName: a11y.controls.sidewaysVelocityStringProperty },
+    );
+    const kmsVisibleProperty = DerivedProperty.not(model.planetSpeedsProperty);
+    const kmsControls = new VBox({
+      spacing: 8,
+      children: [radialKms, sidewaysKms],
+      visibleProperty: kmsVisibleProperty,
+    });
+    const msControls = new VBox({
+      spacing: 8,
+      children: [radialMs, sidewaysMs],
+      visibleProperty: model.planetSpeedsProperty,
+    });
+    const hint = new Text(strings.radialVelocityHintStringProperty, {
+      font: FONTS.SMALL,
+      fill: StellarWobbleColors.mutedTextColorProperty,
+      maxWidth: CONTROL_PANEL_WIDTH,
+    });
+
+    const planetSpeedsCheckbox = createCheckbox(model.planetSpeedsProperty, strings.planetSpeedsStringProperty);
+    const wavesCheckbox = createCheckbox(this.waveView.showWavesProperty, strings.showWavesStringProperty);
+    const componentsCheckbox = createCheckbox(
+      this.waveView.showComponentsProperty,
+      strings.showComponentsStringProperty,
+    );
+
+    const controlPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 10,
+        align: "left",
+        children: [
+          new Node({ children: [kmsControls, msControls] }),
+          hint,
+          planetSpeedsCheckbox,
+          wavesCheckbox,
+          componentsCheckbox,
+        ],
+      }),
+      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+    );
+
+    // ── Readouts ──────────────────────────────────────────────────────────────
+    const velocityText = (velocityProperty: TReadOnlyProperty<number>): TReadOnlyProperty<string> =>
+      new DerivedProperty(
+        [
+          velocityProperty,
+          model.planetSpeedsProperty,
+          units.valueUnitsPatternStringProperty,
+          units.kilometersPerSecondStringProperty,
+          units.metersPerSecondStringProperty,
+        ],
+        (velocity, planetSpeeds, pattern, kms, ms) =>
+          pattern
+            .replace("{{value}}", formatSigned(planetSpeeds ? velocity : velocity / 1000, 3))
+            .replace("{{units}}", planetSpeeds ? ms : kms),
+      );
+    const radialReadout = new RichText(
+      new PatternStringProperty(strings.radialReadoutPatternStringProperty, {
+        value: velocityText(model.radialVelocityProperty),
+      }),
+      { font: FONTS.READOUT, fill: StellarWobbleColors.textColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
+    );
+    const sidewaysReadout = new RichText(
+      new PatternStringProperty(strings.sidewaysReadoutPatternStringProperty, {
+        value: velocityText(model.sidewaysVelocityProperty),
+      }),
+      { font: FONTS.READOUT, fill: StellarWobbleColors.textColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
+    );
+    const shiftDescriptionProperty = new DerivedProperty(
+      [
+        model.radialVelocityProperty,
+        common.redshiftStringProperty,
+        common.blueshiftStringProperty,
+        common.noShiftStringProperty,
+      ],
+      (velocity, redshift, blueshift, noShift) => {
+        if (velocity > 0) {
+          return redshift;
+        }
+        return velocity < 0 ? blueshift : noShift;
+      },
+    );
+    const shiftDescription = new Text(shiftDescriptionProperty, {
+      font: FONTS.TITLE,
+      maxWidth: CONTROL_PANEL_WIDTH,
+    });
+    model.radialVelocityProperty.link((velocity) => {
+      shiftDescription.fill =
+        velocity > 0
+          ? StellarWobbleColors.redshiftColorProperty
+          : velocity < 0
+            ? StellarWobbleColors.blueshiftColorProperty
+            : StellarWobbleColors.transverseColorProperty;
+    });
+
+    const equation = createEquationNode(strings.equationStringProperty, CONTROL_PANEL_WIDTH);
+    const equationValues = new RichText(
+      new PatternStringProperty(strings.equationValuesPatternStringProperty, {
+        shift: new DerivedProperty([model.radialVelocityProperty], (velocity) =>
+          formatSigned(dopplerShift(H_ALPHA.restWavelength, velocity), 2),
+        ),
+        rest: String(H_ALPHA.restWavelength),
+        velocity: new DerivedProperty([model.radialVelocityProperty], (velocity) =>
+          formatGrouped(velocity).replace("-", "−"),
+        ),
+      }),
+      {
+        font: FONTS.READOUT,
+        fill: StellarWobbleColors.accentColorProperty,
+        maxWidth: CONTROL_PANEL_WIDTH,
+        visibleProperty: equation.visibleProperty,
+      },
+    );
+
+    const explanationButton = createExplanationButton(
+      strings.explanationTitleStringProperty,
+      [
+        strings.explanation1StringProperty,
+        strings.explanation2StringProperty,
+        strings.explanation3StringProperty,
+        strings.explanation4StringProperty,
+      ],
+      a11y.controls.explanationStringProperty,
+    );
+    const explanationLabel = new Text(common.explanationButtonStringProperty, {
+      font: FONTS.LABEL,
       fill: StellarWobbleColors.textColorProperty,
-      center: this.layoutBounds.center,
+      maxWidth: CONTROL_PANEL_WIDTH - 40,
     });
-    this.addChild(placeholderText);
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getDopplerA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    const readoutPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 6,
+        align: "left",
+        children: [
+          shiftDescription,
+          radialReadout,
+          sidewaysReadout,
+          equation,
+          equationValues,
+          new HBox({ spacing: 8, children: [explanationButton, explanationLabel] }),
+        ],
+      }),
+      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+    );
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    const rightColumn = new VBox({ spacing: 10, align: "left", children: [controlPanel, readoutPanel] });
+    rightColumn.right = bounds.maxX - SCREEN_VIEW_MARGIN;
+    rightColumn.top = bounds.minY + SCREEN_VIEW_MARGIN;
+
+    // ── Time controls and Reset All ──────────────────────────────────────────
+    const timeControlNode = new TimeControlNode(model.timer.isPlayingProperty, {
+      playPauseStepButtonOptions: {
+        ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+        stepForwardButtonOptions: {
+          ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS.stepForwardButtonOptions,
+          listener: () => this.waveView.advance(FRAME_DT * 3),
+        },
+      },
+    });
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
         model.reset();
         this.reset();
       },
-      right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
-      bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
+      right: bounds.maxX - SCREEN_VIEW_MARGIN,
+      bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
+    timeControlNode.right = resetAllButton.left - 30;
+    timeControlNode.centerY = resetAllButton.centerY;
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [this.waveView, fullSpectrum, zooms, rightColumn, timeControlNode, resetAllButton];
+
+    // ── Accessibility: traversal order ─────────────────────────────────────────
     this.addChild(
       new Node({
         pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
+          kmsControls,
+          msControls,
+          planetSpeedsCheckbox,
+          wavesCheckbox,
+          componentsCheckbox,
+          explanationButton,
+          timeControlNode,
           resetAllButton,
         ],
       }),
     );
   }
 
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
+  /** Resets view-side state (wave picture and its checkboxes). */
   public reset(): void {
-    // TODO: reset any view-side state here
+    this.waveView.reset();
   }
 
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
-  public override step(_dt: number): void {
-    // TODO: implement animation updates here
+  public override step(dt: number): void {
+    this.waveView.step(dt);
   }
-
-  // ── Accessibility / listeners: dispose ─────────────────────────────────────
-  // ScreenView is `isDisposable: false` and lives for the whole sim, so this
-  // class rarely needs dispose(). Child Nodes (and a live currentDetails
-  // DerivedProperty you own on a short-lived object) do. When you add
-  // DerivedProperty / Multilink / Property.link against model state, keep the
-  // references and tear them down — forks copy what they see. Pattern:
-  //
-  // private readonly disposeDopplerScreenView: () => void;
-  //
-  // // in the constructor, after creating the listeners:
-  // const statusMultilink = Multilink.multilink(
-  //   [model.someProperty, model.otherProperty],
-  //   (a, b) => { /* update view from model */ },
-  // );
-  // const detailsProperty = new DerivedProperty(
-  //   [model.stateProperty],
-  //   (state) => `State: ${state}`,
-  // ); // → pass as currentDetailsContent in DopplerScreenSummaryContent
-  // const onExternal = (v: number) => { /* … */ };
-  // model.externalProperty.link(onExternal); // Property you do NOT own
-  //
-  // this.disposeDopplerScreenView = () => {
-  //   statusMultilink.dispose();                 // Multilink you created
-  //   detailsProperty.dispose();                 // DerivedProperty you created
-  //   model.externalProperty.unlink(onExternal); // undo external link
-  // };
-  //
-  // public override dispose(): void {
-  //   this.disposeDopplerScreenView();
-  //   super.dispose();
-  // }
 }

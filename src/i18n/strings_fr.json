@@ -6,54 +6,203 @@
     "viewingAngle": "Viewing Angle",
     "observatory": "Observatory"
   },
+  "units": {
+    "valueUnitsPattern": "{{value}} {{units}}",
+    "nm": "nm",
+    "metersPerSecond": "m/s",
+    "kilometersPerSecond": "km/s",
+    "days": "days",
+    "years": "years",
+    "au": "AU",
+    "degrees": "°",
+    "solarMasses": "M<sub>☉</sub>",
+    "jupiterMasses": "M<sub>J</sub>",
+    "earthMasses": "M<sub>⊕</sub>"
+  },
+  "common": {
+    "labSpectrum": "Lab",
+    "starSpectrum": "Star",
+    "fullSpectrumTitle": "Spectrum of the star's light",
+    "wavelengthAxis": "Wavelength (nm)",
+    "zoomTitlePattern": "{{line}} line (zoomed)",
+    "shiftPattern": "Δλ = {{value}} nm",
+    "magnifiedPattern": "shift drawn ×{{factor}}",
+    "toScale": "shift drawn to scale",
+    "toEarth": "To Earth",
+    "notToScale": "Not to scale",
+    "redshift": "Redshift: moving away from us",
+    "blueshift": "Blueshift: moving toward us",
+    "noShift": "No shift: no motion along our line of sight",
+    "barycenter": "center of mass",
+    "timeAxis": "Time (days)",
+    "radialVelocityAxis": "Radial velocity (m/s)",
+    "starMass": "Star mass",
+    "planetMass": "Planet mass",
+    "distance": "Star–planet distance",
+    "massBothPattern": "{{jupiter}} M<sub>J</sub> = {{earth}} M<sub>⊕</sub>",
+    "explanationButton": "How does it work?",
+    "equationsTitle": "Equations"
+  },
+  "doppler": {
+    "radialVelocity": "Radial velocity",
+    "radialVelocityHint": "+ away from Earth, − toward Earth",
+    "sidewaysVelocity": "Sideways velocity",
+    "planetSpeeds": "Planet-sized speeds (m/s)",
+    "showWaves": "Light waves",
+    "showComponents": "Velocity parts",
+    "waveNote": "Not to scale: the star's speed is hugely exaggerated compared with the speed of light.",
+    "radialReadoutPattern": "Radial velocity: {{value}}",
+    "sidewaysReadoutPattern": "Sideways velocity: {{value}}",
+    "equation": "Δλ / λ = v<sub>r</sub> / c",
+    "equationValuesPattern": "{{shift}} nm / {{rest}} nm = {{velocity}} m/s / c",
+    "explanationTitle": "Measuring a star's speed with light",
+    "explanation1": "Atoms in a star's outer layers absorb light at exact wavelengths, so its spectrum is crossed by dark lines. We know where these lines belong from measurements in the laboratory.",
+    "explanation2": "If the star moves away from us, each light wave is stretched: the lines move to longer, redder wavelengths (a redshift). If it moves toward us, the waves are squeezed and the lines move to shorter, bluer wavelengths (a blueshift).",
+    "explanation3": "Only motion along our line of sight shifts the lines. Comparing each line with its lab position gives that speed, the radial velocity: Δλ / λ = v<sub>r</sub> / c.",
+    "explanation4": "The shifts are tiny. A star wobbling at 10 m/s moves a line by about 0.00002 nm, so astronomers need very stable spectrographs that compare thousands of lines at once."
+  },
+  "wobble": {
+    "topViewTitle": "View from above the orbit",
+    "telescopeView": "Telescope view",
+    "showVelocity": "Star's velocity",
+    "telescopeCaption": "This is all an astronomer gets: the planet is far too faint to see next to its star. We detect the planet only through the star's light.",
+    "starMotionMagnifiedPattern": "Star's motion drawn ×{{factor}}",
+    "chartTitle": "Star's radial velocity",
+    "periodPattern": "Orbital period: {{value}}",
+    "starSpeedPattern": "Star's speed: {{value}}",
+    "amplitudePattern": "Largest radial velocity: {{value}}",
+    "equation": "M<sub>★</sub> v<sub>★</sub> = M<sub>p</sub> v<sub>p</sub>",
+    "explanationTitle": "A planet makes its star wobble",
+    "explanation1": "A star and its planet both orbit their common center of mass. The star is much heavier, so the center of mass sits very close to the star (often inside it), and the star moves in a tiny circle.",
+    "explanation2": "As the star circles, it moves toward us for half the orbit and away for the other half. Its spectral lines shift blue, then red, then blue again, once per orbit.",
+    "explanation3": "We never see the planet. We measure the star's radial velocity night after night: the repeating pattern reveals the planet. The time for one cycle is the planet's orbital period, and the size of the swing tells us its mass.",
+    "explanation4": "Heavier planets and closer planets give bigger, faster wobbles, which is why the first planets found this way were giant planets very close to their stars (\"hot Jupiters\")."
+  },
+  "viewingAngle": {
+    "view3DTitle": "Orbit in 3D (drag to rotate)",
+    "skyViewTitle": "Orbit as seen from Earth",
+    "inclination": "Orbit tilt (inclination)",
+    "faceOn": "face-on",
+    "edgeOn": "edge-on",
+    "earthAzimuth": "Earth's direction",
+    "resetView": "Reset view",
+    "chartTitle": "Star's radial velocity over one orbit",
+    "phaseAxis": "Orbital phase",
+    "edgeOnCurve": "if seen edge-on",
+    "measuredAmplitudePattern": "Largest radial velocity we measure: {{value}}",
+    "edgeOnAmplitudePattern": "Edge-on, it would be: {{value}}",
+    "trueMassPattern": "True planet mass: {{value}}",
+    "minimumMassPattern": "Mass we infer (minimum): {{value}}",
+    "faceOnWarning": "Face-on: the star moves only across the sky, never toward or away from us. No Doppler shift: the planet goes undetected!",
+    "equation": "K = v<sub>★</sub> sin i       M<sub>p</sub> sin i ≤ M<sub>p</sub>",
+    "explanationTitle": "Where we stand matters",
+    "explanation1": "The Doppler effect only measures the part of the star's motion along our line of sight. How much of the wobble we see depends on how the orbit is tilted toward Earth.",
+    "explanation2": "Seen edge-on (tilt 90°), the star moves straight toward and away from us: we see the full wobble. Seen face-on (tilt 0°), the star moves only across the sky: no shift at all, and the planet is invisible to this method.",
+    "explanation3": "In between, we measure the full speed multiplied by sin i. Since we usually don't know the tilt, we can only find a minimum mass, M<sub>p</sub> sin i: the true planet may be heavier.",
+    "explanation4": "Changing Earth's direction within the orbital plane does not change the size of the signal, only when in the orbit the star is moving toward us."
+  },
+  "observatory": {
+    "target": "Target",
+    "mysteryStar": "Mystery star",
+    "fiftyOnePeg": "51 Pegasi",
+    "sunJupiter": "Sun + Jupiter",
+    "sunEarth": "Sun + Earth",
+    "newMystery": "New mystery star",
+    "starMassPattern": "Star mass: {{value}} M<sub>☉</sub> (from its spectrum)",
+    "precision": "Spectrograph precision",
+    "precisionPattern": "±{{value}} m/s",
+    "cadence": "Days between nights",
+    "observeOne": "Observe 1 night",
+    "observeTen": "Observe 10 nights",
+    "clearData": "Clear data",
+    "measurementsPattern": "Measurements: {{count}} over {{span}} days",
+    "fitTitle": "Your model",
+    "fitPeriod": "Period",
+    "fitAmplitude": "Amplitude",
+    "fitPhase": "Phase",
+    "foldData": "Fold data on your period",
+    "showModel": "Show your model",
+    "residualPattern": "Scatter about your model: {{value}} m/s",
+    "noData": "No measurements yet: observe some nights!",
+    "inferredMassPattern": "Planet minimum mass: {{value}}",
+    "reveal": "Reveal answer",
+    "answerPattern": "Answer: P = {{period}} days, K = {{amplitude}} m/s, M<sub>p</sub> sin i = {{mass}}",
+    "noPlanetAnswer": "Answer: this star's wobble is far below the noise.",
+    "chartTitle": "Radial-velocity measurements",
+    "phaseAxis": "Phase (using your period)",
+    "equation": "M<sub>p</sub> sin i ≈ K (P / 2πG)<sup>1/3</sup> M<sub>★</sub><sup>2/3</sup>",
+    "explanationTitle": "Finding a planet in the data",
+    "explanation1": "Each night you can observe, the spectrograph gives one radial velocity, with some measurement error (the error bar).",
+    "explanation2": "Collect measurements over several orbits, then adjust your model: the period sets how often the pattern repeats, the amplitude sets its size, and the phase slides it in time.",
+    "explanation3": "When your model is good, folding the data on your period stacks all the orbits into one clean curve, and the scatter about your model drops to about the measurement error.",
+    "explanation4": "From the period, the amplitude and the star's mass you get the planet's minimum mass. Try Sun + Earth: its 9 cm/s wobble is far below ±1 m/s, which is why Earth twins are so hard to find."
+  },
   "a11y": {
     "doppler": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "The play area shows a star sending out light waves toward Earth at the bottom, with arrows for the star's velocity. Below it, the star's spectrum is compared with a laboratory spectrum, and two dark lines, hydrogen-beta and hydrogen-alpha, are magnified to show their shift.",
+        "controlArea": "The control area has sliders for the star's radial and sideways velocity, a checkbox to switch to planet-sized speeds, checkboxes for the light waves and velocity parts, play and pause buttons, an explanation button, and a Reset All button.",
+        "interactionHint": "Change the radial velocity and watch the dark lines shift red or blue. Then try a sideways velocity."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetailsPattern": "The star's radial velocity is {{radial}}, its sideways velocity is {{sideways}}. {{shift}} Hydrogen-alpha shifts by {{delta}} nanometers.",
+      "responses": {
+        "shiftPattern": "{{shift}} Hydrogen-alpha shifts by {{delta}} nanometers."
+      },
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "radialVelocity": "Radial velocity",
+        "sidewaysVelocity": "Sideways velocity",
+        "explanation": "Explanation"
       }
     },
     "wobble": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "The play area shows a star and a planet orbiting their common center of mass, seen from above, with Earth toward the bottom. A chart traces the star's radial velocity over time, and the star's dark spectral lines shift back and forth.",
+        "controlArea": "The control area has sliders for planet mass, star–planet distance and star mass, checkboxes for the telescope view and the star's velocity, time controls, an explanation button, and a Reset All button.",
+        "interactionHint": "Play the animation and watch the star's lines shift. Turn on the telescope view to hide the planet, then make the planet heavier or closer."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetailsPattern": "Planet of {{planetMass}} Jupiter masses at {{distance}} AU from a {{starMass}} solar-mass star. Orbital period {{period}}. The star's radial velocity swings between plus and minus {{amplitude}} meters per second.",
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "planetMass": "Planet mass",
+        "distance": "Star–planet distance",
+        "starMass": "Star mass",
+        "explanation": "Explanation"
       }
     },
     "viewingAngle": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "The play area shows the orbit in 3D with an arrow toward Earth, the orbit as seen from Earth, and a chart of the star's radial velocity over one orbit, compared with what an edge-on observer would see.",
+        "controlArea": "The control area has sliders for the orbit's tilt and Earth's direction, a reset-view button, time controls, an explanation button, and a Reset All button.",
+        "interactionHint": "Tilt the orbit from edge-on to face-on and watch the radial-velocity signal shrink to nothing."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetailsPattern": "The orbit is tilted {{inclination}} degrees. We measure {{measured}} meters per second out of {{edgeOn}} edge-on, so we infer a minimum mass of {{minimum}} Jupiter masses for a planet of {{trueMass}}.",
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "inclination": "Orbit tilt",
+        "earthAzimuth": "Earth's direction",
+        "rotateView": "3D orbit view. Use arrow keys to rotate.",
+        "explanation": "Explanation"
       }
     },
     "observatory": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "The play area shows a chart of radial-velocity measurements of the target star, with error bars, and your model curve.",
+        "controlArea": "The control area has the target selector, the spectrograph precision, buttons to observe one or ten nights, sliders for your model's period, amplitude and phase, a checkbox to fold the data, a button to reveal the answer, and a Reset All button.",
+        "interactionHint": "Observe several nights, then adjust the model until it passes through the measurements."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetailsPattern": "{{count}} measurements. Your model: period {{period}} days, amplitude {{amplitude}} meters per second; scatter about it {{residual}} meters per second.",
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "target": "Target star",
+        "precision": "Spectrograph precision",
+        "cadence": "Days between observing nights",
+        "fitPeriod": "Model period",
+        "fitAmplitude": "Model amplitude",
+        "fitPhase": "Model phase",
+        "explanation": "Explanation"
       }
     }
   },
   "preferences": {
     "title": "Simulation",
-    "exampleToggle": "Exemple de bascule"
+    "showEquations": "Show equations",
+    "showEquationsHelp": "Show the formulas behind the readouts (Doppler shift, wobble size, minimum mass)."
   }
 }

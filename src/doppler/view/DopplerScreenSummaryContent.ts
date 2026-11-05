@@ -1,40 +1,64 @@
 /**
  * DopplerScreenSummaryContent.ts
  *
- * The accessible screen summary read by screen readers (SceneryStack's
- * Interactive Description). It appears at the top of the parallel DOM and gives
- * a non-visual user a way to orient themselves and to re-read the simulation's
- * current state at any time.
- *
- * A summary has four regions (all optional, but provide at least the first
- * three in every sim for consistency across OpenLyceum):
- *   - playAreaContent       — what the play area contains
- *   - controlAreaContent    — what the controls do
- *   - currentDetailsContent — a LIVE paragraph describing current state
- *   - interactionHintContent — a short hint on how to get started
- *
- * ── Making "current details" live ─────────────────────────────────────────────
- * The template has no model state, so currentDetails is a static string. In a
- * real sim, build a DerivedProperty over the relevant model Properties and pass
- * it as `currentDetailsContent` so the paragraph updates as the sim runs.
- * See LunarLander/src/.../LunarLanderScreenSummaryContent.ts for the pattern.
- * If that DerivedProperty (or any Multilink) is owned by a short-lived object,
- * dispose it on teardown — see the commented dispose() stub in DopplerScreenView.
+ * The accessible screen summary for the Doppler screen. Its current-details
+ * paragraph stays live: it reports the radial and sideways velocity, the
+ * direction of the shift, and Hα's shift in nanometres.
  */
+import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { ScreenSummaryContent } from "scenerystack/sim";
+import { dopplerShift, H_ALPHA } from "../../common/model/stellarSpectrum.js";
+import { formatSignificant, toPlainText } from "../../common/view/chartUtils.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { DopplerModel } from "../model/DopplerModel.js";
 
+/** Plain-text speech of a velocity in m/s with units ("100 kilometers per second" is read from "100 km/s"). */
+function speakVelocity(velocity: number, planetSpeeds: boolean, kms: string, ms: string): string {
+  const value = planetSpeeds ? velocity : velocity / 1000;
+  return `${toPlainText(formatSignificant(value, 3))} ${planetSpeeds ? ms : kms}`;
+}
+
 export class DopplerScreenSummaryContent extends ScreenSummaryContent {
-  // `model` is unused in the template but kept in the signature so real sims can
-  // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: DopplerModel) {
-    const a11y = StringManager.getInstance().getDopplerA11yStrings();
+  public constructor(model: DopplerModel) {
+    const stringManager = StringManager.getInstance();
+    const a11y = stringManager.getDopplerA11yStrings();
+    const common = stringManager.getCommonStrings();
+    const units = stringManager.getUnits();
+
+    const shiftProperty = new DerivedProperty(
+      [
+        model.radialVelocityProperty,
+        common.redshiftStringProperty,
+        common.blueshiftStringProperty,
+        common.noShiftStringProperty,
+      ],
+      (velocity, redshift, blueshift, noShift) => {
+        const text = velocity > 0 ? redshift : velocity < 0 ? blueshift : noShift;
+        return `${text}.`;
+      },
+    );
+    const velocityProperty = (property: typeof model.radialVelocityProperty) =>
+      new DerivedProperty(
+        [
+          property,
+          model.planetSpeedsProperty,
+          units.kilometersPerSecondStringProperty,
+          units.metersPerSecondStringProperty,
+        ],
+        speakVelocity,
+      );
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.currentDetailsStringProperty,
+      currentDetailsContent: new PatternStringProperty(a11y.currentDetailsPatternStringProperty, {
+        radial: velocityProperty(model.radialVelocityProperty),
+        sideways: velocityProperty(model.sidewaysVelocityProperty),
+        shift: shiftProperty,
+        delta: new DerivedProperty([model.radialVelocityProperty], (velocity) =>
+          toPlainText(formatSignificant(dopplerShift(H_ALPHA.restWavelength, velocity), 2)),
+        ),
+      }),
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }

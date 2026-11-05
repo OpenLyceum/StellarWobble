@@ -72,6 +72,173 @@ const StellarWobbleColors = {
     projector: "#1a1a1a",
   }),
 
+  /** Secondary text: captions, "not to scale" notes, units. */
+  mutedTextColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "mutedText", {
+    default: "#9aa4b8",
+    projector: "#555555",
+  }),
+
+  // ── Space scenes ─────────────────────────────────────────────────────────────
+
+  /** Fill of the space views (orbit view, Doppler wave view). */
+  spaceColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "space", {
+    default: "#05070f",
+    projector: "#eef1f7",
+  }),
+
+  /** Border of the space views. */
+  spaceBorderColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "spaceBorder", {
+    default: "#2c3a5a",
+    projector: "#9aa4b8",
+  }),
+
+  /** Background stars drawn in the space views. */
+  backgroundStarColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "backgroundStar", {
+    default: "#c8d0e0",
+    projector: "#9aa4b8",
+  }),
+
+  /** The planet disc. */
+  planetColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "planet", {
+    default: "#6fb3ff",
+    projector: "#1f5fbf",
+  }),
+
+  /** Orbit paths. */
+  orbitPathColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "orbitPath", {
+    default: "#5c6b8a",
+    projector: "#8a94a8",
+  }),
+
+  /** The star's own (magnified) orbit about the barycentre. */
+  starOrbitPathColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "starOrbitPath", {
+    default: "#ffcf5c",
+    projector: "#b07800",
+  }),
+
+  /** Barycentre (centre-of-mass) marker. */
+  barycenterColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "barycenter", {
+    default: "#ff5ca8",
+    projector: "#c2185b",
+  }),
+
+  /** Direction-to-Earth arrow and Earth icon. */
+  earthColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "earth", {
+    default: "#3fd19a",
+    projector: "#0b7a52",
+  }),
+
+  /** Expanding wavefronts in the Doppler view. */
+  wavefrontColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "wavefront", {
+    default: "rgba(255,230,160,0.55)",
+    projector: "rgba(176,120,0,0.6)",
+  }),
+
+  // ── Velocity arrows ──────────────────────────────────────────────────────────
+
+  /** The star's full velocity. */
+  velocityColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "velocity", {
+    default: "#c792ea",
+    projector: "#6a1b9a",
+  }),
+
+  /** Motion away from Earth (redshift). */
+  redshiftColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "redshift", {
+    default: "#ff6b5c",
+    projector: "#c62828",
+  }),
+
+  /** Motion toward Earth (blueshift). */
+  blueshiftColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "blueshift", {
+    default: "#5cb8ff",
+    projector: "#1565c0",
+  }),
+
+  /** Sideways (across-the-sky) component, which causes no shift. */
+  transverseColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "transverse", {
+    default: "#a0a0a0",
+    projector: "#777777",
+  }),
+
+  // ── Spectra ──────────────────────────────────────────────────────────────────
+
+  /** Frame drawn around spectrum strips. */
+  spectrumFrameColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "spectrumFrame", {
+    default: "#8090b0",
+    projector: "#555555",
+  }),
+
+  /** Dashed marker at a line's laboratory (rest) wavelength. */
+  restMarkerColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "restMarker", {
+    default: "#ffffff",
+    projector: "#222222",
+  }),
+
+  /** Line profile (intensity vs wavelength) curve under a zoomed line. */
+  profileColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "profile", {
+    default: "#ffd36b",
+    projector: "#8a5a00",
+  }),
+
+  // ── Charts ───────────────────────────────────────────────────────────────────
+
+  chartBackgroundColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "chartBackground", {
+    default: "#0b1020",
+    projector: "#ffffff",
+  }),
+
+  chartAxisColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "chartAxis", {
+    default: "#8090b0",
+    projector: "#333333",
+  }),
+
+  chartGridColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "chartGrid", {
+    default: "#1f2a44",
+    projector: "#dddddd",
+  }),
+
+  /** Zero line of a radial-velocity chart. */
+  chartZeroLineColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "chartZeroLine", {
+    default: "#56648a",
+    projector: "#888888",
+  }),
+
+  /** The star's radial-velocity curve. */
+  rvCurveColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "rvCurve", {
+    default: "#ffcf5c",
+    projector: "#b07800",
+  }),
+
+  /** Ghost curve: the signal an edge-on observer would see. */
+  ghostCurveColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "ghostCurve", {
+    default: "rgba(255,207,92,0.35)",
+    projector: "rgba(176,120,0,0.35)",
+  }),
+
+  /** Measured data points. */
+  measurementColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "measurement", {
+    default: "#e8ecf5",
+    projector: "#222222",
+  }),
+
+  /** The user's fitted model curve. */
+  fitCurveColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "fitCurve", {
+    default: "#3fd19a",
+    projector: "#0b7a52",
+  }),
+
+  /** The true (revealed) curve. */
+  answerCurveColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "answerCurve", {
+    default: "#ff5ca8",
+    projector: "#c2185b",
+  }),
+
+  /** Time / phase cursor on a chart. */
+  cursorColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "cursor", {
+    default: "#ffffff",
+    projector: "#222222",
+  }),
+
   // ── Light control surfaces ───────────────────────────────────────────────────
   // White chrome (combo boxes, flat push buttons, editable input fields) stays light
   // in both profiles; its text stays dark. Same values in default and projector mode,

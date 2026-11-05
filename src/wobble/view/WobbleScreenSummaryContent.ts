@@ -34,7 +34,7 @@ export class WobbleScreenSummaryContent extends ScreenSummaryContent {
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.currentDetailsStringProperty,
+      currentDetailsContent: a11y.screenSummary.interactionHintStringProperty,
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }
