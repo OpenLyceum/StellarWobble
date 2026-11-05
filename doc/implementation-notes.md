@@ -1,135 +1,61 @@
-# Implementation Notes - Stellar Wobble
+# Stellar Wobble — implementation notes
 
-Developer-facing notes on the **SceneryStackTemplate** scaffold. **Replace and expand this file when
-forking** to describe your sim's real architecture (see Stern Gerlach or Light Propagation for
-target quality). Until then, this documents what the template provides out of the box.
+This note covers architecture and decisions; the physics is in [model.md](model.md).
 
-## Architecture Overview
-
-SceneryStackTemplate is the fleet-canonical starting point for new SceneryStack sims (one or N screens).
-It demonstrates Model–View separation, color profiles, localization, reset behavior, accessibility
-reference wiring, and reusable common components — **without** domain physics.
+## Layout
 
 ```
-main.ts
-  └─ DopplerScreen             (Screen<DopplerModel, DopplerScreenView>)
-       ├─ DopplerModel          state + logic  (src/doppler/model/)  ← stub: add physics here
-       └─ DopplerScreenView     visuals        (src/doppler/view/)
-            ├─ DopplerScreenSummaryContent     (PDOM overview — reference a11y pattern)
-            └─ DopplerKeyboardHelpContent      (keyboard help dialog)
-
-src/common/
-  ├─ StellarWobblePanel.ts           pre-themed panel (uses StellarWobbleColors)
-  ├─ StellarWobbleButtonOptions.ts   flat button / combo-box option bundles
-  └─ TimeModel.ts          composable play/pause + elapsed time
-
-src/preferences/
-  ├─ StellarWobblePreferencesModel   sim-specific pref state
-  ├─ StellarWobblePreferencesNode    pref UI in Preferences → Simulation
-  └─ stellarWobbleQueryParameters    QueryStringMachine declarations
+src/
+  StellarWobble{Colors,Constants,Namespace}.ts   colours (with default + projector), constants (SI), namespace
+  common/
+    model/orbitPhysics.ts       pure two-body + line-of-sight functions (no SceneryStack beyond Vector3)
+    model/stellarSpectrum.ts    absorption lines, Doppler shift, spectrum intensity, magnification factor
+    model/starAppearance.ts     temperature / radius / blackbody colour from mass (drawing only)
+    model/OrbitalSystem.ts      shared model of Wobble + Viewing Angle (Properties, clock in orbits, RV trace)
+    view/SpectrumStripNode.ts   canvas strip painted per pixel column from an intensity function
+    view/FullSpectrumNode.ts    380–700 nm lab + star strips, line labels, zoom boxes
+    view/SpectralLineZoomNode.ts  ±1 nm window: strips, profile, rest marker, shift arrow, Δλ, magnification
+    view/ChartFrameNode.ts      bamboo chart frame (copied from RelativisticDynamics)
+    view/controls.ts            createNumberControl (log scale), createCheckbox, explanation button, equation node
+    view/formatters.ts          periods, speeds, planet masses with localized units
+    view/StarNode.ts            glowing star coloured by temperature
+  doppler/        DopplerModel (two speed scales), WaveViewNode (camera-follows-star wavefronts)
+  wobble/         WobbleModel (OrbitalSystem edge-on), TopViewNode, LiveRVChartNode
+  viewing-angle/  ViewingAngleModel (+ minimum mass), Orbit3DViewNode, SkyViewNode, PhaseRVChartNode
+  observatory/    ObservatoryModel, ObservatoryTarget (enumeration), PlanetSignal, ObservatoryChartNode
+  preferences/    one preference: Show equations (?showEquations), a module-level singleton
 ```
 
-Data flows Model → View through AXON `Property` objects (`.link()` / `.lazyLink()`). The view never
-integrates physics; the model never imports scenery.
+## Decisions
 
-## Forking checklist
+- **Separate from ExtrasolarPlanets.** That sim is a faithful NAAP port and keeps the NAAP
+  approximations, including eccentric orbits. This sim teaches the Doppler measurement, the geometry
+  and "we see the star, not the planet", so it keeps orbits circular and uses the exact barycentric
+  form.
+- **The clock runs in orbits, not seconds.** Periods range from about a day to about 11 years, and
+  one orbit always takes 8 s of wall-clock time at normal speed. The live chart uses days via P. The
+  trace is a sweep: after `TRACE_ORBITS` it restarts from the left, so chart ranges change only when
+  the parameters change, never every frame.
+- **Magnification is explicit.** Every place that exaggerates the drawing (the zoomed shift, the
+  star's orbit, the wave picture) labels the exaggeration on screen. The factors come from
+  `shiftMagnification` (1-2-5 steps).
+- **The Viewing Angle view moves Earth, not the orbit.** The orbit is fixed in the 3-D scene and the
+  "To Earth" arrow follows i and λ, so the screen is about where we stand. The camera is
+  orthographic, drawn with plain Paths, and rotated by dragging the background or with the arrow
+  keys (the view node is focusable).
+- **Observatory residual uses null for "no data".** `NumberProperty` rejects NaN, so the residual is
+  `Property<number | null>`.
+- **Preferences are a module-level singleton** (`stellarWobblePreferences`). `main.ts` passes it to
+  the Preferences dialog and the views read it through `createEquationNode`.
 
-### Automated rename + scaffold (recommended)
+## Testing
 
-```sh
-npm run rename -- --id my-sim --name "My Simulation"
-npm run scaffold-screens -- --screens Intro,Lab   # or omit --screens for one screen
-npm run check
-```
+- `tests/orbitPhysics.test.ts` and `tests/stellarSpectrum.test.ts` check the physics against known
+  systems.
+- `tests/OrbitalSystem.test.ts` checks momentum balance, sin i scaling, the clock and the trace
+  sweep.
+- `tests/ObservatoryModel.test.ts` checks 51 Peg's minimum mass, the noise statistics and resets.
+- `tests/memory-leak.test.ts` covers the shared model and the spectrum and star nodes.
 
-Or from the workspace: `Baton/scripts/create-sim.sh --repo MySim --name "My Simulation"`.
-
-`scripts/rename-sim.ts` updates sim-level identifiers (package id, Colors, Preferences).
-`scripts/scaffold-screens.ts` emits fleet-named screen folders and wires main/strings/icons.
-
-### Manual steps (after rename/scaffold or if skipping the scripts)
-
-1. **`doc/model.md`** — educator physics (equations, ranges, simplifications).
-2. **`doc/implementation-notes.md`** — this file, rewritten for your architecture.
-3. **Screen model(s)** — real Properties, `step(dt)`, `reset()`; compose `TimeModel` if animated.
-4. **Screen view(s)** — play area + controls; wire `ResetAllButton` to `model.reset()`.
-5. **`*Colors.ts`** — sim palette (default + projector profiles).
-6. **Locale JSON** — title, strings, `a11y` keys; register locales in `init.ts`.
-7. **`public/icons/icon.svg`** → `npm run icons`; align theme color in `index.html` / vite config.
-8. **`tests/setup.ts`** — `init({ name: … })` must match `package.json` name after rename.
-9. **`AGENTS.md`** — sim-specific file map and pitfalls for AI assistants.
-
-## Common components (keep when forking)
-
-### StellarWobblePanel
-
-Every control panel should use `StellarWobblePanel` so projector-mode switching is automatic:
-
-```typescript
-import { StellarWobblePanel } from "../../common/StellarWobblePanel.js";
-const panel = new StellarWobblePanel(content);
-const panelWide = new StellarWobblePanel(content, { xMargin: 20 });
-```
-
-### TimeModel
-
-Compose into your screen model for animation (do not subclass `TimeModel`):
-
-```typescript
-export class MyModel implements TModel {
-  public readonly timer = new TimeModel();  // pass true to auto-play on startup
-
-  public step(dt: number): void {
-    this.timer.step(dt);
-    // physics uses this.timer.timeProperty.value
-  }
-  public reset(): void { this.timer.reset(); /* restore initial state */ }
-}
-```
-
-Wire `TimeControlNode` to `model.timer.isPlayingProperty` in the view.
-
-### StellarWobbleButtonOptions
-
-Spread flat button options into every push/round button and `TimeControlNode` (see `AGENTS.md`).
-Use `STELLAR_WOBBLE_COMBO_BOX_OPTIONS` + `LIGHT_SURFACE_TEXT_FILL` for light control surfaces on dark panels.
-
-## Accessibility (reference implementation)
-
-The template is the **canonical OpenLyceum a11y reference**:
-
-- PDOM `accessibleName` on interactive nodes (prefer live `StringProperty`s).
-- `DopplerScreenSummaryContent` with a live `currentDetailsContent` `DerivedProperty` over model state.
-- Explicit `pdomOrder` + `DopplerKeyboardHelpContent`.
-- Strings under `a11y` in locale JSON → `StringManager.getDopplerA11yStrings()`.
-
-Full checklist: [Baton/ACCESSIBILITY.md](https://github.com/OpenLyceum/Baton/blob/main/ACCESSIBILITY.md).
-
-## Testing (fleet layout — keep when forking)
-
-| Path | Purpose |
-|---|---|
-| `vitest.config.ts` | `happy-dom`; `setupFiles: ["./tests/setup.ts"]`; `execArgv: ["--expose-gc"]` |
-| `tests/setup.ts` | Canvas/AudioContext mocks + `init()` before SceneryStack imports |
-| `tests/TimeModel.test.ts` | **Replace** with real model/physics tests mirroring `src/` |
-| `tests/memory-leak.test.ts` | WeakRef + `forceGC` dispose regression |
-| `tests/fuzz/fuzz.spec.ts` | Optional Playwright smoke via `?fuzz` |
-
-Run `npm test`. Expand `memory-leak.test.ts` when adding runtime-created nodes or Property links.
-
-## Multi-screen simulations
-
-Default is single-screen. To add screens, see **`doc/multi-screen.md`**: per-screen folders mirroring
-`src/doppler/`, `StringManager` screen-name getters, optional shared root model, a shared
-`src/common/StellarWobbleScreenIcons.ts` module (`create{Screen}Icon()` factories wired as
-`homeScreenIcon` / `navigationBarIcon`), and register all screens in `main.ts`.
-
-## PWA
-
-After `npm run build`, the sim is installable offline via Workbox (`dist/manifest.webmanifest`).
-
-## Known template stubs (remove when forking)
-
-- `DopplerModel.step()` / `reset()` — empty placeholders until you add physics.
-- Placeholder play-area content in `DopplerScreenView` — replace with real UI.
-- `tests/TimeModel.test.ts` — sample only; add tests for your model under `tests/`.
+Fuzz with `npm run test:fuzz`. In the dev console the screen models are
+`phet.joist.sim.screens[i].model`, at index 0 when the URL has `?screens=n`.
