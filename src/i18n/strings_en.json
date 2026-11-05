@@ -40,9 +40,7 @@
     "starMass": "Star mass",
     "planetMass": "Planet mass",
     "distance": "Star–planet distance",
-    "massBothPattern": "{{jupiter}} M<sub>J</sub> = {{earth}} M<sub>⊕</sub>",
     "explanationButton": "How does it work?",
-    "equationsTitle": "Equations",
     "movingAway": "moving away",
     "movingToward": "moving toward us"
   },
@@ -150,9 +148,6 @@
         "interactionHint": "Change the radial velocity and watch the dark lines shift red or blue. Then try a sideways velocity."
       },
       "currentDetailsPattern": "The star's radial velocity is {{radial}}, its sideways velocity is {{sideways}}. {{shift}} Hydrogen-alpha shifts by {{delta}} nanometers.",
-      "responses": {
-        "shiftPattern": "{{shift}} Hydrogen-alpha shifts by {{delta}} nanometers."
-      },
       "controls": {
         "radialVelocity": "Radial velocity",
         "sidewaysVelocity": "Sideways velocity",
