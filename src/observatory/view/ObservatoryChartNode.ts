@@ -97,40 +97,37 @@ export class ObservatoryChartNode extends Node {
       title.bottom = -6;
     });
 
-    const update = (): void => {
+    /** Sets the ranges to fit the data and curves; returns the x maximum (days, or 1 when folded). */
+    const updateRanges = (): number => {
       const measurements = model.measurements;
-      const fold = model.foldProperty.value;
-      const fitPeriod = model.fitPeriodProperty.value;
-      const signal = model.signalProperty.value;
-      const reveal = model.revealProperty.value;
-      noData.visible = measurements.length === 0;
-
-      // x positions of the data.
-      const xOf = (time: number): number => (fold ? (((time / fitPeriod) % 1) + 1) % 1 : time);
-
-      // Ranges.
-      const lastTime = measurements.length > 0 ? (measurements[measurements.length - 1]?.time ?? 0) : 0;
+      const lastTime = measurements[measurements.length - 1]?.time ?? 0;
       let xMax = 1;
-      if (!fold) {
+      if (!model.foldProperty.value) {
         const span = Math.max(MIN_TIME_SPAN, lastTime * 1.05);
         const step = niceStep(span, 5);
         xMax = Math.ceil(span / step) * step;
       }
       let extent = Math.max(MIN_HALF_RANGE, model.showModelProperty.value ? model.fitAmplitudeProperty.value : 0);
-      if (reveal) {
-        extent = Math.max(extent, signal.amplitude);
+      if (model.revealProperty.value) {
+        extent = Math.max(extent, model.signalProperty.value.amplitude);
       }
       for (const measurement of measurements) {
         extent = Math.max(extent, Math.abs(measurement.velocity) + measurement.uncertainty);
       }
       const yMax = niceCeil(extent * 1.1);
       chart.setRanges(new Range(0, xMax), new Range(-yMax, yMax));
+      return xMax;
+    };
 
-      // Data points and error bars.
+    /** Draws each measurement as a point with its error bar. */
+    const updateData = (): void => {
+      const fold = model.foldProperty.value;
+      const fitPeriod = model.fitPeriodProperty.value;
       const pointShape = new Shape();
       const barShape = new Shape();
-      for (const measurement of measurements) {
-        const view = transform.modelToViewPosition(new Vector2(xOf(measurement.time), measurement.velocity));
+      for (const measurement of model.measurements) {
+        const x = fold ? (((measurement.time / fitPeriod) % 1) + 1) % 1 : measurement.time;
+        const view = transform.modelToViewPosition(new Vector2(x, measurement.velocity));
         const top = transform.modelToViewY(measurement.velocity + measurement.uncertainty);
         const bottom = transform.modelToViewY(measurement.velocity - measurement.uncertainty);
         barShape.moveTo(view.x, top).lineTo(view.x, bottom);
@@ -141,33 +138,36 @@ export class ObservatoryChartNode extends Node {
       }
       points.shape = pointShape;
       errorBars.shape = barShape;
+      noData.visible = model.measurements.length === 0;
+    };
 
-      // The user's model.
+    /** Samples a velocity curve over [0, xMax] with enough points per cycle. */
+    const sampleCurve = (xMax: number, cycles: number, velocityAt: (x: number) => number): Vector2[] => {
+      const count = Math.min(MAX_SAMPLES, Math.max(MIN_SAMPLES, Math.ceil(cycles * SAMPLES_PER_CYCLE)));
+      return Array.from({ length: count + 1 }, (_, i) => {
+        const x = (i / count) * xMax;
+        return new Vector2(x, velocityAt(x));
+      });
+    };
+
+    const update = (): void => {
+      const fold = model.foldProperty.value;
+      const fitPeriod = model.fitPeriodProperty.value;
+      const signal = model.signalProperty.value;
+      const xMax = updateRanges();
+      updateData();
+
       fitPlot.visible = model.showModelProperty.value;
       if (fitPlot.visible) {
-        const cycles = fold ? 1 : xMax / fitPeriod;
-        const count = Math.min(MAX_SAMPLES, Math.max(MIN_SAMPLES, Math.ceil(cycles * SAMPLES_PER_CYCLE)));
-        const fitData: Vector2[] = [];
-        for (let i = 0; i <= count; i++) {
-          const x = (i / count) * xMax;
-          fitData.push(new Vector2(x, model.fitVelocity(fold ? x * fitPeriod : x)));
-        }
-        fitPlot.setDataSet(fitData);
+        fitPlot.setDataSet(
+          sampleCurve(xMax, fold ? 1 : xMax / fitPeriod, (x) => model.fitVelocity(fold ? x * fitPeriod : x)),
+        );
       }
 
-      // The true signal.
-      answerPlot.visible = reveal && !fold;
+      // The true signal (time mode only).
+      answerPlot.visible = model.revealProperty.value && !fold;
       if (answerPlot.visible) {
-        const count = Math.min(
-          MAX_SAMPLES,
-          Math.max(MIN_SAMPLES, Math.ceil((xMax / signal.period) * SAMPLES_PER_CYCLE)),
-        );
-        answerPlot.setDataSet(
-          Array.from({ length: count + 1 }, (_, i) => {
-            const time = (i / count) * xMax;
-            return new Vector2(time, signalVelocity(signal, time));
-          }),
-        );
+        answerPlot.setDataSet(sampleCurve(xMax, xMax / signal.period, (time) => signalVelocity(signal, time)));
       }
     };
 

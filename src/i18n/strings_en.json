@@ -102,7 +102,9 @@
     "explanation1": "The Doppler effect only measures the part of the star's motion along our line of sight. How much of the wobble we see depends on how the orbit is tilted toward Earth.",
     "explanation2": "Seen edge-on (tilt 90°), the star moves straight toward and away from us: we see the full wobble. Seen face-on (tilt 0°), the star moves only across the sky: no shift at all, and the planet is invisible to this method.",
     "explanation3": "In between, we measure the full speed multiplied by sin i. Since we usually don't know the tilt, we can only find a minimum mass, M<sub>p</sub> sin i: the true planet may be heavier.",
-    "explanation4": "Changing Earth's direction within the orbital plane does not change the size of the signal, only when in the orbit the star is moving toward us."
+    "explanation4": "Changing Earth's direction within the orbital plane does not change the size of the signal, only when in the orbit the star is moving toward us.",
+    "keyboardHelpHeading": "3D orbit view",
+    "keyboardHelpRotate": "Rotate the view"
   },
   "observatory": {
     "target": "Target",
