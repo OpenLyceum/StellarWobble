@@ -41,6 +41,8 @@ export type CreateNumberControlOptions = {
   logarithmic?: boolean;
   /** Accessible name; defaults to the visible title. */
   accessibleName?: TReadOnlyProperty<string>;
+  /** Write the units straight after the value, with no pattern (for "°"). */
+  compactUnits?: boolean;
   /** Extra NumberControl options merged last. */
   numberControlOptions?: NumberControlOptions;
 };
@@ -95,9 +97,12 @@ export function createNumberControl(
   const unitsProperty = options.unitsProperty;
   const format = (controlled: number): string => {
     const text = formatSignificant(roundToFigures(toValue(controlled), figures), figures);
-    return unitsProperty
-      ? StringUtils.fillIn(units.valueUnitsPatternStringProperty.value, { value: text, units: unitsProperty.value })
-      : text;
+    if (!unitsProperty) {
+      return text;
+    }
+    return options.compactUnits
+      ? `${text}${unitsProperty.value}`
+      : StringUtils.fillIn(units.valueUnitsPatternStringProperty.value, { value: text, units: unitsProperty.value });
   };
 
   return new NumberControl(

@@ -1,43 +1,47 @@
 /**
  * ViewingAngleModel.ts
  *
- * The top-level model for the simulation screen.
- *
- * Add your simulation's state here using reactive Property objects from
- * scenerystack/axon. The view observes these properties and updates automatically.
- *
- * ── Example ──────────────────────────────────────────────────────────────────
- *   import { BooleanProperty, NumberProperty } from "scenerystack/axon";
- *
- *   public readonly isRunningProperty = new BooleanProperty(false);
- *   public readonly timeProperty = new NumberProperty(0);    // seconds
- *
- * ── Step cycle ────────────────────────────────────────────────────────────────
- * The Sim calls step(dt) on every animation frame. Advance your model state
- * in that method (e.g. integrate equations, update positions).
- *
- * ── Reset ─────────────────────────────────────────────────────────────────────
- * reset() is called when the user presses Reset All. Call .reset() on every
- * Property declared here.
+ * Model for the Viewing Angle screen: the same star–planet system, but the
+ * user chooses where Earth is: the orbit's inclination to our line of sight
+ * (90° edge-on … 0° face-on) and Earth's direction within the orbital plane.
+ * The signal shrinks as K = v★ sin i, and the mass we infer from it is the
+ * minimum mass Mp sin i.
  */
+
+import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import type { TModel } from "scenerystack/joist";
+import { OrbitalSystem } from "../../common/model/OrbitalSystem.js";
+import { minimumPlanetMass } from "../../common/model/orbitPhysics.js";
+import { JUPITER_MASS_KG, SUN_MASS_KG } from "../../StellarWobbleConstants.js";
+
+/** Initial inclination, degrees. */
+const INITIAL_INCLINATION = 60;
+
+/** Initial Earth direction, degrees (toward model −y, as on the Wobble screen). */
+const INITIAL_EARTH_AZIMUTH = 270;
 
 export class ViewingAngleModel implements TModel {
-  /**
-   * Resets all model state to initial values.
-   * Called when the user presses the Reset All button.
-   */
-  public reset(): void {
-    // TODO: call .reset() on every Property declared in this model
+  public readonly system = new OrbitalSystem({
+    inclination: INITIAL_INCLINATION,
+    earthAzimuth: INITIAL_EARTH_AZIMUTH,
+  });
+
+  /** The planet mass an observer infers from K and P, Jupiter masses (= true mass × sin i). */
+  public readonly minimumMassProperty: TReadOnlyProperty<number>;
+
+  public constructor() {
+    const system = this.system;
+    this.minimumMassProperty = new DerivedProperty(
+      [system.semiAmplitudeProperty, system.periodProperty, system.starMassProperty],
+      (amplitude, period, starMass) => minimumPlanetMass(amplitude, period, starMass * SUN_MASS_KG) / JUPITER_MASS_KG,
+    );
   }
 
-  /**
-   * Steps the model forward by dt seconds.
-   * Called every animation frame by the Sim framework.
-   *
-   * @param _dt - elapsed time in seconds since the last frame
-   */
-  public step(_dt: number): void {
-    // TODO: advance simulation state here
+  public reset(): void {
+    this.system.reset();
+  }
+
+  public step(dt: number): void {
+    this.system.step(dt);
   }
 }

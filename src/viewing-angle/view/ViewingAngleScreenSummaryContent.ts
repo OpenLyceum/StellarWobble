@@ -1,40 +1,35 @@
 /**
  * ViewingAngleScreenSummaryContent.ts
  *
- * The accessible screen summary read by screen readers (SceneryStack's
- * Interactive Description). It appears at the top of the parallel DOM and gives
- * a non-visual user a way to orient themselves and to re-read the simulation's
- * current state at any time.
- *
- * A summary has four regions (all optional, but provide at least the first
- * three in every sim for consistency across OpenLyceum):
- *   - playAreaContent       — what the play area contains
- *   - controlAreaContent    — what the controls do
- *   - currentDetailsContent — a LIVE paragraph describing current state
- *   - interactionHintContent — a short hint on how to get started
- *
- * ── Making "current details" live ─────────────────────────────────────────────
- * The template has no model state, so currentDetails is a static string. In a
- * real sim, build a DerivedProperty over the relevant model Properties and pass
- * it as `currentDetailsContent` so the paragraph updates as the sim runs.
- * See LunarLander/src/.../LunarLanderScreenSummaryContent.ts for the pattern.
- * If that DerivedProperty (or any Multilink) is owned by a short-lived object,
- * dispose it on teardown — see the commented dispose() stub in ViewingAngleScreenView.
+ * The accessible screen summary for the Viewing Angle screen. Its
+ * current-details paragraph stays live: the tilt, the measured and edge-on
+ * amplitudes, and the minimum mass against the true mass.
  */
+import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { ScreenSummaryContent } from "scenerystack/sim";
+import { formatSignificant, toPlainText } from "../../common/view/chartUtils.js";
+import { formatPlanetMass, unitsDependencies } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { ViewingAngleModel } from "../model/ViewingAngleModel.js";
 
 export class ViewingAngleScreenSummaryContent extends ScreenSummaryContent {
-  // `model` is unused in the template but kept in the signature so real sims can
-  // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: ViewingAngleModel) {
+  public constructor(model: ViewingAngleModel) {
     const a11y = StringManager.getInstance().getViewingAngleA11yStrings();
+    const system = model.system;
+    const plain = (value: number, digits = 3) => toPlainText(formatSignificant(value, digits));
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.screenSummary.interactionHintStringProperty,
+      currentDetailsContent: new PatternStringProperty(a11y.currentDetailsPatternStringProperty, {
+        inclination: new DerivedProperty([system.inclinationProperty], (inclination) => plain(inclination, 2)),
+        measured: new DerivedProperty([system.semiAmplitudeProperty], (amplitude) => plain(amplitude)),
+        edgeOn: new DerivedProperty([system.edgeOnAmplitudeProperty], (amplitude) => plain(amplitude)),
+        minimum: new DerivedProperty([model.minimumMassProperty], (mass) => plain(mass)),
+        trueMass: DerivedProperty.deriveAny([system.planetMassProperty, ...unitsDependencies()], () =>
+          toPlainText(formatPlanetMass(system.planetMassProperty.value)),
+        ),
+      }),
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }

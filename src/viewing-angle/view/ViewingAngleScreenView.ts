@@ -1,44 +1,65 @@
 /**
  * ViewingAngleScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * The Viewing Angle screen: the size of the radial-velocity signal depends on
+ * where Earth is.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. StellarWobbleControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ *  - Left: the orbit in 3-D with the moving "To Earth" arrow, and below it the
+ *    orbit as seen from Earth.
+ *  - Middle: the radial velocity over one orbit against the edge-on ghost, and
+ *    readouts of the measured and edge-on amplitudes, the true planet mass and
+ *    the minimum mass we would infer.
+ *  - Right: inclination, Earth's direction, and planet mass.
  */
 
+import { DerivedProperty, PatternStringProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
-import { ResetAllButton } from "scenerystack/scenery-phet";
+import { HBox, Node, RichText, type TColor, Text, VBox } from "scenerystack/scenery";
+import { ResetAllButton, TimeControlNode, TimeSpeed } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
-import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/StellarWobbleButtonOptions.js";
+import { TextPushButton } from "scenerystack/sun";
+import {
+  FLAT_PANEL_PUSH_BUTTON_OPTIONS,
+  FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+  FLAT_RESET_ALL_BUTTON_OPTIONS,
+  LIGHT_SURFACE_TEXT_FILL,
+  TIME_CONTROL_SPEED_RADIO_OPTIONS,
+} from "../../common/StellarWobbleButtonOptions.js";
+import { StellarWobblePanel } from "../../common/StellarWobblePanel.js";
+import { createEquationNode, createExplanationButton, createNumberControl } from "../../common/view/controls.js";
+import { formatPlanetMass, formatSpeed, unitsDependencies } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../StellarWobbleConstants.js";
+import {
+  CONTROL_PANEL_WIDTH,
+  EARTH_AZIMUTH_RANGE,
+  FONTS,
+  INCLINATION_RANGE,
+  PLANET_MASS_RANGE,
+  SCREEN_VIEW_MARGIN,
+} from "../../StellarWobbleConstants.js";
 import type { ViewingAngleModel } from "../model/ViewingAngleModel.js";
+import { Orbit3DViewNode } from "./Orbit3DViewNode.js";
+import { PhaseRVChartNode } from "./PhaseRVChartNode.js";
+import { SkyViewNode } from "./SkyViewNode.js";
 import { ViewingAngleScreenSummaryContent } from "./ViewingAngleScreenSummaryContent.js";
 
 export type ViewingAngleScreenViewOptions = ScreenViewOptions;
 
+const VIEW_3D_WIDTH = 390;
+const VIEW_3D_HEIGHT = 330;
+const SKY_VIEW_SIZE = 185;
+const CHART_WIDTH = 270;
+const CHART_HEIGHT = 200;
+const READOUT_WIDTH = 300;
+
+/** Below this inclination (degrees) the face-on warning is shown. */
+const FACE_ON_WARNING_INCLINATION = 3;
+
 export class ViewingAngleScreenView extends ScreenView {
+  private readonly orbitView: Orbit3DViewNode;
+
   public constructor(model: ViewingAngleModel, providedOptions?: ViewingAngleScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See ViewingAngleScreenSummaryContent for the four content regions.
     const options = optionize<ViewingAngleScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new ViewingAngleScreenSummaryContent(model),
@@ -47,114 +68,213 @@ export class ViewingAngleScreenView extends ScreenView {
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: StellarWobbleColors.backgroundColorProperty,
+    const stringManager = StringManager.getInstance();
+    const strings = stringManager.getViewingAngleStrings();
+    const common = stringManager.getCommonStrings();
+    const units = stringManager.getUnits();
+    const a11y = stringManager.getViewingAngleA11yStrings();
+    const system = model.system;
+    const bounds = this.layoutBounds;
+
+    // ── Views of the orbit ────────────────────────────────────────────────────
+    this.orbitView = new Orbit3DViewNode(system, VIEW_3D_WIDTH, VIEW_3D_HEIGHT);
+    this.orbitView.left = bounds.minX + SCREEN_VIEW_MARGIN;
+    this.orbitView.top = bounds.minY + SCREEN_VIEW_MARGIN;
+
+    const skyView = new SkyViewNode(system, SKY_VIEW_SIZE);
+    skyView.left = this.orbitView.left;
+    skyView.top = this.orbitView.bottom + 10;
+
+    // ── Chart ─────────────────────────────────────────────────────────────────
+    const chart = new PhaseRVChartNode(system, CHART_WIDTH, CHART_HEIGHT, strings.chartTitleStringProperty);
+    chart.left = this.orbitView.right + 20;
+    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
+
+    // ── Readouts ──────────────────────────────────────────────────────────────
+    const readout = (
+      pattern: TReadOnlyProperty<string>,
+      dependencies: readonly TReadOnlyProperty<unknown>[],
+      format: () => string,
+      fill: TColor = StellarWobbleColors.textColorProperty,
+    ): RichText =>
+      new RichText(
+        new PatternStringProperty(pattern, {
+          value: DerivedProperty.deriveAny([...dependencies, ...unitsDependencies()], format),
+        }),
+        { font: FONTS.READOUT, fill: fill, maxWidth: READOUT_WIDTH },
+      );
+    const measuredReadout = readout(
+      strings.measuredAmplitudePatternStringProperty,
+      [system.semiAmplitudeProperty],
+      () => formatSpeed(system.semiAmplitudeProperty.value),
+      StellarWobbleColors.rvCurveColorProperty,
+    );
+    const edgeOnReadout = readout(strings.edgeOnAmplitudePatternStringProperty, [system.edgeOnAmplitudeProperty], () =>
+      formatSpeed(system.edgeOnAmplitudeProperty.value),
+    );
+    const trueMassReadout = readout(strings.trueMassPatternStringProperty, [system.planetMassProperty], () =>
+      formatPlanetMass(system.planetMassProperty.value),
+    );
+    const minimumMassReadout = readout(
+      strings.minimumMassPatternStringProperty,
+      [model.minimumMassProperty],
+      () => formatPlanetMass(model.minimumMassProperty.value),
+      StellarWobbleColors.accentColorProperty,
+    );
+    const faceOnWarning = new RichText(strings.faceOnWarningStringProperty, {
+      font: FONTS.READOUT,
+      fill: StellarWobbleColors.redshiftColorProperty,
+      lineWrap: READOUT_WIDTH,
+      visibleProperty: new DerivedProperty(
+        [system.inclinationProperty],
+        (inclination) => inclination < FACE_ON_WARNING_INCLINATION,
+      ),
     });
-    this.addChild(backgroundRect);
-
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text(StringManager.getInstance().getScreenNames().viewingAngleStringProperty, {
-      font: "bold 36px sans-serif",
-      fill: StellarWobbleColors.textColorProperty,
-      center: this.layoutBounds.center,
+    const equation = createEquationNode(strings.equationStringProperty, READOUT_WIDTH);
+    const explanationButton = createExplanationButton(
+      strings.explanationTitleStringProperty,
+      [
+        strings.explanation1StringProperty,
+        strings.explanation2StringProperty,
+        strings.explanation3StringProperty,
+        strings.explanation4StringProperty,
+      ],
+      a11y.controls.explanationStringProperty,
+    );
+    const explanationRow = new HBox({
+      spacing: 8,
+      children: [
+        explanationButton,
+        new Text(common.explanationButtonStringProperty, {
+          font: FONTS.LABEL,
+          fill: StellarWobbleColors.textColorProperty,
+          maxWidth: READOUT_WIDTH - 40,
+        }),
+      ],
     });
-    this.addChild(placeholderText);
+    const readoutPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 6,
+        align: "left",
+        children: [
+          measuredReadout,
+          edgeOnReadout,
+          trueMassReadout,
+          minimumMassReadout,
+          faceOnWarning,
+          equation,
+          explanationRow,
+        ],
+      }),
+      { minWidth: READOUT_WIDTH + 24 },
+    );
+    readoutPanel.left = skyView.right + 15;
+    readoutPanel.top = chart.bottom + 50;
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getViewingAngleA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    // ── Controls ──────────────────────────────────────────────────────────────
+    const tickLabel = (label: TReadOnlyProperty<string>): Text =>
+      new Text(label, { font: FONTS.SMALL, fill: StellarWobbleColors.textColorProperty, maxWidth: 60 });
+    const inclinationControl = createNumberControl(
+      strings.inclinationStringProperty,
+      system.inclinationProperty,
+      INCLINATION_RANGE,
+      {
+        unitsProperty: units.degreesStringProperty,
+        compactUnits: true,
+        significantFigures: 2,
+        delta: 1,
+        accessibleName: a11y.controls.inclinationStringProperty,
+        numberControlOptions: {
+          sliderOptions: {
+            majorTicks: [
+              { value: 0, label: tickLabel(strings.faceOnStringProperty) },
+              { value: 90, label: tickLabel(strings.edgeOnStringProperty) },
+            ],
+            majorTickStroke: StellarWobbleColors.textColorProperty,
+          },
+        },
+      },
+    );
+    const azimuthControl = createNumberControl(
+      strings.earthAzimuthStringProperty,
+      system.earthAzimuthProperty,
+      EARTH_AZIMUTH_RANGE,
+      {
+        unitsProperty: units.degreesStringProperty,
+        compactUnits: true,
+        significantFigures: 3,
+        delta: 5,
+        accessibleName: a11y.controls.earthAzimuthStringProperty,
+      },
+    );
+    const planetMassControl = createNumberControl(
+      common.planetMassStringProperty,
+      system.planetMassProperty,
+      PLANET_MASS_RANGE,
+      { unitsProperty: units.jupiterMassesStringProperty, logarithmic: true },
+    );
+    const resetViewButton = new TextPushButton(strings.resetViewStringProperty, {
+      ...FLAT_PANEL_PUSH_BUTTON_OPTIONS,
+      font: FONTS.LABEL,
+      textFill: LIGHT_SURFACE_TEXT_FILL,
+      maxTextWidth: CONTROL_PANEL_WIDTH - 20,
+      listener: () => this.orbitView.resetCamera(),
+    });
+    const controlPanel = new StellarWobblePanel(
+      new VBox({
+        spacing: 14,
+        align: "left",
+        children: [inclinationControl, azimuthControl, planetMassControl, resetViewButton],
+      }),
+      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+    );
+    controlPanel.right = bounds.maxX - SCREEN_VIEW_MARGIN;
+    controlPanel.top = bounds.minY + SCREEN_VIEW_MARGIN;
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    // ── Time controls and Reset All ──────────────────────────────────────────
+    const timeControlNode = new TimeControlNode(system.timer.isPlayingProperty, {
+      timeSpeedProperty: system.timeSpeedProperty,
+      timeSpeeds: [TimeSpeed.FAST, TimeSpeed.NORMAL, TimeSpeed.SLOW],
+      ...TIME_CONTROL_SPEED_RADIO_OPTIONS,
+      playPauseStepButtonOptions: {
+        ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+        stepForwardButtonOptions: {
+          ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS.stepForwardButtonOptions,
+          listener: () => system.advance(0.1),
+        },
+      },
+    });
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
         model.reset();
         this.reset();
       },
-      right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
-      bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
+      right: bounds.maxX - SCREEN_VIEW_MARGIN,
+      bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
+    timeControlNode.right = resetAllButton.left - 30;
+    timeControlNode.bottom = resetAllButton.bottom;
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [this.orbitView, skyView, chart, readoutPanel, controlPanel, timeControlNode, resetAllButton];
+
     this.addChild(
       new Node({
         pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
+          inclinationControl,
+          azimuthControl,
+          planetMassControl,
+          this.orbitView,
+          resetViewButton,
+          explanationButton,
+          timeControlNode,
           resetAllButton,
         ],
       }),
     );
   }
 
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
   public reset(): void {
-    // TODO: reset any view-side state here
+    this.orbitView.resetCamera();
   }
-
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
-  public override step(_dt: number): void {
-    // TODO: implement animation updates here
-  }
-
-  // ── Accessibility / listeners: dispose ─────────────────────────────────────
-  // ScreenView is `isDisposable: false` and lives for the whole sim, so this
-  // class rarely needs dispose(). Child Nodes (and a live currentDetails
-  // DerivedProperty you own on a short-lived object) do. When you add
-  // DerivedProperty / Multilink / Property.link against model state, keep the
-  // references and tear them down — forks copy what they see. Pattern:
-  //
-  // private readonly disposeViewingAngleScreenView: () => void;
-  //
-  // // in the constructor, after creating the listeners:
-  // const statusMultilink = Multilink.multilink(
-  //   [model.someProperty, model.otherProperty],
-  //   (a, b) => { /* update view from model */ },
-  // );
-  // const detailsProperty = new DerivedProperty(
-  //   [model.stateProperty],
-  //   (state) => `State: ${state}`,
-  // ); // → pass as currentDetailsContent in ViewingAngleScreenSummaryContent
-  // const onExternal = (v: number) => { /* … */ };
-  // model.externalProperty.link(onExternal); // Property you do NOT own
-  //
-  // this.disposeViewingAngleScreenView = () => {
-  //   statusMultilink.dispose();                 // Multilink you created
-  //   detailsProperty.dispose();                 // DerivedProperty you created
-  //   model.externalProperty.unlink(onExternal); // undo external link
-  // };
-  //
-  // public override dispose(): void {
-  //   this.disposeViewingAngleScreenView();
-  //   super.dispose();
-  // }
 }
