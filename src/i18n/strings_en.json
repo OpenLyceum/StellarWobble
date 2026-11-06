@@ -157,7 +157,7 @@
     "periodogramHint": "Click a peak to use its period.",
     "transitsNote": "This planet also transits its star: find its dips in Transit Hunter.",
     "explanation5": "The periodogram tries every period from 1 to 5000 days and shows how much of the scatter a sine of that period explains. The highest peak is usually the planet. Observing once a night also makes false peaks, called aliases, near 1 day and at P/(1 ± P) days: fold the data to check.",
-    "explanation6": "Stellar jitter: the star's own surface (convection, spots, oscillations) also moves by a metre or two per second. That motion is not in the error bars, so with jitter on even the right model scatters by more than 1 × the error bars."
+    "explanation6": "Stellar jitter: the star's own surface (convection, spots, oscillations) also moves by a meter or two per second. That motion is not in the error bars, so with jitter on even the right model scatters by more than 1 × the error bars."
   },
   "a11y": {
     "doppler": {
