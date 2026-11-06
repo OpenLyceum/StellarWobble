@@ -131,7 +131,7 @@
     "fitPhase": "Fase",
     "foldData": "Plegar datos con tu período",
     "showModel": "Mostrar tu modelo",
-    "residualPattern": "Dispersión respecto a tu modelo: {{value}} m/s",
+    "residualPattern": "Dispersión respecto a tu modelo: {{value}} m/s = {{ratio}} × las barras de error",
     "noData": "Aún no hay mediciones: ¡observa algunas noches!",
     "inferredMassPattern": "Masa mínima del planeta: {{value}}",
     "reveal": "Revelar respuesta",
@@ -145,8 +145,19 @@
     "explanationTitle": "Encontrar un planeta en los datos",
     "explanation1": "Cada noche que puedes observar, el espectrógrafo da una velocidad radial, con cierto error de medición (la barra de error).",
     "explanation2": "Reúne mediciones durante varias órbitas y luego ajusta tu modelo: el período fija cada cuánto se repite el patrón, la amplitud su tamaño y la fase lo desplaza en el tiempo.",
-    "explanation3": "Cuando tu modelo es bueno, plegar los datos con tu período apila todas las órbitas en una sola curva limpia, y la dispersión respecto a tu modelo baja hasta aproximadamente el error de medición.",
-    "explanation4": "Con el período, la amplitud y la masa de la estrella obtienes la masa mínima del planeta. Prueba Sol + Tierra: su bamboleo de 9 cm/s está muy por debajo de ±1 m/s, por eso es tan difícil encontrar gemelos de la Tierra."
+    "explanation3": "Cuando tu modelo es bueno, plegar los datos con tu período apila todas las órbitas en una sola curva limpia, y la dispersión respecto a tu modelo baja hasta aproximadamente el error de medición: cerca de 1 × las barras de error.",
+    "explanation4": "Con el período, la amplitud y la masa de la estrella obtienes la masa mínima del planeta. Prueba Sol + Tierra: su bamboleo de 9 cm/s está muy por debajo de ±1 m/s, por eso es tan difícil encontrar gemelos de la Tierra.",
+    "jitterPattern": "Agitación estelar (±{{value}} m/s)",
+    "periodogram": "Periodograma",
+    "periodogramTitle": "Periodograma de tus mediciones",
+    "periodogramPeriodAxis": "Período de prueba (días)",
+    "periodogramPowerAxis": "Potencia (parte de la dispersión explicada)",
+    "periodogramNeedDataPattern": "Observa al menos {{count}} noches para calcular un periodograma.",
+    "usePeak": "Usar el pico más alto",
+    "periodogramHint": "Haz clic en un pico para usar su período.",
+    "transitsNote": "Este planeta también transita frente a su estrella: busca sus caídas en Cazador de tránsitos.",
+    "explanation5": "El periodograma prueba todos los períodos de 1 a 5000 días y muestra qué parte de la dispersión explica una sinusoide de ese período. El pico más alto suele ser el planeta. Observar una vez por noche también produce picos falsos, llamados alias, cerca de 1 día y en P/(1 ± P) días: pliega los datos para comprobarlo.",
+    "explanation6": "Agitación estelar: la propia superficie de la estrella (convección, manchas, oscilaciones) también se mueve uno o dos metros por segundo. Ese movimiento no está en las barras de error, así que con la agitación activada incluso el modelo correcto se dispersa más de 1 × las barras de error."
   },
   "a11y": {
     "doppler": {
@@ -193,10 +204,10 @@
     "observatory": {
       "screenSummary": {
         "playArea": "El área de juego muestra un gráfico de las mediciones de velocidad radial de la estrella objetivo, con barras de error, y la curva de tu modelo.",
-        "controlArea": "El área de control tiene el selector de objetivo, la precisión del espectrógrafo, botones para observar una o diez noches, botones para acercar y desplazar el eje del tiempo del gráfico, deslizadores para el período, la amplitud y la fase de tu modelo, una casilla para plegar los datos, un botón para revelar la respuesta y un botón Restablecer todo.",
+        "controlArea": "El área de control tiene el selector de objetivo, la precisión del espectrógrafo, una casilla de agitación estelar, botones para observar una o diez noches, botones para acercar y desplazar el eje del tiempo del gráfico, deslizadores para el período, la amplitud y la fase de tu modelo, casillas para plegar los datos y mostrar el periodograma, un botón para usar el pico más alto del periodograma, un botón para revelar la respuesta y un botón Restablecer todo.",
         "interactionHint": "Observa varias noches y luego ajusta el modelo hasta que pase por las mediciones."
       },
-      "currentDetailsPattern": "{{count}} mediciones. Tu modelo: período {{period}} días, amplitud {{amplitude}} metros por segundo; dispersión {{residual}} metros por segundo.",
+      "currentDetailsPattern": "{{count}} mediciones. Tu modelo: período {{period}} días, amplitud {{amplitude}} metros por segundo; dispersión {{residual}} metros por segundo, {{ratio}} veces las barras de error.",
       "controls": {
         "target": "Estrella objetivo",
         "precision": "Precisión del espectrógrafo",
@@ -209,7 +220,8 @@
         "scrollEarlier": "Desplazar a días anteriores",
         "scrollLater": "Desplazar a días posteriores",
         "showAll": "Mostrar todos los días",
-        "explanation": "Explicación"
+        "explanation": "Explicación",
+        "usePeak": "Usar el pico más alto del periodograma como período del modelo"
       }
     }
   },

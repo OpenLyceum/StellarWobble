@@ -3,9 +3,10 @@
  *
  * The Observatory screen: find a planet in noisy radial-velocity data.
  *
- *  - Top left: the measurements (ObservatoryChartNode).
- *  - Bottom left: the user's model (period, amplitude, phase), fold and show
- *    options, and the scatter about the model.
+ *  - Top left: the measurements (ObservatoryChartNode), or their periodogram
+ *    (PeriodogramNode) when "Periodogram" is checked.
+ *  - Bottom left: the user's model (period, amplitude, phase), fold, show and
+ *    periodogram options, and the scatter about the model, in m/s and in error bars.
  *  - Right: the target, the spectrograph, the observing buttons, and the result
  *    (minimum mass, reveal answer).
  */
@@ -38,21 +39,28 @@ import {
   CADENCE_RANGE_DAYS,
   CONTROL_PANEL_WIDTH,
   FIT_AMPLITUDE_RANGE_MS,
+  FIT_AMPLITUDE_STEP_DECADES,
   FIT_PERIOD_RANGE_DAYS,
+  FIT_PERIOD_STEP_DECADES,
   FONTS,
   INSTRUMENT_PRECISIONS_MS,
   SCREEN_VIEW_MARGIN,
+  STELLAR_JITTER_MS,
 } from "../../StellarWobbleConstants.js";
 import type { ObservatoryModel } from "../model/ObservatoryModel.js";
 import { ObservatoryTarget } from "../model/ObservatoryTarget.js";
 import { signalMinimumMass } from "../model/PlanetSignal.js";
 import { ObservatoryChartNode } from "./ObservatoryChartNode.js";
 import { ObservatoryScreenSummaryContent } from "./ObservatoryScreenSummaryContent.js";
+import { PeriodogramNode } from "./PeriodogramNode.js";
 
 export type ObservatoryScreenViewOptions = ScreenViewOptions;
 
 const CHART_WIDTH = 610;
 const CHART_HEIGHT = 330;
+
+/** Targets whose planet also transits: their answer points to Transit Hunter. */
+const TRANSITING_TARGETS: readonly ObservatoryTarget[] = [ObservatoryTarget.HD_189733, ObservatoryTarget.HD_209458];
 
 export class ObservatoryScreenView extends ScreenView {
   public constructor(model: ObservatoryModel, providedOptions?: ObservatoryScreenViewOptions) {
@@ -86,6 +94,12 @@ export class ObservatoryScreenView extends ScreenView {
     const chart = new ObservatoryChartNode(model, CHART_WIDTH, CHART_HEIGHT);
     chart.left = bounds.minX + SCREEN_VIEW_MARGIN + 50;
     chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
+    const periodogram = new PeriodogramNode(model, CHART_WIDTH, CHART_HEIGHT);
+    periodogram.translation = chart.translation;
+    model.showPeriodogramProperty.link((show) => {
+      periodogram.visible = show;
+      chart.visible = !show;
+    });
 
     // ── Observing panel ───────────────────────────────────────────────────────
     const targetItems = [
@@ -146,6 +160,10 @@ export class ObservatoryScreenView extends ScreenView {
         accessibleName: a11y.controls.cadenceStringProperty,
       },
     );
+    const jitterCheckbox = createCheckbox(
+      model.jitterProperty,
+      new PatternStringProperty(strings.jitterPatternStringProperty, { value: STELLAR_JITTER_MS }),
+    );
     const observeOneButton = pushButton(strings.observeOneStringProperty, () => model.observe(1));
     const observeTenButton = pushButton(strings.observeTenStringProperty, () => model.observe(10));
     const clearButton = pushButton(strings.clearDataStringProperty, () => model.clearData());
@@ -172,6 +190,7 @@ export class ObservatoryScreenView extends ScreenView {
           label(strings.precisionStringProperty),
           precisionRadios,
           cadenceControl,
+          jitterCheckbox,
           new HBox({ spacing: 8, children: [observeOneButton, observeTenButton] }),
           clearButton,
           measurementsText,
@@ -193,8 +212,8 @@ export class ObservatoryScreenView extends ScreenView {
       {
         unitsProperty: units.daysStringProperty,
         logarithmic: true,
-        significantFigures: 4,
-        delta: 0.002,
+        significantFigures: 5,
+        delta: FIT_PERIOD_STEP_DECADES,
         accessibleName: a11y.controls.fitPeriodStringProperty,
       },
     );
@@ -204,7 +223,8 @@ export class ObservatoryScreenView extends ScreenView {
       FIT_AMPLITUDE_RANGE_MS,
       {
         unitsProperty: units.metersPerSecondStringProperty,
-        delta: 0.5,
+        logarithmic: true,
+        delta: FIT_AMPLITUDE_STEP_DECADES,
         accessibleName: a11y.controls.fitAmplitudeStringProperty,
       },
     );
@@ -215,13 +235,17 @@ export class ObservatoryScreenView extends ScreenView {
     });
     const foldCheckbox = createCheckbox(model.foldProperty, strings.foldDataStringProperty);
     const showModelCheckbox = createCheckbox(model.showModelProperty, strings.showModelStringProperty);
+    const periodogramCheckbox = createCheckbox(model.showPeriodogramProperty, strings.periodogramStringProperty);
     const residualText = new Text(
       new PatternStringProperty(strings.residualPatternStringProperty, {
         value: new DerivedProperty([model.residualProperty], (residual) =>
           residual === null ? "—" : formatSignificant(residual, 3),
         ),
+        ratio: new DerivedProperty([model.normalizedResidualProperty], (ratio) =>
+          ratio === null ? "—" : formatSignificant(ratio, 2),
+        ),
       }),
-      { font: FONTS.READOUT, fill: StellarWobbleColors.fitCurveColorProperty, maxWidth: 260 },
+      { font: FONTS.READOUT, fill: StellarWobbleColors.fitCurveColorProperty, maxWidth: CHART_WIDTH },
     );
 
     const fitPanel = new StellarWobblePanel(
@@ -235,7 +259,8 @@ export class ObservatoryScreenView extends ScreenView {
             maxWidth: 300,
           }),
           new HBox({ spacing: 18, align: "top", children: [periodControl, amplitudeControl, phaseControl] }),
-          new HBox({ spacing: 18, children: [foldCheckbox, showModelCheckbox, residualText] }),
+          new HBox({ spacing: 18, children: [foldCheckbox, showModelCheckbox, periodogramCheckbox] }),
+          residualText,
         ],
       }),
     );
@@ -259,19 +284,27 @@ export class ObservatoryScreenView extends ScreenView {
       [
         model.signalProperty,
         model.precisionProperty,
+        model.targetProperty,
         strings.answerPatternStringProperty,
         strings.noPlanetAnswerStringProperty,
+        strings.transitsNoteStringProperty,
         ...unitsDependencies(),
       ],
       () => {
         const signal = model.signalProperty.value;
-        const answer = strings.answerPatternStringProperty.value
-          .replace("{{period}}", formatSignificant(signal.period, 4))
-          .replace("{{amplitude}}", formatSignificant(signal.amplitude, 3))
-          .replace("{{mass}}", formatPlanetMass(signalMinimumMass(signal)));
-        return signal.amplitude < model.precisionProperty.value / 3
-          ? `${answer}<br>${strings.noPlanetAnswerStringProperty.value}`
-          : answer;
+        const lines = [
+          strings.answerPatternStringProperty.value
+            .replace("{{period}}", formatSignificant(signal.period, 4))
+            .replace("{{amplitude}}", formatSignificant(signal.amplitude, 3))
+            .replace("{{mass}}", formatPlanetMass(signalMinimumMass(signal))),
+        ];
+        if (signal.amplitude < model.precisionProperty.value / 3) {
+          lines.push(strings.noPlanetAnswerStringProperty.value);
+        }
+        if (TRANSITING_TARGETS.includes(model.targetProperty.value)) {
+          lines.push(strings.transitsNoteStringProperty.value);
+        }
+        return lines.join("<br>");
       },
     );
     const answerText = new RichText(answerStringProperty, {
@@ -287,6 +320,8 @@ export class ObservatoryScreenView extends ScreenView {
         strings.explanation2StringProperty,
         strings.explanation3StringProperty,
         strings.explanation4StringProperty,
+        strings.explanation5StringProperty,
+        strings.explanation6StringProperty,
       ],
       a11y.controls.explanationStringProperty,
     );
@@ -318,7 +353,7 @@ export class ObservatoryScreenView extends ScreenView {
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
 
-    this.children = [chart, fitPanel, observingPanel, resultPanel, resetAllButton, comboListParent];
+    this.children = [chart, periodogram, fitPanel, observingPanel, resultPanel, resetAllButton, comboListParent];
 
     this.addChild(
       new Node({
@@ -327,15 +362,18 @@ export class ObservatoryScreenView extends ScreenView {
           newMysteryButton,
           precisionRadios,
           cadenceControl,
+          jitterCheckbox,
           observeOneButton,
           observeTenButton,
           clearButton,
           ...chart.timeControls,
+          periodogram.usePeakButton,
           periodControl,
           amplitudeControl,
           phaseControl,
           foldCheckbox,
           showModelCheckbox,
+          periodogramCheckbox,
           revealButton,
           explanationButton,
           resetAllButton,

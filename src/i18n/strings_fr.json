@@ -131,7 +131,7 @@
     "fitPhase": "Phase",
     "foldData": "Replier sur votre période",
     "showModel": "Afficher votre modèle",
-    "residualPattern": "Écart à votre modèle : {{value}} m/s",
+    "residualPattern": "Écart à votre modèle : {{value}} m/s = {{ratio}} × les barres d'erreur",
     "noData": "Pas encore de mesures : observez quelques nuits !",
     "inferredMassPattern": "Masse minimale de la planète : {{value}}",
     "reveal": "Révéler la réponse",
@@ -145,8 +145,19 @@
     "explanationTitle": "Trouver une planète dans les données",
     "explanation1": "Chaque nuit d'observation, le spectrographe donne une vitesse radiale, avec une certaine erreur de mesure (la barre d'erreur).",
     "explanation2": "Accumulez des mesures sur plusieurs orbites, puis ajustez votre modèle : la période fixe la fréquence de répétition du motif, l'amplitude sa taille, et la phase le fait glisser dans le temps.",
-    "explanation3": "Quand votre modèle est bon, replier les données sur votre période superpose toutes les orbites en une seule courbe nette, et l'écart à votre modèle tombe à peu près à l'erreur de mesure.",
-    "explanation4": "La période, l'amplitude et la masse de l'étoile donnent la masse minimale de la planète. Essayez Soleil + Terre : son oscillation de 9 cm/s est bien en dessous de ±1 m/s, d'où la difficulté de trouver des jumelles de la Terre."
+    "explanation3": "Quand votre modèle est bon, replier les données sur votre période superpose toutes les orbites en une seule courbe nette, et l'écart à votre modèle tombe à peu près à l'erreur de mesure : environ 1 × les barres d'erreur.",
+    "explanation4": "La période, l'amplitude et la masse de l'étoile donnent la masse minimale de la planète. Essayez Soleil + Terre : son oscillation de 9 cm/s est bien en dessous de ±1 m/s, d'où la difficulté de trouver des jumelles de la Terre.",
+    "jitterPattern": "Agitation stellaire (±{{value}} m/s)",
+    "periodogram": "Périodogramme",
+    "periodogramTitle": "Périodogramme de vos mesures",
+    "periodogramPeriodAxis": "Période d'essai (jours)",
+    "periodogramPowerAxis": "Puissance (part de l'écart expliquée)",
+    "periodogramNeedDataPattern": "Observez au moins {{count}} nuits pour calculer un périodogramme.",
+    "usePeak": "Prendre le plus haut pic",
+    "periodogramHint": "Cliquez sur un pic pour prendre sa période.",
+    "transitsNote": "Cette planète transite aussi devant son étoile : cherchez ses creux dans Chasseur de transits.",
+    "explanation5": "Le périodogramme essaie toutes les périodes de 1 à 5000 jours et montre quelle part de l'écart une sinusoïde de cette période explique. Le plus haut pic est en général la planète. Observer une fois par nuit crée aussi de faux pics, appelés alias, près de 1 jour et à P/(1 ± P) jours : repliez les données pour vérifier.",
+    "explanation6": "Agitation stellaire : la surface de l'étoile elle-même (convection, taches, oscillations) bouge aussi d'un ou deux mètres par seconde. Ce mouvement n'est pas dans les barres d'erreur, donc avec l'agitation même le bon modèle s'écarte de plus de 1 × les barres d'erreur."
   },
   "a11y": {
     "doppler": {
@@ -193,10 +204,10 @@
     "observatory": {
       "screenSummary": {
         "playArea": "La zone de jeu montre un graphique des mesures de vitesse radiale de l'étoile cible, avec leurs barres d'erreur, et la courbe de votre modèle.",
-        "controlArea": "La zone de contrôle contient le choix de la cible, la précision du spectrographe, des boutons pour observer une ou dix nuits, des boutons pour zoomer et défiler sur l'axe du temps du graphique, des curseurs pour la période, l'amplitude et la phase de votre modèle, une case pour replier les données, un bouton pour révéler la réponse et un bouton Tout réinitialiser.",
+        "controlArea": "La zone de contrôle contient le choix de la cible, la précision du spectrographe, une case pour l'agitation stellaire, des boutons pour observer une ou dix nuits, des boutons pour zoomer et défiler sur l'axe du temps du graphique, des curseurs pour la période, l'amplitude et la phase de votre modèle, des cases pour replier les données et afficher le périodogramme, un bouton pour prendre le plus haut pic du périodogramme, un bouton pour révéler la réponse et un bouton Tout réinitialiser.",
         "interactionHint": "Observez plusieurs nuits, puis ajustez le modèle jusqu'à ce qu'il passe par les mesures."
       },
-      "currentDetailsPattern": "{{count}} mesures. Votre modèle : période {{period}} jours, amplitude {{amplitude}} mètres par seconde ; écart {{residual}} mètres par seconde.",
+      "currentDetailsPattern": "{{count}} mesures. Votre modèle : période {{period}} jours, amplitude {{amplitude}} mètres par seconde ; écart {{residual}} mètres par seconde, soit {{ratio}} fois les barres d'erreur.",
       "controls": {
         "target": "Étoile cible",
         "precision": "Précision du spectrographe",
@@ -209,7 +220,8 @@
         "scrollEarlier": "Défiler vers les jours précédents",
         "scrollLater": "Défiler vers les jours suivants",
         "showAll": "Afficher tous les jours",
-        "explanation": "Explication"
+        "explanation": "Explication",
+        "usePeak": "Prendre le plus haut pic du périodogramme comme période du modèle"
       }
     }
   },

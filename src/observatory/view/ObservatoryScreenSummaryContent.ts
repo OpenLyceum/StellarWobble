@@ -3,7 +3,7 @@
  *
  * The accessible screen summary for the Observatory screen. Its current-details
  * paragraph stays live: the number of measurements, the user's model, and the
- * scatter of the data about it.
+ * scatter of the data about it (in m/s and in error bars).
  */
 import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { ScreenSummaryContent } from "scenerystack/sim";
@@ -26,6 +26,9 @@ export class ObservatoryScreenSummaryContent extends ScreenSummaryContent {
         amplitude: new DerivedProperty([model.fitAmplitudeProperty], (amplitude) => plain(amplitude)),
         residual: new DerivedProperty([model.residualProperty], (residual) =>
           residual === null ? "-" : plain(residual),
+        ),
+        ratio: new DerivedProperty([model.normalizedResidualProperty], (ratio) =>
+          ratio === null ? "-" : plain(ratio, 2),
         ),
       }),
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,

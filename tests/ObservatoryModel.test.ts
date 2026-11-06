@@ -12,6 +12,7 @@ import {
   signalMinimumMass,
   signalVelocity,
 } from "../src/observatory/model/PlanetSignal.js";
+import { FIT_PERIOD_STEP_DECADES } from "../src/StellarWobbleConstants.js";
 
 describe("PlanetSignal", () => {
   it("gives 51 Peg b its published minimum mass (≈ 0.47 M_J)", () => {
@@ -94,9 +95,62 @@ describe("ObservatoryModel", () => {
     expect(model.residualProperty.value).not.toBeNull();
     expect(model.residualProperty.value ?? 0).toBeGreaterThan(2.4);
     expect(model.residualProperty.value ?? 0).toBeLessThan(3.6);
+    // About one error bar.
+    expect(model.normalizedResidualProperty.value ?? 0).toBeGreaterThan(0.8);
+    expect(model.normalizedResidualProperty.value ?? 0).toBeLessThan(1.2);
     // A wrong model is much worse.
-    model.fitAmplitudeProperty.value = 0;
+    model.fitAmplitudeProperty.value = 0.05;
     expect(model.residualProperty.value ?? 0).toBeGreaterThan(30);
+    expect(model.normalizedResidualProperty.value ?? 0).toBeGreaterThan(10);
+  });
+
+  it("adds stellar jitter that the error bars do not include", () => {
+    dotRandom.setSeed(5);
+    const model = new ObservatoryModel();
+    model.targetProperty.value = ObservatoryTarget.FIFTY_ONE_PEG;
+    model.precisionProperty.value = 1;
+    model.jitterProperty.value = true;
+    model.observe(200);
+    const signal = model.signalProperty.value;
+    model.fitPeriodProperty.value = signal.period;
+    model.fitAmplitudeProperty.value = signal.amplitude;
+    model.fitPhaseProperty.value = signal.phase;
+    expect(model.measurements.every((measurement) => measurement.uncertainty === 1)).toBe(true);
+    // √(1² + 2²) ≈ 2.24 error bars even for the true curve.
+    expect(model.normalizedResidualProperty.value ?? 0).toBeGreaterThan(1.8);
+    expect(model.normalizedResidualProperty.value ?? 0).toBeLessThan(2.7);
+  });
+
+  it("finds 51 Peg b's period from the periodogram's highest peak", () => {
+    dotRandom.setSeed(6);
+    const model = new ObservatoryModel();
+    model.targetProperty.value = ObservatoryTarget.FIFTY_ONE_PEG;
+    expect(model.peakPeriod()).toBeNull();
+    model.observe(4);
+    expect(model.periodogram()).toBeNull();
+    model.observe(60);
+    model.usePeakPeriod();
+    expect(model.fitPeriodProperty.value).toBeCloseTo(4.2308, 2);
+    // A period range limits the search (here to an alias-free stretch without the planet).
+    const other = model.peakPeriod(100, 5000);
+    expect(other).not.toBeNull();
+    expect(other ?? 0).toBeGreaterThanOrEqual(100);
+  });
+
+  it("recomputes the periodogram when the data change", () => {
+    const model = new ObservatoryModel();
+    model.observe(10);
+    const first = model.periodogram();
+    expect(model.periodogram()).toBe(first);
+    model.observe(1);
+    expect(model.periodogram()).not.toBe(first);
+  });
+
+  it("steps the period finely enough to fold 300 nights of 51 Peg data", () => {
+    // One arrow click at P = 4.23 d shifts the fit by T·ΔP/P² orbits over a T-day run.
+    const period = 4.2308;
+    const step = period * (10 ** FIT_PERIOD_STEP_DECADES - 1);
+    expect((300 * step) / period ** 2).toBeLessThan(0.01);
   });
 
   it("infers the minimum mass from the fitted period and amplitude", () => {

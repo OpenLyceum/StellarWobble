@@ -29,9 +29,10 @@ star's light. Written for introductory astronomy. Built with
 - **Observatory.** Observe a mystery star, one of seven real stars with short-period planets
   (51 Pegasi, HD 209458, Gliese 436, Proxima Centauri and others, from the NASA Exoplanet Archive),
   or the Sun as Jupiter or Earth would make it wobble. You get one noisy measurement per night, at a
-  precision and cadence you choose, with cloudy nights. Zoom in on the time axis and scroll along it
-  (drag, mouse wheel or buttons), fit a period, an amplitude and a phase, fold the data on your
-  period, and read off the planet's minimum mass, then reveal the answer.
+  precision and cadence you choose, with cloudy nights and optional stellar jitter. Zoom in on the
+  time axis and scroll along it (drag, mouse wheel or buttons), find the period with a periodogram,
+  fit a period, an amplitude and a phase, fold the data on your period, check the scatter in error
+  bars, and read off the planet's minimum mass, then reveal the answer.
 - **Accessible:**
   - Every control works from the keyboard.
   - Each screen has a live screen summary and a keyboard-help dialog.

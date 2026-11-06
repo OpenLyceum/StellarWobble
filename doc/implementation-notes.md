@@ -22,7 +22,8 @@ src/
   doppler/        DopplerModel (two speed scales), WaveViewNode (camera-follows-star wavefronts)
   wobble/         WobbleModel (OrbitalSystem edge-on), TopViewNode, LiveRVChartNode
   viewing-angle/  ViewingAngleModel (+ minimum mass), Orbit3DViewNode, SkyViewNode, PhaseRVChartNode
-  observatory/    ObservatoryModel, ObservatoryTarget (enumeration), PlanetSignal, ObservatoryChartNode
+  observatory/    ObservatoryModel, ObservatoryTarget (enumeration), PlanetSignal, periodogram (Lomb–Scargle),
+                  ObservatoryChartNode, PeriodogramNode (drawn in place of the chart)
   preferences/    one preference: Show equations (?showEquations), a module-level singleton
 ```
 
@@ -45,6 +46,13 @@ src/
   keys (the view node is focusable).
 - **Observatory residual uses null for "no data".** `NumberProperty` rejects NaN, so the residual is
   `Property<number | null>`.
+- **The period slider steps 0.00005 decade.** NumberControl rounds both the slider and the arrow
+  buttons to multiples of `delta`, so on a logarithmic control `delta` is the relative resolution of
+  every reachable value. The earlier 0.002 decade (0.46 %) left the best fit of a long run between two
+  reachable periods; the slider is for coarse moves, the arrows and the periodogram for fine ones.
+- **The periodogram is cached and drawn per pixel column.** `ObservatoryModel.periodogram()` computes
+  it on first use after the data change (rotation recurrence, no trig in the inner loop), and
+  `PeriodogramNode` draws the highest power in each pixel column so no narrow peak disappears.
 - **Preferences are a module-level singleton** (`stellarWobblePreferences`). `main.ts` passes it to
   the Preferences dialog and the views read it through `createEquationNode`.
 
@@ -55,7 +63,8 @@ src/
 - `tests/OrbitalSystem.test.ts` checks momentum balance, sin i scaling, the clock and the trace
   sweep.
 - `tests/timeWindow.test.ts` checks the Observatory chart's zoom and scroll limits.
-- `tests/ObservatoryModel.test.ts` checks the real targets' minimum masses against the archive, the noise statistics and resets.
+- `tests/ObservatoryModel.test.ts` checks the real targets' minimum masses against the archive, the noise statistics (with and without stellar jitter), the period step, the periodogram peak and resets.
+- `tests/periodogram.test.ts` checks the Lomb–Scargle power (noiseless peak = 1, the recurrence against a direct evaluation, peak refinement, a weak signal in noise).
 - `tests/memory-leak.test.ts` covers the shared model and the spectrum and star nodes.
 
 Fuzz with `npm run test:fuzz`. In the dev console the screen models are

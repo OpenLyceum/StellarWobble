@@ -116,9 +116,29 @@ export const ZOOM_MAX_SHIFT_FRACTION = 0.7;
 /** Instrument precisions offered (1σ noise of one measurement), m/s. */
 export const INSTRUMENT_PRECISIONS_MS = [1, 3, 10] as const;
 
-/** Fit-slider ranges. */
+/** Fit-slider ranges (both sliders are logarithmic). */
 export const FIT_PERIOD_RANGE_DAYS = new Range(1, 5000);
-export const FIT_AMPLITUDE_RANGE_MS = new Range(0, 250);
+export const FIT_AMPLITUDE_RANGE_MS = new Range(0.05, 300);
+
+/**
+ * Arrow-button steps of the fit sliders, in decades. The period step is 0.012 %,
+ * so one click shifts a fit by under 1 % of an orbit even across the 300 nights
+ * the chart keeps (a coarser step left the best fit between two clicks).
+ */
+export const FIT_PERIOD_STEP_DECADES = 0.00005;
+export const FIT_AMPLITUDE_STEP_DECADES = 0.002;
+
+/**
+ * Extra scatter from the star itself (convection, spots and oscillations on its
+ * surface), m/s, when "Stellar jitter" is on. Quiet Sun-like stars show about
+ * 1–2 m/s; active stars much more. The error bars do not include it.
+ */
+export const STELLAR_JITTER_MS = 2;
+
+/** Periodogram: trials per peak width, most trial frequencies, and fewest measurements. */
+export const PERIODOGRAM_OVERSAMPLING = 5;
+export const PERIODOGRAM_MAX_FREQUENCIES = 40_000;
+export const PERIODOGRAM_MIN_MEASUREMENTS = 5;
 
 /** Days between observations, range for the cadence slider. */
 export const CADENCE_RANGE_DAYS = new Range(1, 200);

@@ -119,6 +119,18 @@ Observing rules:
   which costs a further day, and the time of night is jittered by up to ±0.2 day.
 - **Noise:** each measurement adds Gaussian noise of the chosen precision (1, 3 or 10 m/s), and that
   precision is its error bar.
+- **Stellar jitter (optional):** a further 2 m/s of Gaussian scatter from the star's own surface
+  (convection, spots, oscillations; quiet Sun-like stars show 1–2 m/s). The error bar does not
+  include it, as for real stars, so even the true curve then scatters by about √(σ² + 2²)/σ error bars.
 - **Fit:** the user's model has the same functional form. The scatter readout is the RMS residual of
-  the data about it, so a good fit gives a scatter close to the precision.
+  the data about it, in m/s and in error bars, √(mean (residual/σ)²): a good fit without jitter gives
+  about 1. Both fit sliders are logarithmic. The period's arrow step is 0.00005 decade (0.012 %), so
+  one click moves a fit at P = 4.23 d by under 1 % of an orbit across the 300 nights the chart keeps;
+  the amplitude runs from 0.05 to 300 m/s in 0.46 % steps, fine enough for Proxima's 1.2 m/s.
+- **Periodogram:** the Lomb–Scargle periodogram (weighted least-squares sine fit at each trial
+  frequency, power = fraction of the weighted variance explained, 0–1) over periods of 1–5000 days.
+  The frequency grid is uniform with spacing 1/(5 × baseline), capped at 40 000 trials. "Use highest
+  peak" (or a click near a peak) refines the peak by golden-section search on the exact power and
+  sets the model's period. Nightly sampling makes aliases at 1/P ± 1 cycles per day, i.e. periods
+  P/(1 ± P).
 - **Fold:** folding plots each point at frac(t / P<sub>fit</sub>).

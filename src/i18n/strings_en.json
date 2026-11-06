@@ -131,7 +131,7 @@
     "fitPhase": "Phase",
     "foldData": "Fold data on your period",
     "showModel": "Show your model",
-    "residualPattern": "Scatter about your model: {{value}} m/s",
+    "residualPattern": "Scatter about your model: {{value}} m/s = {{ratio}} × the error bars",
     "noData": "No measurements yet: observe some nights!",
     "inferredMassPattern": "Planet minimum mass: {{value}}",
     "reveal": "Reveal answer",
@@ -145,8 +145,19 @@
     "explanationTitle": "Finding a planet in the data",
     "explanation1": "Each night you can observe, the spectrograph gives one radial velocity, with some measurement error (the error bar).",
     "explanation2": "Collect measurements over several orbits, then adjust your model: the period sets how often the pattern repeats, the amplitude sets its size, and the phase slides it in time.",
-    "explanation3": "When your model is good, folding the data on your period stacks all the orbits into one clean curve, and the scatter about your model drops to about the measurement error.",
-    "explanation4": "From the period, the amplitude and the star's mass you get the planet's minimum mass. Try Sun + Earth: its 9 cm/s wobble is far below ±1 m/s, which is why Earth twins are so hard to find."
+    "explanation3": "When your model is good, folding the data on your period stacks all the orbits into one clean curve, and the scatter about your model drops to about the measurement error: about 1 × the error bars.",
+    "explanation4": "From the period, the amplitude and the star's mass you get the planet's minimum mass. Try Sun + Earth: its 9 cm/s wobble is far below ±1 m/s, which is why Earth twins are so hard to find.",
+    "jitterPattern": "Stellar jitter (±{{value}} m/s)",
+    "periodogram": "Periodogram",
+    "periodogramTitle": "Periodogram of your measurements",
+    "periodogramPeriodAxis": "Trial period (days)",
+    "periodogramPowerAxis": "Power (share of scatter explained)",
+    "periodogramNeedDataPattern": "Observe at least {{count}} nights to compute a periodogram.",
+    "usePeak": "Use highest peak",
+    "periodogramHint": "Click a peak to use its period.",
+    "transitsNote": "This planet also transits its star: find its dips in Transit Hunter.",
+    "explanation5": "The periodogram tries every period from 1 to 5000 days and shows how much of the scatter a sine of that period explains. The highest peak is usually the planet. Observing once a night also makes false peaks, called aliases, near 1 day and at P/(1 ± P) days: fold the data to check.",
+    "explanation6": "Stellar jitter: the star's own surface (convection, spots, oscillations) also moves by a metre or two per second. That motion is not in the error bars, so with jitter on even the right model scatters by more than 1 × the error bars."
   },
   "a11y": {
     "doppler": {
@@ -193,10 +204,10 @@
     "observatory": {
       "screenSummary": {
         "playArea": "The play area shows a chart of radial-velocity measurements of the target star, with error bars, and your model curve.",
-        "controlArea": "The control area has the target selector, the spectrograph precision, buttons to observe one or ten nights, buttons to zoom and scroll the chart's time axis, sliders for your model's period, amplitude and phase, a checkbox to fold the data, a button to reveal the answer, and a Reset All button.",
+        "controlArea": "The control area has the target selector, the spectrograph precision, a stellar jitter checkbox, buttons to observe one or ten nights, buttons to zoom and scroll the chart's time axis, sliders for your model's period, amplitude and phase, checkboxes to fold the data and to show the periodogram, a button to use the periodogram's highest peak, a button to reveal the answer, and a Reset All button.",
         "interactionHint": "Observe several nights, then adjust the model until it passes through the measurements."
       },
-      "currentDetailsPattern": "{{count}} measurements. Your model: period {{period}} days, amplitude {{amplitude}} meters per second; scatter about it {{residual}} meters per second.",
+      "currentDetailsPattern": "{{count}} measurements. Your model: period {{period}} days, amplitude {{amplitude}} meters per second; scatter about it {{residual}} meters per second, {{ratio}} times the error bars.",
       "controls": {
         "target": "Target star",
         "precision": "Spectrograph precision",
@@ -209,7 +220,8 @@
         "scrollEarlier": "Scroll to earlier days",
         "scrollLater": "Scroll to later days",
         "showAll": "Show all days",
-        "explanation": "Explanation"
+        "explanation": "Explanation",
+        "usePeak": "Use the highest periodogram peak as the model period"
       }
     }
   },
