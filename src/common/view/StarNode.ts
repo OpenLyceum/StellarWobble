@@ -7,7 +7,8 @@
 
 import type { TReadOnlyProperty } from "scenerystack/axon";
 import { Circle, Color, Node, type NodeOptions, RadialGradient } from "scenerystack/scenery";
-import { blackbodyColor, starTemperature } from "../model/starAppearance.js";
+import { starTemperature } from "../model/starAppearance.js";
+import { blackbodyColor } from "./blackbodyColor.js";
 
 export class StarNode extends Node {
   private readonly disposeStarNode: () => void;
