@@ -51,7 +51,10 @@ export const STELLAR_LINES: readonly AbsorptionLine[] = [
   H_ALPHA,
 ];
 
-/** Observed wavelength of a line emitted at restWavelength by a source with radial velocity vr, nm. */
+/**
+ * Observed wavelength of a line emitted at restWavelength by a source with radial velocity vr, nm.
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export function shiftedWavelength(restWavelength: number, radialVelocity: number): number {
   return restWavelength * (1 + radialVelocity / SPEED_OF_LIGHT);
 }
@@ -61,7 +64,10 @@ export function dopplerShift(restWavelength: number, radialVelocity: number): nu
   return (restWavelength * radialVelocity) / SPEED_OF_LIGHT;
 }
 
-/** The radial velocity that would produce a shift Δλ on a line at restWavelength, m/s. */
+/**
+ * The radial velocity that would produce a shift Δλ on a line at restWavelength, m/s.
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export function radialVelocityFromShift(restWavelength: number, shift: number): number {
   return (shift / restWavelength) * SPEED_OF_LIGHT;
 }

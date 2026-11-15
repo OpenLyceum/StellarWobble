@@ -106,7 +106,10 @@ export function starVelocity(phase: number, starSpeed: number): Vector3 {
   return new Vector3(starSpeed * Math.sin(theta), -starSpeed * Math.cos(theta), 0);
 }
 
-/** Radial velocity of a body with this velocity, m/s; positive = moving away from Earth. */
+/**
+ * Radial velocity of a body with this velocity, m/s; positive = moving away from Earth.
+ * @internal Exported for unit tests; not part of the application API.
+ */
 export function radialVelocityOf(velocity: Vector3, toEarth: Vector3): number {
   return -velocity.dot(toEarth);
 }
