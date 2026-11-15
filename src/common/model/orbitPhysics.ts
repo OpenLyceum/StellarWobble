@@ -100,18 +100,6 @@ export function directionToEarth(inclinationRad: number, earthAzimuthRad: number
   return new Vector3(s * Math.cos(earthAzimuthRad), s * Math.sin(earthAzimuthRad), Math.cos(inclinationRad));
 }
 
-/** Planet position relative to the barycentre, at orbital angle θ = 2π·phase. */
-export function planetPosition(phase: number, planetRadius: number): Vector3 {
-  const theta = 2 * Math.PI * phase;
-  return new Vector3(planetRadius * Math.cos(theta), planetRadius * Math.sin(theta), 0);
-}
-
-/** Star position relative to the barycentre: always opposite the planet. */
-export function starPosition(phase: number, starRadius: number): Vector3 {
-  const theta = 2 * Math.PI * phase;
-  return new Vector3(-starRadius * Math.cos(theta), -starRadius * Math.sin(theta), 0);
-}
-
 /** Star velocity about the barycentre (counter-clockwise, speed v★). */
 export function starVelocity(phase: number, starSpeed: number): Vector3 {
   const theta = 2 * Math.PI * phase;

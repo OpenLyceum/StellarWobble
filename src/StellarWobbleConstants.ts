@@ -88,7 +88,7 @@ export const WOBBLE_SPEED_RANGE_MS = new Range(-100, 100);
  * slider is at its maximum. The wave picture is not to scale: it exaggerates
  * v/c so the bunching of the waves is visible.
  */
-export const MAX_DISPLAY_BETA = 0.75;
+const MAX_DISPLAY_BETA = 0.75;
 
 /** Wave picture: drawn wave speed (px/s) and emission period (s). */
 export const WAVE_DISPLAY_SPEED = 90;
