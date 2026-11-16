@@ -44,6 +44,7 @@ Physics and data: [`doc/model.md`](doc/model.md). Architecture and decisions:
 | `src/common/model/orbitPhysics.ts` | Period, barycentric radii and speeds, K, minimum mass, direction to Earth, closed-form RV |
 | `src/common/model/stellarSpectrum.ts` | Absorption lines, Doppler shift, spectrum intensity, magnification factor |
 | `src/common/model/OrbitalSystem.ts` | Shared model of Wobble and Viewing Angle |
+| `src/common/view/orbitSchematic.ts` | Shared barycentre mark, velocity arrows, drawn star-orbit radius |
 | `src/common/view/SpectralLineZoomNode.ts` | The zoom window that makes the shift visible |
 | `src/common/view/controls.ts` | Number controls (log scale), checkboxes, explanation dialog button, equation node |
 | `src/observatory/model/PlanetSignal.ts` | Target signals (seven real short-period planets from the NASA Exoplanet Archive, Sun + Jupiter, Sun + Earth, random mystery) |

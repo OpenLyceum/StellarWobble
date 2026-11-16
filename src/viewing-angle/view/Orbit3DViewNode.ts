@@ -21,7 +21,13 @@ import { Circle, DragListener, KeyboardListener, Line, Node, Path, Rectangle, Te
 import { ArrowNode } from "scenerystack/scenery-phet";
 import type { OrbitalSystem } from "../../common/model/OrbitalSystem.js";
 import { directionToEarth, starVelocity } from "../../common/model/orbitPhysics.js";
-import { shiftMagnification } from "../../common/model/stellarSpectrum.js";
+import {
+  createBarycenterMarker,
+  createVelocityArrows,
+  drawnStarOrbitRadius,
+  isRadialArrowVisible,
+  radialComponentFill,
+} from "../../common/view/orbitSchematic.js";
 import { StarNode } from "../../common/view/StarNode.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
@@ -109,16 +115,9 @@ export class Orbit3DViewNode extends Node {
       stroke: StellarWobbleColors.orbitPathColorProperty,
       lineDash: [1, ORBIT_3D_VIEW_NODE_SETTINGS.NORMAL_LINE_LINE_DASH_DASH],
     });
-    const barycenter = new Path(
-      new Shape()
-        .moveTo(ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_X, ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_Y)
-        .lineTo(ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_Y_SEGMENT_2)
-        .moveTo(ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_X, ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_X_MOVE_TO_Y)
-        .lineTo(ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_Y),
-      {
-        stroke: StellarWobbleColors.barycenterColorProperty,
-        lineWidth: ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_LINE_WIDTH,
-      },
+    const barycenter = createBarycenterMarker(
+      Math.abs(ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_X),
+      ORBIT_3D_VIEW_NODE_SETTINGS.BARYCENTER_LINE_WIDTH,
     );
     const star = new StarNode(system.starMassProperty, 13);
     const planet = new Circle(ORBIT_3D_VIEW_NODE_SETTINGS.PLANET_RADIUS, {
@@ -140,18 +139,12 @@ export class Orbit3DViewNode extends Node {
       maxWidth: ORBIT_3D_VIEW_NODE_SETTINGS.EARTH_LABEL_MAX_WIDTH,
     });
 
-    const arrowOptions = {
+    const { velocityArrow, radialArrow } = createVelocityArrows({
       headHeight: ORBIT_3D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_HEIGHT,
       headWidth: ORBIT_3D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_WIDTH,
       tailWidth: ORBIT_3D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_TAIL_WIDTH,
-      stroke: "black",
       lineWidth: ORBIT_3D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_LINE_WIDTH,
-    };
-    const velocityArrow = new ArrowNode(0, 0, 1, 0, {
-      ...arrowOptions,
-      fill: StellarWobbleColors.velocityColorProperty,
     });
-    const radialArrow = new ArrowNode(0, 0, 1, 0, arrowOptions);
 
     const bodies = new Node({ children: [planet, star] });
     const scene = new Node({
@@ -186,8 +179,7 @@ export class Orbit3DViewNode extends Node {
 
       // Orbits and the orbital plane.
       const ratio = system.starOrbitRadiusProperty.value / system.planetOrbitRadiusProperty.value;
-      const starRadius =
-        ratio * PLANET_ORBIT_RADIUS * shiftMagnification(ratio * PLANET_ORBIT_RADIUS, MAX_STAR_ORBIT_RADIUS);
+      const starRadius = drawnStarOrbitRadius(ratio, PLANET_ORBIT_RADIUS, MAX_STAR_ORBIT_RADIUS);
       const circle = (radius: number): Shape => {
         const shape = new Shape();
         for (let i = 0; i <= ORBIT_SAMPLES; i++) {
@@ -199,7 +191,7 @@ export class Orbit3DViewNode extends Node {
       };
       planeFill.shape = circle(PLANET_ORBIT_RADIUS * 1.15);
       planetOrbit.shape = circle(PLANET_ORBIT_RADIUS);
-      starOrbit.shape = circle(Math.max(starRadius, 0.5));
+      starOrbit.shape = circle(starRadius);
       const normalTip = project(new Vector3(0, 0, 60)).point;
       normalLine.setLine(center.x, center.y, normalTip.x, normalTip.y);
       barycenter.center = center;
@@ -243,13 +235,13 @@ export class Orbit3DViewNode extends Node {
       const radialTip = project(
         new Vector3(-starRadius * Math.cos(theta), -starRadius * Math.sin(theta), 0).plus(radialVector),
       ).point;
-      const radialVisible = radialTip.distance(starTail) > 3;
+      const radialVisible = isRadialArrowVisible(radialTip.distance(starTail));
       radialArrow.visible = radialVisible;
       if (radialVisible) {
         radialArrow.setTailAndTip(starTail.x, starTail.y, radialTip.x, radialTip.y);
       }
-      radialArrow.fill =
-        along > 0 ? StellarWobbleColors.blueshiftColorProperty : StellarWobbleColors.redshiftColorProperty;
+      // along > 0: toward Earth (blueshift) → awayFromObserver is false.
+      radialArrow.fill = radialComponentFill(along <= 0);
     };
 
     const multilink = Multilink.multilinkAny(

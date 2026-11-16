@@ -530,6 +530,12 @@ export const VIEWING_ANGLE_MODEL_SETTINGS = {
   INITIAL_EARTH_AZIMUTH: 270,
 } as const;
 
+/** Shared orbit schematic helpers (common/view/orbitSchematic.ts). Lengths are in px. */
+export const ORBIT_SCHEMATIC_SETTINGS = {
+  /** Hide the radial-component arrow when shorter than this, px. */
+  RADIAL_ARROW_MIN_LENGTH_PX: 3,
+} as const;
+
 /** Settings for viewing-angle/view/Orbit3DViewNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const ORBIT_3D_VIEW_NODE_SETTINGS = {
   BARYCENTER_X_SEGMENT_2: 5, // px

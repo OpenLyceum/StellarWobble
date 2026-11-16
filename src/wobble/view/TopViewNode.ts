@@ -25,6 +25,13 @@ import type { OrbitalSystem } from "../../common/model/OrbitalSystem.js";
 import { starRadiusSolar } from "../../common/model/starAppearance.js";
 import { shiftMagnification } from "../../common/model/stellarSpectrum.js";
 import { formatGrouped } from "../../common/view/chartUtils.js";
+import {
+  createBarycenterMarker,
+  createVelocityArrows,
+  drawnStarOrbitRadius,
+  isRadialArrowVisible,
+  radialComponentFill,
+} from "../../common/view/orbitSchematic.js";
 import { StarNode } from "../../common/view/StarNode.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
@@ -93,8 +100,8 @@ export class TopViewNode extends Node {
       (ratio, planetRadius) => shiftMagnification(ratio * planetRadius, MAX_STAR_ORBIT_RADIUS),
     );
     const starOrbitRadiusProperty = new DerivedProperty(
-      [radiusRatioProperty, planetOrbitRadiusProperty, magnificationProperty],
-      (ratio, planetRadius, magnification) => ratio * planetRadius * magnification,
+      [radiusRatioProperty, planetOrbitRadiusProperty],
+      (ratio, planetRadius) => drawnStarOrbitRadius(ratio, planetRadius, MAX_STAR_ORBIT_RADIUS),
     );
 
     // ── Orbits and bodies ────────────────────────────────────────────────────────
@@ -111,17 +118,10 @@ export class TopViewNode extends Node {
       stroke: StellarWobbleColors.starOrbitPathColorProperty,
       lineDash: [2, TOP_VIEW_NODE_SETTINGS.STAR_ORBIT_LINE_DASH_DASH],
     });
-    const barycenter = new Path(
-      new Shape()
-        .moveTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X, TOP_VIEW_NODE_SETTINGS.BARYCENTER_Y)
-        .lineTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, TOP_VIEW_NODE_SETTINGS.BARYCENTER_Y_SEGMENT_2)
-        .moveTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X, TOP_VIEW_NODE_SETTINGS.BARYCENTER_X_MOVE_TO_Y)
-        .lineTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, TOP_VIEW_NODE_SETTINGS.BARYCENTER_Y),
-      {
-        stroke: StellarWobbleColors.barycenterColorProperty,
-        lineWidth: TOP_VIEW_NODE_SETTINGS.BARYCENTER_LINE_WIDTH,
-        center: center,
-      },
+    const barycenter = createBarycenterMarker(
+      Math.abs(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X),
+      TOP_VIEW_NODE_SETTINGS.BARYCENTER_LINE_WIDTH,
+      center,
     );
     const barycenterLabel = new Text(common.barycenterStringProperty, {
       font: FONTS.SMALL,
@@ -145,18 +145,12 @@ export class TopViewNode extends Node {
     });
 
     // ── Velocity arrows ──────────────────────────────────────────────────────────
-    const arrowOptions = {
+    const { velocityArrow, radialArrow } = createVelocityArrows({
       headHeight: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_HEIGHT,
       headWidth: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_WIDTH,
       tailWidth: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_TAIL_WIDTH,
-      stroke: "black",
       lineWidth: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_LINE_WIDTH,
-    };
-    const velocityArrow = new ArrowNode(0, 0, 1, 0, {
-      ...arrowOptions,
-      fill: StellarWobbleColors.velocityColorProperty,
     });
-    const radialArrow = new ArrowNode(0, 0, 1, 0, arrowOptions);
     const arrows = new Node({ children: [radialArrow, velocityArrow], visibleProperty: this.showVelocityProperty });
 
     // ── Earth ────────────────────────────────────────────────────────────────────
@@ -225,7 +219,7 @@ export class TopViewNode extends Node {
         // Model y points up; screen y points down.
         const direction = new Vector2(Math.cos(theta), -Math.sin(theta));
         planetOrbit.radius = planetRadius;
-        starOrbit.radius = Math.max(starRadius, 0.5);
+        starOrbit.radius = starRadius;
         planet.center = center.plus(direction.timesScalar(planetRadius));
         const starCenter = telescopeView ? center : center.minus(direction.timesScalar(starRadius));
         star.center = starCenter;
@@ -242,13 +236,12 @@ export class TopViewNode extends Node {
         velocityArrow.setTailAndTip(starCenter.x, starCenter.y, starCenter.x + velocity.x, starCenter.y + velocity.y);
         // The telescope measures only the radial part (through the Doppler shift).
         velocityArrow.visible = !telescopeView;
-        const radialVisible = Math.abs(velocity.y) > 3;
+        const radialVisible = isRadialArrowVisible(Math.abs(velocity.y));
         radialArrow.visible = radialVisible;
         if (radialVisible) {
           radialArrow.setTailAndTip(starCenter.x, starCenter.y, starCenter.x, starCenter.y + velocity.y);
         }
-        radialArrow.fill =
-          radialVelocity > 0 ? StellarWobbleColors.redshiftColorProperty : StellarWobbleColors.blueshiftColorProperty;
+        radialArrow.fill = radialComponentFill(radialVelocity > 0);
       },
     );
 
