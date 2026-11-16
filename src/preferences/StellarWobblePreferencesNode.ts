@@ -51,7 +51,7 @@ export class StellarWobblePreferencesNode extends VBox {
 
     super({
       align: "left",
-      spacing: STELLAR_WOBBLE_PREFERENCES_NODE_SETTINGS.CONSTRUCTOR_SPACING,
+      spacing: STELLAR_WOBBLE_PREFERENCES_NODE_SETTINGS.SPACING,
       children: [header, showEquationsCheckbox, description],
     });
   }

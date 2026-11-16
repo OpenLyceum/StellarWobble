@@ -99,8 +99,8 @@ export class WaveViewNode extends Node {
       maxWidth: WAVE_VIEW_NODE_SETTINGS.EARTH_LABEL_MAX_WIDTH,
     });
     earthLabel.boundsProperty.link(() => {
-      earthLabel.left = width / 2 + WAVE_VIEW_NODE_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
-      earthLabel.centerY = height - WAVE_VIEW_NODE_SETTINGS.CONSTRUCTOR_CENTER_Y_OFFSET;
+      earthLabel.left = width / 2 + WAVE_VIEW_NODE_SETTINGS.LEFT_OFFSET;
+      earthLabel.centerY = height - WAVE_VIEW_NODE_SETTINGS.CENTER_Y_OFFSET;
     });
     const lineOfSight = new Line(this.starCenter.x, this.starCenter.y, width / 2, height - 46, {
       stroke: StellarWobbleColors.earthColorProperty,

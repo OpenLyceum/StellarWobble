@@ -87,11 +87,11 @@ export class WobbleScreenView extends ScreenView {
       width: ZOOM_WIDTH,
     });
     zoom.left = this.topView.left;
-    zoom.top = this.topView.bottom + WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
+    zoom.top = this.topView.bottom + WOBBLE_SCREEN_VIEW_SETTINGS.TOP_OFFSET;
 
     // ── Chart ─────────────────────────────────────────────────────────────────
     const chart = new LiveRVChartNode(system, CHART_WIDTH, CHART_HEIGHT, strings.chartTitleStringProperty);
-    chart.left = this.topView.right + WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
+    chart.left = this.topView.right + WOBBLE_SCREEN_VIEW_SETTINGS.LEFT_OFFSET;
     chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
 
     // ── Readouts ──────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ export class WobbleScreenView extends ScreenView {
       }),
       { minWidth: CHART_WIDTH + WOBBLE_SCREEN_VIEW_SETTINGS.READOUT_PANEL_MIN_WIDTH_OFFSET },
     );
-    readoutPanel.left = this.topView.right + WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
+    readoutPanel.left = this.topView.right + WOBBLE_SCREEN_VIEW_SETTINGS.LEFT_OFFSET;
     readoutPanel.top = chart.bottom + 20;
 
     // ── Controls ──────────────────────────────────────────────────────────────
@@ -213,7 +213,7 @@ export class WobbleScreenView extends ScreenView {
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    timeControlNode.right = resetAllButton.left - WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
+    timeControlNode.right = resetAllButton.left - WOBBLE_SCREEN_VIEW_SETTINGS.RIGHT_OFFSET;
     timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.topView, zoom, chart, readoutPanel, controlPanel, timeControlNode, resetAllButton];

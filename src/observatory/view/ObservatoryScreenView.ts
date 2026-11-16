@@ -93,8 +93,8 @@ export class ObservatoryScreenView extends ScreenView {
 
     // ── Chart ─────────────────────────────────────────────────────────────────
     const chart = new ObservatoryChartNode(model, CHART_WIDTH, CHART_HEIGHT);
-    chart.left = bounds.minX + SCREEN_VIEW_MARGIN + OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
-    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
+    chart.left = bounds.minX + SCREEN_VIEW_MARGIN + OBSERVATORY_SCREEN_VIEW_SETTINGS.LEFT_OFFSET;
+    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + OBSERVATORY_SCREEN_VIEW_SETTINGS.TOP_OFFSET;
     const periodogram = new PeriodogramNode(model, CHART_WIDTH, CHART_HEIGHT);
     periodogram.translation = chart.translation;
     model.showPeriodogramProperty.link((show) => {
@@ -271,12 +271,12 @@ export class ObservatoryScreenView extends ScreenView {
             maxWidth: OBSERVATORY_SCREEN_VIEW_SETTINGS.FIT_PANEL_MAX_WIDTH,
           }),
           new HBox({
-            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_FIT_PANEL_SPACING,
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.FIT_SECTION_SPACING,
             align: "top",
             children: [periodControl, amplitudeControl, phaseControl],
           }),
           new HBox({
-            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_FIT_PANEL_SPACING,
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.FIT_SECTION_SPACING,
             children: [foldCheckbox, showModelCheckbox, periodogramCheckbox],
           }),
           residualText,
@@ -360,7 +360,7 @@ export class ObservatoryScreenView extends ScreenView {
           revealButton,
           answerText,
           new HBox({
-            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RESULT_PANEL_SPACING,
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.RESULT_SECTION_SPACING,
             children: [
               explanationButton,
               label(

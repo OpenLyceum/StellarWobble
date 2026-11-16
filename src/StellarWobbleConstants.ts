@@ -263,7 +263,7 @@ export const FULL_SPECTRUM_NODE_SETTINGS = {
   STAR_LABEL_X_OFFSET: -4, // px
 
   LABEL_OPTIONS_MAX_WIDTH_OFFSET: 4, // px
-  CONSTRUCTOR_TOP_OFFSET: 5, // px
+  TOP_OFFSET: 5, // px
 
   /** Width reserved for the lab/star labels, px. */
   LABEL_COLUMN: 36,
@@ -283,7 +283,7 @@ export const SPECTRAL_LINE_ZOOM_NODE_SETTINGS = {
   LABEL_OPTIONS_MAX_WIDTH_OFFSET: 4, // px
   REST_MARKER_LINE_DASH_DASH: 3, // px
   PLACE_READOUTS_TOP_OFFSET: 14, // px
-  CONSTRUCTOR_BOTTOM_OFFSET: 4, // px
+  BOTTOM_OFFSET: 4, // px
 
   /** Width reserved for the lab/star labels, px. */
   LABEL_COLUMN: 34,
@@ -345,12 +345,12 @@ export const DOPPLER_SCREEN_VIEW_SETTINGS = {
   VELOCITY_TEXT_DIGITS: 3, // digits
   EQUATION_VALUES_DIGITS: 2, // digits
 
-  CONSTRUCTOR_TOP_OFFSET: 10, // px
+  TOP_OFFSET: 10, // px
   CONTROL_PANEL_MIN_WIDTH_OFFSET: 24, // px
   EXPLANATION_LABEL_MAX_WIDTH_OFFSET: 40, // px
-  CONSTRUCTOR_READOUT_PANEL_SPACING: 8, // px
+  READOUT_COLUMN_SPACING: 8, // px
   READOUT_PANEL_MIN_WIDTH_OFFSET: 24, // px
-  CONSTRUCTOR_RIGHT_OFFSET: 30, // px
+  RIGHT_OFFSET: 30, // px
 
   WAVE_VIEW_WIDTH: 560,
   WAVE_VIEW_HEIGHT: 250,
@@ -367,8 +367,8 @@ export const DOPPLER_SCREEN_VIEW_SETTINGS = {
 
 /** Settings for doppler/view/WaveViewNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const WAVE_VIEW_NODE_SETTINGS = {
-  CONSTRUCTOR_LEFT_OFFSET: 10, // px
-  CONSTRUCTOR_CENTER_Y_OFFSET: 28, // px
+  LEFT_OFFSET: 10, // px
+  CENTER_Y_OFFSET: 28, // px
   LINE_OF_SIGHT_LINE_DASH_DASH: 5, // px
   NOTE_MAX_WIDTH_OFFSET: 16, // px
 
@@ -408,11 +408,11 @@ export const OBSERVATORY_MODEL_SETTINGS = {
 /** Settings for observatory/view/ObservatoryChartNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const OBSERVATORY_CHART_NODE_SETTINGS = {
   ANSWER_PLOT_LINE_DASH_DASH: 6, // px
-  CONSTRUCTOR_ANSWER_PLOT_LINE_DASH_DASH: 4, // px
+  ANSWER_PLOT_LINE_DASH_GAP: 4, // px
   NO_DATA_MAX_WIDTH_OFFSET: 20, // px
-  CONSTRUCTOR_BOTTOM_OFFSET: 10, // px
-  CONSTRUCTOR_CONTROLS_SPACING: 6, // px
-  CONSTRUCTOR_TOP_OFFSET: 6, // px
+  BOTTOM_OFFSET: 10, // px
+  CONTROL_ROW_SPACING: 6, // px
+  TOP_OFFSET: 6, // px
 
   /** Smallest time span shown, days. */
   MIN_TIME_SPAN: 10,
@@ -463,12 +463,12 @@ export const OBSERVATORY_SCREEN_VIEW_SETTINGS = {
   AMPLITUDE_FORMAT_SIGNIFICANT_DIGITS: 3, // digits
   EXPLANATION_BUTTON_LABEL_MAX_WIDTH: 150, // px
 
-  CONSTRUCTOR_LEFT_OFFSET: 50, // px
-  CONSTRUCTOR_TOP_OFFSET: 22, // px
+  LEFT_OFFSET: 50, // px
+  TOP_OFFSET: 22, // px
   TARGET_ITEMS_MAX_WIDTH_OFFSET: 60, // px
   OBSERVING_PANEL_MIN_WIDTH_OFFSET: 24, // px
-  CONSTRUCTOR_FIT_PANEL_SPACING: 18, // px
-  CONSTRUCTOR_RESULT_PANEL_SPACING: 8, // px
+  FIT_SECTION_SPACING: 18, // px
+  RESULT_SECTION_SPACING: 8, // px
   RESULT_PANEL_MIN_WIDTH_OFFSET: 24, // px
 
   CHART_WIDTH: 610,
@@ -492,9 +492,9 @@ export const OBSERVATORY_SCREEN_VIEW_SETTINGS = {
 
 /** Settings for observatory/view/PeriodogramNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const PERIODOGRAM_NODE_SETTINGS = {
-  CONSTRUCTOR_TOP_OFFSET: 6, // px
+  TOP_OFFSET: 6, // px
   ANSWER_LINE_LINE_DASH_DASH: 6, // px
-  CONSTRUCTOR_ANSWER_LINE_LINE_DASH_DASH: 4, // px
+  ANSWER_LINE_LINE_DASH_GAP: 4, // px
   MESSAGE_MAX_WIDTH_OFFSET: 20, // px
   HINT_MAX_WIDTH_OFFSET: 220, // px
   PLACE_CONTROLS_LEFT_OFFSET: 12, // px
@@ -503,8 +503,8 @@ export const PERIODOGRAM_NODE_SETTINGS = {
   CLICK_PICK_PIXELS: 8,
   /** Height of the button below the plot. */
   BUTTON_HEIGHT: 26,
-  CONSTRUCTOR_X: -5,
-  CONSTRUCTOR_RIGHT: -7,
+  X: -5,
+  RIGHT: -7,
   RIGHT_RIGHT: -32,
   BOTTOM_BOTTOM: -6,
   CURVE_LINE_WIDTH: 1.5,
@@ -519,7 +519,7 @@ export const STELLAR_WOBBLE_PREFERENCES_NODE_SETTINGS = {
   SHOW_EQUATIONS_CHECKBOX_SPACING: 8,
   DESCRIPTION_FONT_SIZE: 12,
   DESCRIPTION_MAX_WIDTH: 420,
-  CONSTRUCTOR_SPACING: 12,
+  SPACING: 12,
 } as const;
 
 /** Settings for viewing-angle/model/ViewingAngleModel.ts. */
@@ -594,10 +594,10 @@ export const ORBIT_3D_VIEW_NODE_SETTINGS = {
 /** Settings for viewing-angle/view/PhaseRVChartNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const PHASE_RV_CHART_NODE_SETTINGS = {
   GHOST_PLOT_LINE_DASH_DASH: 6, // px
-  CONSTRUCTOR_GHOST_PLOT_LINE_DASH_DASH: 4, // px
+  GHOST_PLOT_LINE_DASH_GAP: 4, // px
   LEGEND_LINE_DASH_DASH: 6, // px
-  CONSTRUCTOR_LEGEND_LINE_DASH_DASH: 4, // px
-  CONSTRUCTOR_RIGHT_OFFSET: 4, // px
+  LEGEND_LINE_DASH_GAP: 4, // px
+  RIGHT_OFFSET: 4, // px
 
   SAMPLES: 120,
   HEADROOM: 1.15,
@@ -639,12 +639,12 @@ export const VIEWING_ANGLE_SCREEN_SUMMARY_CONTENT_SETTINGS = {
 
 /** Settings for viewing-angle/view/ViewingAngleScreenView.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const VIEWING_ANGLE_SCREEN_VIEW_SETTINGS = {
-  CONSTRUCTOR_TOP_OFFSET: 10, // px
-  CONSTRUCTOR_LEFT_OFFSET: 20, // px
+  TOP_OFFSET: 10, // px
+  LEFT_OFFSET: 20, // px
   EXPLANATION_ROW_MAX_WIDTH_OFFSET: 40, // px
   READOUT_PANEL_MIN_WIDTH_OFFSET: 24, // px
   CONTROL_PANEL_MIN_WIDTH_OFFSET: 24, // px
-  CONSTRUCTOR_RIGHT_OFFSET: 30, // px
+  RIGHT_OFFSET: 30, // px
 
   VIEW_3_D_WIDTH: 390,
   VIEW_3_D_HEIGHT: 330,
@@ -694,11 +694,11 @@ export const TOP_VIEW_NODE_SETTINGS = {
   STAR_ORBIT_LINE_DASH_DASH: 3, // px
   PLANET_SIZE_MULTILINK_RADIUS_OFFSET: 3, // px
   PLANET_SIZE_MULTILINK_RADIUS_FACTOR: 6, // dimensionless
-  CONSTRUCTOR_LEFT_OFFSET: 10, // px
-  CONSTRUCTOR_CENTER_Y_OFFSET: 24, // px
+  LEFT_OFFSET: 10, // px
+  CENTER_Y_OFFSET: 24, // px
   MAGNIFICATION_TEXT_MAX_WIDTH_OFFSET: 16, // px
   CAPTION_LINE_WRAP_OFFSET: 40, // px
-  CONSTRUCTOR_BOTTOM_OFFSET: 48, // px
+  BOTTOM_OFFSET: 48, // px
   UPDATE_MULTILINK_BOTTOM_OFFSET: 8, // px
   UPDATE_MULTILINK_TOP_OFFSET: 8, // px
   LINE_OF_SIGHT_LINE_DASH_DASH: 5, // px
@@ -745,12 +745,12 @@ export const WOBBLE_SCREEN_SUMMARY_CONTENT_SETTINGS = {
 
 /** Settings for wobble/view/WobbleScreenView.ts. Layout lengths are in px; counts and ratios are dimensionless. */
 export const WOBBLE_SCREEN_VIEW_SETTINGS = {
-  CONSTRUCTOR_TOP_OFFSET: 10, // px
-  CONSTRUCTOR_LEFT_OFFSET: 20, // px
+  TOP_OFFSET: 10, // px
+  LEFT_OFFSET: 20, // px
   EXPLANATION_ROW_MAX_WIDTH_OFFSET: 40, // px
   READOUT_PANEL_MIN_WIDTH_OFFSET: 70, // px
   CONTROL_PANEL_MIN_WIDTH_OFFSET: 24, // px
-  CONSTRUCTOR_RIGHT_OFFSET: 30, // px
+  RIGHT_OFFSET: 30, // px
 
   TOP_VIEW_SIZE: 340,
   CHART_WIDTH: 260,

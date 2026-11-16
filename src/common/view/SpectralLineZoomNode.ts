@@ -240,7 +240,7 @@ export class SpectralLineZoomNode extends Node {
       magnificationText,
     ];
     title.left = LABEL_COLUMN;
-    title.bottom = labTop - SPECTRAL_LINE_ZOOM_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
+    title.bottom = labTop - SPECTRAL_LINE_ZOOM_NODE_SETTINGS.BOTTOM_OFFSET;
 
     if (providedOptions?.nodeOptions) {
       this.mutate(providedOptions.nodeOptions);

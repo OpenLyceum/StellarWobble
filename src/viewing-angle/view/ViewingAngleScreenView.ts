@@ -84,11 +84,11 @@ export class ViewingAngleScreenView extends ScreenView {
 
     const skyView = new SkyViewNode(system, SKY_VIEW_SIZE);
     skyView.left = this.orbitView.left;
-    skyView.top = this.orbitView.bottom + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
+    skyView.top = this.orbitView.bottom + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.TOP_OFFSET;
 
     // ── Chart ─────────────────────────────────────────────────────────────────
     const chart = new PhaseRVChartNode(system, CHART_WIDTH, CHART_HEIGHT, strings.chartTitleStringProperty);
-    chart.left = this.orbitView.right + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
+    chart.left = this.orbitView.right + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.LEFT_OFFSET;
     chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
 
     // ── Readouts ──────────────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ export class ViewingAngleScreenView extends ScreenView {
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    timeControlNode.right = resetAllButton.left - VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
+    timeControlNode.right = resetAllButton.left - VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.RIGHT_OFFSET;
     timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.orbitView, skyView, chart, readoutPanel, controlPanel, timeControlNode, resetAllButton];

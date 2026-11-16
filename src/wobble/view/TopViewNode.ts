@@ -167,8 +167,8 @@ export class TopViewNode extends Node {
       maxWidth: TOP_VIEW_NODE_SETTINGS.EARTH_LABEL_MAX_WIDTH,
     });
     earthLabel.boundsProperty.link(() => {
-      earthLabel.left = center.x + TOP_VIEW_NODE_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
-      earthLabel.centerY = size - TOP_VIEW_NODE_SETTINGS.CONSTRUCTOR_CENTER_Y_OFFSET;
+      earthLabel.left = center.x + TOP_VIEW_NODE_SETTINGS.LEFT_OFFSET;
+      earthLabel.centerY = size - TOP_VIEW_NODE_SETTINGS.CENTER_Y_OFFSET;
     });
 
     // ── Labels ───────────────────────────────────────────────────────────────────
@@ -199,7 +199,7 @@ export class TopViewNode extends Node {
     const captionBox = new Node({ children: [caption] });
     caption.boundsProperty.link(() => {
       caption.centerX = size / 2;
-      caption.bottom = size - TOP_VIEW_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
+      caption.bottom = size - TOP_VIEW_NODE_SETTINGS.BOTTOM_OFFSET;
     });
 
     const orbitalLayer = new Node({

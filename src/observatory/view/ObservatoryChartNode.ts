@@ -102,7 +102,7 @@ export class ObservatoryChartNode extends Node {
       lineWidth: OBSERVATORY_CHART_NODE_SETTINGS.ANSWER_PLOT_LINE_WIDTH,
       lineDash: [
         OBSERVATORY_CHART_NODE_SETTINGS.ANSWER_PLOT_LINE_DASH_DASH,
-        OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_ANSWER_PLOT_LINE_DASH_DASH,
+        OBSERVATORY_CHART_NODE_SETTINGS.ANSWER_PLOT_LINE_DASH_GAP,
       ],
     });
     const fitPlot = new LinePlot(transform, [], {
@@ -124,7 +124,7 @@ export class ObservatoryChartNode extends Node {
     });
     noData.boundsProperty.link(() => {
       noData.centerX = width / 2;
-      noData.bottom = height / 2 - OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
+      noData.bottom = height / 2 - OBSERVATORY_CHART_NODE_SETTINGS.BOTTOM_OFFSET;
     });
     chart.overlayLayer.addChild(noData);
 
@@ -351,7 +351,7 @@ export class ObservatoryChartNode extends Node {
       spacing: OBSERVATORY_CHART_NODE_SETTINGS.CONTROLS_SPACING,
       children: [
         new HBox({
-          spacing: OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_CONTROLS_SPACING,
+          spacing: OBSERVATORY_CHART_NODE_SETTINGS.CONTROL_ROW_SPACING,
           children: [scrollEarlierButton, zoomOutButton, zoomInButton, scrollLaterButton, showAllButton],
         }),
         hint,
@@ -359,7 +359,7 @@ export class ObservatoryChartNode extends Node {
     });
     controls.boundsProperty.link(() => {
       controls.centerX = width / 2;
-      controls.top = chart.bottom + OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
+      controls.top = chart.bottom + OBSERVATORY_CHART_NODE_SETTINGS.TOP_OFFSET;
     });
     this.timeControls = [scrollEarlierButton, zoomOutButton, zoomInButton, scrollLaterButton, showAllButton];
 

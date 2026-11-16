@@ -68,19 +68,19 @@ export class PeriodogramNode extends Node {
           font: FONTS.TICK_LABEL,
           fill: StellarWobbleColors.textColorProperty,
           centerX: x,
-          top: height + PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET,
+          top: height + PERIODOGRAM_NODE_SETTINGS.TOP_OFFSET,
         }),
       );
     }
     for (const power of POWER_TICKS) {
       const y = powerToY(power);
       gridShape.moveTo(0, y).lineTo(width, y);
-      tickShape.moveTo(PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_X, y).lineTo(0, y);
+      tickShape.moveTo(PERIODOGRAM_NODE_SETTINGS.X, y).lineTo(0, y);
       tickLabels.addChild(
         new Text(formatTickValue(power, String(power).split(".")[1]?.length ?? 0), {
           font: FONTS.TICK_LABEL,
           fill: StellarWobbleColors.textColorProperty,
-          right: PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_RIGHT,
+          right: PERIODOGRAM_NODE_SETTINGS.RIGHT,
           centerY: y,
         }),
       );
@@ -133,7 +133,7 @@ export class PeriodogramNode extends Node {
       lineWidth: PERIODOGRAM_NODE_SETTINGS.ANSWER_LINE_LINE_WIDTH,
       lineDash: [
         PERIODOGRAM_NODE_SETTINGS.ANSWER_LINE_LINE_DASH_DASH,
-        PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_ANSWER_LINE_LINE_DASH_DASH,
+        PERIODOGRAM_NODE_SETTINGS.ANSWER_LINE_LINE_DASH_GAP,
       ],
       pickable: false,
     });

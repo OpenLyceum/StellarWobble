@@ -133,7 +133,7 @@ export class FullSpectrumNode extends Node {
           font: FONTS.SMALL,
           fill: StellarWobbleColors.mutedTextColorProperty,
           centerX: x,
-          top: axisTop + FULL_SPECTRUM_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET,
+          top: axisTop + FULL_SPECTRUM_NODE_SETTINGS.TOP_OFFSET,
         }),
       );
     }

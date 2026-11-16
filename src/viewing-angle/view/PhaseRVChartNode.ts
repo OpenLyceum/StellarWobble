@@ -58,7 +58,7 @@ export class PhaseRVChartNode extends Node {
       lineWidth: PHASE_RV_CHART_NODE_SETTINGS.GHOST_PLOT_LINE_WIDTH,
       lineDash: [
         PHASE_RV_CHART_NODE_SETTINGS.GHOST_PLOT_LINE_DASH_DASH,
-        PHASE_RV_CHART_NODE_SETTINGS.CONSTRUCTOR_GHOST_PLOT_LINE_DASH_DASH,
+        PHASE_RV_CHART_NODE_SETTINGS.GHOST_PLOT_LINE_DASH_GAP,
       ],
     });
     const curvePlot = new LinePlot(transform, [], {
@@ -95,7 +95,7 @@ export class PhaseRVChartNode extends Node {
           lineWidth: PHASE_RV_CHART_NODE_SETTINGS.LEGEND_LINE_WIDTH,
           lineDash: [
             PHASE_RV_CHART_NODE_SETTINGS.LEGEND_LINE_DASH_DASH,
-            PHASE_RV_CHART_NODE_SETTINGS.CONSTRUCTOR_LEGEND_LINE_DASH_DASH,
+            PHASE_RV_CHART_NODE_SETTINGS.LEGEND_LINE_DASH_GAP,
           ],
         }),
         new Text(strings.edgeOnCurveStringProperty, {
@@ -106,7 +106,7 @@ export class PhaseRVChartNode extends Node {
       ],
     });
     legend.boundsProperty.link(() => {
-      legend.right = width - PHASE_RV_CHART_NODE_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
+      legend.right = width - PHASE_RV_CHART_NODE_SETTINGS.RIGHT_OFFSET;
       legend.top = PHASE_RV_CHART_NODE_SETTINGS.TOP_TOP;
     });
     chart.overlayLayer.addChild(legend);

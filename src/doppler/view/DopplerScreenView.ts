@@ -80,7 +80,7 @@ export class DopplerScreenView extends ScreenView {
     // ── Spectra ───────────────────────────────────────────────────────────────
     const fullSpectrum = new FullSpectrumNode(model.radialVelocityProperty, WAVE_VIEW_WIDTH - 36);
     fullSpectrum.left = this.waveView.left;
-    fullSpectrum.top = this.waveView.bottom + DOPPLER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
+    fullSpectrum.top = this.waveView.bottom + DOPPLER_SCREEN_VIEW_SETTINGS.TOP_OFFSET;
 
     const zoomBeta = new SpectralLineZoomNode(H_BETA, model.radialVelocityProperty, model.magnificationProperty, {
       width: ZOOM_WIDTH,
@@ -274,7 +274,7 @@ export class DopplerScreenView extends ScreenView {
           equation,
           equationValues,
           new HBox({
-            spacing: DOPPLER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_READOUT_PANEL_SPACING,
+            spacing: DOPPLER_SCREEN_VIEW_SETTINGS.READOUT_COLUMN_SPACING,
             children: [explanationButton, explanationLabel],
           }),
         ],
@@ -309,7 +309,7 @@ export class DopplerScreenView extends ScreenView {
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    timeControlNode.right = resetAllButton.left - DOPPLER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
+    timeControlNode.right = resetAllButton.left - DOPPLER_SCREEN_VIEW_SETTINGS.RIGHT_OFFSET;
     timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.waveView, fullSpectrum, zooms, rightColumn, timeControlNode, resetAllButton];
