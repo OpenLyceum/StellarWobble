@@ -24,7 +24,7 @@ export type VelocityArrowOptions = {
 };
 
 /** × mark centred on the origin (caller sets `center` when placing it). */
-export function barycenterCrossShape(halfExtent: number): Shape {
+function barycenterCrossShape(halfExtent: number): Shape {
   return new Shape()
     .moveTo(-halfExtent, -halfExtent)
     .lineTo(halfExtent, halfExtent)
