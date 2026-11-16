@@ -33,6 +33,9 @@ export const AU_M = 1.496e11;
 /** One day, s. */
 export const DAY_S = 86_400;
 
+/** Mean length of a year used for period display, days. */
+export const DAYS_PER_YEAR = 365.25;
+
 /** Solar effective temperature, K. */
 export const SUN_TEMPERATURE_K = 5772;
 
@@ -262,9 +265,9 @@ export const FULL_SPECTRUM_NODE_SETTINGS = {
   LABEL_OPTIONS_MAX_WIDTH_OFFSET: 4, // px
   CONSTRUCTOR_TOP_OFFSET: 5, // px
 
-  /** Line labels drawn above the laboratory strip (wavelength, nm → label). */
+  /** Width reserved for the lab/star labels, px. */
   LABEL_COLUMN: 36,
-  /** Line labels drawn above the laboratory strip (wavelength, nm → label). */
+  /** Wavelength tick spacing along the spectrum strip, nm. */
   TICK_SPACING_NM: 50,
   STRIP_HEIGHT: 18,
   LINE_LABEL_TOP: 20,
@@ -282,9 +285,9 @@ export const SPECTRAL_LINE_ZOOM_NODE_SETTINGS = {
   PLACE_READOUTS_TOP_OFFSET: 14, // px
   CONSTRUCTOR_BOTTOM_OFFSET: 4, // px
 
-  /** Height of the profile plot, px. */
+  /** Width reserved for the lab/star labels, px. */
   LABEL_COLUMN: 34,
-  /** Height of the profile plot, px. */
+  /** Vertical gap between the lab and star strips, px. */
   GAP: 3,
   LAB_TOP: 22,
   PROFILE_FRAME_LINE_WIDTH: 0.5,
@@ -326,7 +329,6 @@ export const FORMATTERS_SETTINGS = {
   FORMAT_PERIOD_DIGITS: 3, // digits
   FORMAT_PLANET_MASS_DIGITS: 3, // digits
 
-  DAYS_PER_YEAR: 365.25,
   DEFAULT_DIGITS: 3,
 } as const;
 
@@ -529,7 +531,7 @@ export const VIEWING_ANGLE_MODEL_SETTINGS = {
 } as const;
 
 /** Settings for viewing-angle/view/Orbit3DViewNode.ts. Layout lengths are in px; counts and ratios are dimensionless. */
-export const ORBIT3_D_VIEW_NODE_SETTINGS = {
+export const ORBIT_3D_VIEW_NODE_SETTINGS = {
   BARYCENTER_X_SEGMENT_2: 5, // px
   BARYCENTER_Y_SEGMENT_2: 5, // px
   BARYCENTER_X_MOVE_TO_Y: 5, // px
@@ -543,23 +545,23 @@ export const ORBIT3_D_VIEW_NODE_SETTINGS = {
   PLANET_ORBIT_RADIUS: 115,
   /** Largest drawn radius of the star's own orbit, px. */
   MAX_STAR_ORBIT_RADIUS: 30,
-  /** Length of the Earth arrow and of the star's velocity arrow, px. */
+  /** Length of the Earth direction arrow, px. */
   EARTH_ARROW_LENGTH: 150,
-  /** Length of the Earth arrow and of the star's velocity arrow, px. */
+  /** Length of the star's velocity arrow, px. */
   VELOCITY_ARROW_LENGTH: 60,
-  /** Length of the Earth arrow and of the star's velocity arrow, px. */
+  /** Samples used to draw each orbit path. */
   ORBIT_SAMPLES: 90,
-  /** Elevation range min (in the source module’s documented units). */
+  /** Minimum camera elevation above the orbital plane, degrees. */
   ELEVATION_RANGE_MIN: -85,
-  /** Elevation range max (in the source module’s documented units). */
+  /** Maximum camera elevation above the orbital plane, degrees. */
   ELEVATION_RANGE_MAX: 85,
-  /** Camera elevation range (degrees above the orbital plane) and keyboard step. */
+  /** Keyboard camera step, degrees. */
   KEYBOARD_STEP_DEG: 5,
-  /** Camera elevation range (degrees above the orbital plane) and keyboard step. */
+  /** Drag sensitivity, degrees per pixel. */
   DRAG_DEG_PER_PX: 0.5,
-  /** Initial camera: 25° above the orbital plane, side-on to the initial Earth direction (−y), so the Earth arrow lies across the view. */
+  /** Initial camera elevation above the orbital plane, degrees. */
   INITIAL_ELEVATION: 25,
-  /** Initial camera: 25° above the orbital plane, side-on to the initial Earth direction (−y), so the Earth arrow lies across the view. */
+  /** Initial camera azimuth (side-on to Earth at −y), degrees. */
   INITIAL_AZIMUTH: 90,
   TITLE_LEFT: 8,
   TITLE_TOP: 6,

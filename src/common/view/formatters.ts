@@ -1,4 +1,3 @@
-import { FORMATTERS_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * formatters.ts
  *
@@ -9,10 +8,14 @@ import { FORMATTERS_SETTINGS } from "../../StellarWobbleConstants.js";
 
 import { StringUtils } from "scenerystack/phetcommon";
 import { StringManager } from "../../i18n/StringManager.js";
-import { DAY_S, EARTH_MASS_KG, JUPITER_MASS_KG } from "../../StellarWobbleConstants.js";
+import {
+  DAY_S,
+  DAYS_PER_YEAR,
+  EARTH_MASS_KG,
+  FORMATTERS_SETTINGS,
+  JUPITER_MASS_KG,
+} from "../../StellarWobbleConstants.js";
 import { formatSignificant } from "./chartUtils.js";
-
-const DAYS_PER_YEAR: number = FORMATTERS_SETTINGS.DAYS_PER_YEAR;
 
 function valueWithUnits(value: string, units: string): string {
   return StringUtils.fillIn(StringManager.getInstance().getUnits().valueUnitsPatternStringProperty.value, {
