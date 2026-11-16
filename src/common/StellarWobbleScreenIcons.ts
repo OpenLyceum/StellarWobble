@@ -43,7 +43,7 @@ function spectrumStrip(x: number, y: number, width: number, height: number, line
     children: [
       new Rectangle(x, y, width, height, { fill: gradient }),
       new Rectangle(x + lineAt * width - 5, y, STELLAR_WOBBLE_SCREEN_ICONS_SETTINGS.SPECTRUM_STRIP_WIDTH, height, {
-        fill: "rgba(0,0,0,0.85)",
+        fill: StellarWobbleColors.iconAbsorptionLineColorProperty,
       }),
     ],
   });

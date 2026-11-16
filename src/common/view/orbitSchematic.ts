@@ -50,7 +50,7 @@ export function createVelocityArrows(options: VelocityArrowOptions): {
     headHeight: options.headHeight,
     headWidth: options.headWidth,
     tailWidth: options.tailWidth,
-    stroke: "black",
+    stroke: StellarWobbleColors.velocityArrowOutlineColorProperty,
     lineWidth: options.lineWidth,
   };
   return {

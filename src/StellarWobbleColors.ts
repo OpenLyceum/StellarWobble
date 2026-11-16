@@ -261,6 +261,20 @@ const StellarWobbleColors = {
     default: "#1a1a1a",
     projector: "#1a1a1a",
   }),
+
+  // ── Moved from views (no-inline-color) ─────────────────────────────────────
+
+  /** Dark absorption line on the screen icon's spectrum strip. */
+  iconAbsorptionLineColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "iconAbsorptionLine", {
+    default: "rgba(0,0,0,0.85)",
+    projector: "rgba(0,0,0,0.85)",
+  }),
+
+  /** Outline of velocity arrows (orbit schematic and wave view). */
+  velocityArrowOutlineColorProperty: new ProfileColorProperty(StellarWobbleNamespace, "velocityArrowOutline", {
+    default: "#000000",
+    projector: "#000000",
+  }),
 };
 
 export default StellarWobbleColors;

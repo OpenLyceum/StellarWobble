@@ -121,7 +121,7 @@ export class WaveViewNode extends Node {
       headHeight: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_HEIGHT,
       headWidth: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_WIDTH,
       tailWidth: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_TAIL_WIDTH,
-      stroke: "black",
+      stroke: StellarWobbleColors.velocityArrowOutlineColorProperty,
       lineWidth: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_LINE_WIDTH,
     };
     const velocityArrow = new ArrowNode(0, 0, 1, 0, {
