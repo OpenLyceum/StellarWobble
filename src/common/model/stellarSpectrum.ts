@@ -1,3 +1,4 @@
+import { SPECTRUM_NUMERICS } from "../../StellarWobbleConstants.js";
 /**
  * stellarSpectrum.ts
  *
@@ -87,7 +88,7 @@ export function spectrumIntensity(
   for (const line of lines) {
     const sigma = Math.max(line.sigma, minSigma);
     const t = (wavelength - shiftedWavelength(line.restWavelength, radialVelocity)) / sigma;
-    if (Math.abs(t) < 6) {
+    if (Math.abs(t) < SPECTRUM_NUMERICS.LINE_SIGMA_CUTOFF) {
       intensity *= 1 - line.depth * Math.exp(-0.5 * t * t);
     }
   }

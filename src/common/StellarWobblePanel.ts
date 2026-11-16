@@ -1,3 +1,4 @@
+import { STELLAR_WOBBLE_PANEL_SETTINGS } from "../StellarWobbleConstants.js";
 /**
  * StellarWobblePanel.ts
  *
@@ -40,8 +41,8 @@ export class StellarWobblePanel extends Panel {
         fill: StellarWobbleColors.panelBackgroundColorProperty,
         stroke: StellarWobbleColors.panelBorderColorProperty,
         cornerRadius: PANEL_CORNER_RADIUS,
-        xMargin: 12,
-        yMargin: 10,
+        xMargin: STELLAR_WOBBLE_PANEL_SETTINGS.OPTIONS_X_MARGIN,
+        yMargin: STELLAR_WOBBLE_PANEL_SETTINGS.OPTIONS_Y_MARGIN,
       },
       providedOptions,
     );

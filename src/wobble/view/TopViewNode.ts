@@ -1,3 +1,4 @@
+import { TOP_VIEW_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * TopViewNode.ts
  *
@@ -30,16 +31,16 @@ import StellarWobbleColors from "../../StellarWobbleColors.js";
 import { DISTANCE_RANGE, FONTS, PLANET_MASS_RANGE } from "../../StellarWobbleConstants.js";
 
 /** Drawn planet-orbit radius at the smallest and largest distance, px. */
-const MIN_ORBIT_RADIUS = 55;
-const MAX_ORBIT_RADIUS = 140;
+const MIN_ORBIT_RADIUS: number = TOP_VIEW_NODE_SETTINGS.MIN_ORBIT_RADIUS;
+const MAX_ORBIT_RADIUS: number = TOP_VIEW_NODE_SETTINGS.MAX_ORBIT_RADIUS;
 
 /** Largest drawn radius of the star's own orbit, px. */
-const MAX_STAR_ORBIT_RADIUS = 42;
+const MAX_STAR_ORBIT_RADIUS: number = TOP_VIEW_NODE_SETTINGS.MAX_STAR_ORBIT_RADIUS;
 
 /** Length of the star's velocity arrow, px. */
-const VELOCITY_ARROW_LENGTH = 55;
+const VELOCITY_ARROW_LENGTH: number = TOP_VIEW_NODE_SETTINGS.VELOCITY_ARROW_LENGTH;
 
-const BACKGROUND_STAR_COUNT = 45;
+const BACKGROUND_STAR_COUNT: number = TOP_VIEW_NODE_SETTINGS.BACKGROUND_STAR_COUNT;
 
 export class TopViewNode extends Node {
   /** Whether the star's velocity arrows are shown. */
@@ -60,7 +61,11 @@ export class TopViewNode extends Node {
     });
     const starField = new Shape();
     for (let i = 0; i < BACKGROUND_STAR_COUNT; i++) {
-      starField.circle(dotRandom.nextDouble() * size, dotRandom.nextDouble() * size, 0.9);
+      starField.circle(
+        dotRandom.nextDouble() * size,
+        dotRandom.nextDouble() * size,
+        TOP_VIEW_NODE_SETTINGS.CIRCLE_RADIUS,
+      );
       starField.newSubpath();
     }
     const backgroundStars = new Path(starField, { fill: StellarWobbleColors.backgroundStarColorProperty });
@@ -68,9 +73,9 @@ export class TopViewNode extends Node {
     const title = new Text(strings.topViewTitleStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.textColorProperty,
-      maxWidth: size - 16,
-      left: 8,
-      top: 6,
+      maxWidth: size - TOP_VIEW_NODE_SETTINGS.TITLE_MAX_WIDTH_OFFSET,
+      left: TOP_VIEW_NODE_SETTINGS.TITLE_LEFT,
+      top: TOP_VIEW_NODE_SETTINGS.TITLE_TOP,
     });
 
     // ── Scale ────────────────────────────────────────────────────────────────────
@@ -96,39 +101,57 @@ export class TopViewNode extends Node {
     const planetOrbit = new Circle(1, {
       center: center,
       stroke: StellarWobbleColors.orbitPathColorProperty,
-      lineDash: [4, 4],
+      lineDash: [
+        TOP_VIEW_NODE_SETTINGS.PLANET_ORBIT_LINE_DASH_DASH,
+        TOP_VIEW_NODE_SETTINGS.PLANET_ORBIT_LINE_DASH_DASH,
+      ],
     });
     const starOrbit = new Circle(1, {
       center: center,
       stroke: StellarWobbleColors.starOrbitPathColorProperty,
-      lineDash: [2, 3],
+      lineDash: [2, TOP_VIEW_NODE_SETTINGS.STAR_ORBIT_LINE_DASH_DASH],
     });
-    const barycenter = new Path(new Shape().moveTo(-6, -6).lineTo(6, 6).moveTo(-6, 6).lineTo(6, -6), {
-      stroke: StellarWobbleColors.barycenterColorProperty,
-      lineWidth: 2.5,
-      center: center,
-    });
+    const barycenter = new Path(
+      new Shape()
+        .moveTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X, TOP_VIEW_NODE_SETTINGS.BARYCENTER_Y)
+        .lineTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, TOP_VIEW_NODE_SETTINGS.BARYCENTER_Y_SEGMENT_2)
+        .moveTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X, TOP_VIEW_NODE_SETTINGS.BARYCENTER_X_MOVE_TO_Y)
+        .lineTo(TOP_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, TOP_VIEW_NODE_SETTINGS.BARYCENTER_Y),
+      {
+        stroke: StellarWobbleColors.barycenterColorProperty,
+        lineWidth: TOP_VIEW_NODE_SETTINGS.BARYCENTER_LINE_WIDTH,
+        center: center,
+      },
+    );
     const barycenterLabel = new Text(common.barycenterStringProperty, {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.barycenterColorProperty,
-      maxWidth: 100,
+      maxWidth: TOP_VIEW_NODE_SETTINGS.BARYCENTER_LABEL_MAX_WIDTH,
     });
     const star = new StarNode(system.starMassProperty, 1);
     const starScaleMultilink = Multilink.multilink([system.starMassProperty], (mass) => {
       star.setScaleMagnitude(14 * starRadiusSolar(mass));
     });
-    const planet = new Circle(5, {
+    const planet = new Circle(TOP_VIEW_NODE_SETTINGS.PLANET_RADIUS, {
       fill: StellarWobbleColors.planetColorProperty,
       stroke: StellarWobbleColors.textColorProperty,
-      lineWidth: 0.5,
+      lineWidth: TOP_VIEW_NODE_SETTINGS.PLANET_LINE_WIDTH,
     });
     const planetSizeMultilink = Multilink.multilink([system.planetMassProperty], (mass) => {
       const fraction = Math.log(mass / PLANET_MASS_RANGE.min) / Math.log(PLANET_MASS_RANGE.max / PLANET_MASS_RANGE.min);
-      planet.radius = 3 + 6 * fraction;
+      planet.radius =
+        TOP_VIEW_NODE_SETTINGS.PLANET_SIZE_MULTILINK_RADIUS_OFFSET +
+        TOP_VIEW_NODE_SETTINGS.PLANET_SIZE_MULTILINK_RADIUS_FACTOR * fraction;
     });
 
     // ── Velocity arrows ──────────────────────────────────────────────────────────
-    const arrowOptions = { headHeight: 10, headWidth: 12, tailWidth: 3.5, stroke: "black", lineWidth: 0.5 };
+    const arrowOptions = {
+      headHeight: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_HEIGHT,
+      headWidth: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_WIDTH,
+      tailWidth: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_TAIL_WIDTH,
+      stroke: "black",
+      lineWidth: TOP_VIEW_NODE_SETTINGS.ARROW_OPTIONS_LINE_WIDTH,
+    };
     const velocityArrow = new ArrowNode(0, 0, 1, 0, {
       ...arrowOptions,
       fill: StellarWobbleColors.velocityColorProperty,
@@ -140,18 +163,18 @@ export class TopViewNode extends Node {
     const earthArrow = new ArrowNode(center.x, size - 40, center.x, size - 10, {
       fill: StellarWobbleColors.earthColorProperty,
       stroke: null,
-      headHeight: 10,
-      headWidth: 14,
-      tailWidth: 4,
+      headHeight: TOP_VIEW_NODE_SETTINGS.EARTH_ARROW_HEAD_HEIGHT,
+      headWidth: TOP_VIEW_NODE_SETTINGS.EARTH_ARROW_HEAD_WIDTH,
+      tailWidth: TOP_VIEW_NODE_SETTINGS.EARTH_ARROW_TAIL_WIDTH,
     });
     const earthLabel = new Text(common.toEarthStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.earthColorProperty,
-      maxWidth: 100,
+      maxWidth: TOP_VIEW_NODE_SETTINGS.EARTH_LABEL_MAX_WIDTH,
     });
     earthLabel.boundsProperty.link(() => {
-      earthLabel.left = center.x + 10;
-      earthLabel.centerY = size - 24;
+      earthLabel.left = center.x + TOP_VIEW_NODE_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
+      earthLabel.centerY = size - TOP_VIEW_NODE_SETTINGS.CONSTRUCTOR_CENTER_Y_OFFSET;
     });
 
     // ── Labels ───────────────────────────────────────────────────────────────────
@@ -162,27 +185,27 @@ export class TopViewNode extends Node {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.mutedTextColorProperty,
       maxWidth: size / 2,
-      left: 8,
-      top: 26,
+      left: TOP_VIEW_NODE_SETTINGS.NOT_TO_SCALE_LEFT,
+      top: TOP_VIEW_NODE_SETTINGS.NOT_TO_SCALE_TOP,
     });
     const magnificationText = new Text(magnificationStringProperty, {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.starOrbitPathColorProperty,
-      maxWidth: size - 16,
-      left: 8,
-      top: 41,
+      maxWidth: size - TOP_VIEW_NODE_SETTINGS.MAGNIFICATION_TEXT_MAX_WIDTH_OFFSET,
+      left: TOP_VIEW_NODE_SETTINGS.MAGNIFICATION_TEXT_LEFT,
+      top: TOP_VIEW_NODE_SETTINGS.MAGNIFICATION_TEXT_TOP,
     });
 
     const caption = new RichText(strings.telescopeCaptionStringProperty, {
-      font: new PhetFont(13),
+      font: new PhetFont(TOP_VIEW_NODE_SETTINGS.CAPTION_FONT_SIZE),
       fill: StellarWobbleColors.textColorProperty,
-      lineWrap: size - 40,
+      lineWrap: size - TOP_VIEW_NODE_SETTINGS.CAPTION_LINE_WRAP_OFFSET,
       align: "center",
     });
     const captionBox = new Node({ children: [caption] });
     caption.boundsProperty.link(() => {
       caption.centerX = size / 2;
-      caption.bottom = size - 48;
+      caption.bottom = size - TOP_VIEW_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
     });
 
     const orbitalLayer = new Node({
@@ -209,9 +232,9 @@ export class TopViewNode extends Node {
         // Keep the label on the side of the centre of mass away from the star.
         barycenterLabel.centerX = center.x;
         if (direction.y < 0) {
-          barycenterLabel.bottom = center.y - 8;
+          barycenterLabel.bottom = center.y - TOP_VIEW_NODE_SETTINGS.UPDATE_MULTILINK_BOTTOM_OFFSET;
         } else {
-          barycenterLabel.top = center.y + 8;
+          barycenterLabel.top = center.y + TOP_VIEW_NODE_SETTINGS.UPDATE_MULTILINK_TOP_OFFSET;
         }
 
         // Star velocity (counter-clockwise), and its part along the line of sight (vertical).
@@ -237,7 +260,7 @@ export class TopViewNode extends Node {
 
     const lineOfSight = new Line(center.x, center.y, center.x, size - 40, {
       stroke: StellarWobbleColors.earthColorProperty,
-      lineDash: [2, 5],
+      lineDash: [2, TOP_VIEW_NODE_SETTINGS.LINE_OF_SIGHT_LINE_DASH_DASH],
     });
 
     this.children = [

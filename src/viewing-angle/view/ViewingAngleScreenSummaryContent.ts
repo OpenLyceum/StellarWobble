@@ -10,19 +10,23 @@ import { ScreenSummaryContent } from "scenerystack/sim";
 import { formatSignificant, toPlainText } from "../../common/view/chartUtils.js";
 import { formatPlanetMass, unitsDependencies } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import { VIEWING_ANGLE_SCREEN_SUMMARY_CONTENT_SETTINGS } from "../../StellarWobbleConstants.js";
 import type { ViewingAngleModel } from "../model/ViewingAngleModel.js";
 
 export class ViewingAngleScreenSummaryContent extends ScreenSummaryContent {
   public constructor(model: ViewingAngleModel) {
     const a11y = StringManager.getInstance().getViewingAngleA11yStrings();
     const system = model.system;
-    const plain = (value: number, digits = 3) => toPlainText(formatSignificant(value, digits));
+    const plain = (value: number, digits: number = VIEWING_ANGLE_SCREEN_SUMMARY_CONTENT_SETTINGS.DEFAULT_DIGITS) =>
+      toPlainText(formatSignificant(value, digits));
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
       currentDetailsContent: new PatternStringProperty(a11y.currentDetailsPatternStringProperty, {
-        inclination: new DerivedProperty([system.inclinationProperty], (inclination) => plain(inclination, 2)),
+        inclination: new DerivedProperty([system.inclinationProperty], (inclination) =>
+          plain(inclination, VIEWING_ANGLE_SCREEN_SUMMARY_CONTENT_SETTINGS.PLAIN_DIGITS),
+        ),
         measured: new DerivedProperty([system.semiAmplitudeProperty], (amplitude) => plain(amplitude)),
         edgeOn: new DerivedProperty([system.edgeOnAmplitudeProperty], (amplitude) => plain(amplitude)),
         minimum: new DerivedProperty([model.minimumMassProperty], (mass) => plain(mass)),

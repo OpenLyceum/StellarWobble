@@ -1,3 +1,4 @@
+import { STAR_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * StarNode.ts
  *
@@ -20,7 +21,7 @@ export class StarNode extends Node {
   public constructor(starMassProperty: TReadOnlyProperty<number> | number, radius: number, options?: NodeOptions) {
     const glow = new Circle(radius * 1.9);
     // A thin darker rim keeps the pale disc visible on the light projector background.
-    const disc = new Circle(radius, { lineWidth: radius * 0.08 });
+    const disc = new Circle(radius, { lineWidth: radius * STAR_NODE_SETTINGS.DISC_LINE_WIDTH_FACTOR });
     super({ children: [glow, disc], ...options });
 
     const update = (mass: number): void => {

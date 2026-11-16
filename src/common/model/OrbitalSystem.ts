@@ -1,3 +1,4 @@
+import { ORBITAL_SYSTEM_DEFAULTS } from "../../StellarWobbleConstants.js";
 /**
  * OrbitalSystem.ts
  *
@@ -121,8 +122,13 @@ export class OrbitalSystem {
   private readonly parameterMultilink;
 
   public constructor(options?: OrbitalSystemOptions) {
-    this.inclinationProperty = new NumberProperty(options?.inclination ?? 90, { range: INCLINATION_RANGE });
-    this.earthAzimuthProperty = new NumberProperty(options?.earthAzimuth ?? 270, { range: EARTH_AZIMUTH_RANGE });
+    this.inclinationProperty = new NumberProperty(options?.inclination ?? ORBITAL_SYSTEM_DEFAULTS.INCLINATION_DEGREES, {
+      range: INCLINATION_RANGE,
+    });
+    this.earthAzimuthProperty = new NumberProperty(
+      options?.earthAzimuth ?? ORBITAL_SYSTEM_DEFAULTS.EARTH_AZIMUTH_DEGREES,
+      { range: EARTH_AZIMUTH_RANGE },
+    );
 
     const starKg = (mass: number): number => mass * SUN_MASS_KG;
     const planetKg = (mass: number): number => mass * JUPITER_MASS_KG;
@@ -194,7 +200,7 @@ export class OrbitalSystem {
       }
       const elapsed = this.orbitsProperty.value - this.traceStart;
       const last = this.trace[this.trace.length - 1];
-      if (!last || elapsed - last.x >= sampleStep / 4) {
+      if (!last || elapsed - last.x >= sampleStep / ORBITAL_SYSTEM_DEFAULTS.TRACE_OVERSAMPLING) {
         this.trace.push(new Vector2(elapsed, this.radialVelocityProperty.value));
       }
     }

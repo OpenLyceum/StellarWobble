@@ -9,12 +9,13 @@ import { DerivedProperty, PatternStringProperty } from "scenerystack/axon";
 import { ScreenSummaryContent } from "scenerystack/sim";
 import { formatSignificant, toPlainText } from "../../common/view/chartUtils.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import { OBSERVATORY_SCREEN_SUMMARY_CONTENT_SETTINGS } from "../../StellarWobbleConstants.js";
 import type { ObservatoryModel } from "../model/ObservatoryModel.js";
 
 export class ObservatoryScreenSummaryContent extends ScreenSummaryContent {
   public constructor(model: ObservatoryModel) {
     const a11y = StringManager.getInstance().getObservatoryA11yStrings();
-    const plain = (value: number, digits = 3) =>
+    const plain = (value: number, digits: number = OBSERVATORY_SCREEN_SUMMARY_CONTENT_SETTINGS.DEFAULT_DIGITS) =>
       Number.isFinite(value) ? toPlainText(formatSignificant(value, digits)) : "-";
 
     super({
@@ -22,13 +23,15 @@ export class ObservatoryScreenSummaryContent extends ScreenSummaryContent {
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
       currentDetailsContent: new PatternStringProperty(a11y.currentDetailsPatternStringProperty, {
         count: model.measurementCountProperty,
-        period: new DerivedProperty([model.fitPeriodProperty], (period) => plain(period, 4)),
+        period: new DerivedProperty([model.fitPeriodProperty], (period) =>
+          plain(period, OBSERVATORY_SCREEN_SUMMARY_CONTENT_SETTINGS.PLAIN_DIGITS),
+        ),
         amplitude: new DerivedProperty([model.fitAmplitudeProperty], (amplitude) => plain(amplitude)),
         residual: new DerivedProperty([model.residualProperty], (residual) =>
           residual === null ? "-" : plain(residual),
         ),
         ratio: new DerivedProperty([model.normalizedResidualProperty], (ratio) =>
-          ratio === null ? "-" : plain(ratio, 2),
+          ratio === null ? "-" : plain(ratio, OBSERVATORY_SCREEN_SUMMARY_CONTENT_SETTINGS.PLAIN_DIGITS_SEGMENT_2),
         ),
       }),
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,

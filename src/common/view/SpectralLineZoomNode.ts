@@ -1,3 +1,4 @@
+import { SPECTRAL_LINE_ZOOM_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * SpectralLineZoomNode.ts
  *
@@ -33,8 +34,8 @@ export type SpectralLineZoomNodeOptions = {
   nodeOptions?: NodeOptions;
 };
 
-const LABEL_COLUMN = 34;
-const GAP = 3;
+const LABEL_COLUMN: number = SPECTRAL_LINE_ZOOM_NODE_SETTINGS.LABEL_COLUMN;
+const GAP: number = SPECTRAL_LINE_ZOOM_NODE_SETTINGS.GAP;
 
 export class SpectralLineZoomNode extends Node {
   private readonly disposeZoomNode: () => void;
@@ -76,7 +77,7 @@ export class SpectralLineZoomNode extends Node {
       maxWidth: width + LABEL_COLUMN,
     });
 
-    const labTop = 22;
+    const labTop: number = SPECTRAL_LINE_ZOOM_NODE_SETTINGS.LAB_TOP;
     const starTop = labTop + stripHeight + GAP;
     const profileTop = starTop + stripHeight + 6;
     const profileBottom = profileTop + profileHeight;
@@ -106,34 +107,40 @@ export class SpectralLineZoomNode extends Node {
     const labelOptions = {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.mutedTextColorProperty,
-      maxWidth: LABEL_COLUMN - 4,
+      maxWidth: LABEL_COLUMN - SPECTRAL_LINE_ZOOM_NODE_SETTINGS.LABEL_OPTIONS_MAX_WIDTH_OFFSET,
     };
     const labLabel = new Text(common.labSpectrumStringProperty, labelOptions);
     const starLabel = new Text(common.starSpectrumStringProperty, labelOptions);
-    labLabel.rightCenter = labFrame.leftCenter.plusXY(-4, 0);
-    starLabel.rightCenter = starFrame.leftCenter.plusXY(-4, 0);
+    labLabel.rightCenter = labFrame.leftCenter.plusXY(SPECTRAL_LINE_ZOOM_NODE_SETTINGS.LAB_LABEL_X_OFFSET, 0);
+    starLabel.rightCenter = starFrame.leftCenter.plusXY(SPECTRAL_LINE_ZOOM_NODE_SETTINGS.STAR_LABEL_X_OFFSET, 0);
 
     // ── Profile plot (intensity vs wavelength) ──────────────────────────────────
     const profileFrame = new Rectangle(LABEL_COLUMN, profileTop, width, profileHeight, {
       stroke: StellarWobbleColors.spectrumFrameColorProperty,
-      lineWidth: 0.5,
+      lineWidth: SPECTRAL_LINE_ZOOM_NODE_SETTINGS.PROFILE_FRAME_LINE_WIDTH,
     });
-    const profilePath = new Path(null, { stroke: StellarWobbleColors.profileColorProperty, lineWidth: 1.5 });
+    const profilePath = new Path(null, {
+      stroke: StellarWobbleColors.profileColorProperty,
+      lineWidth: SPECTRAL_LINE_ZOOM_NODE_SETTINGS.PROFILE_PATH_LINE_WIDTH,
+    });
     const deepest = Math.max(...STELLAR_LINES.map((l) => l.depth));
     const yOf = (intensity: number): number => profileTop + 3 + ((1 - intensity) / deepest) * (profileHeight - 6);
 
     const restX = xOf(line.restWavelength);
     const restMarker = new Line(restX, labTop - 3, restX, profileBottom, {
       stroke: StellarWobbleColors.restMarkerColorProperty,
-      lineDash: [3, 3],
+      lineDash: [
+        SPECTRAL_LINE_ZOOM_NODE_SETTINGS.REST_MARKER_LINE_DASH_DASH,
+        SPECTRAL_LINE_ZOOM_NODE_SETTINGS.REST_MARKER_LINE_DASH_DASH,
+      ],
       lineWidth: 1,
     });
 
     const arrowY = profileBottom + 9;
     const shiftArrow = new ArrowNode(0, 0, 1, 0, {
-      headHeight: 7,
-      headWidth: 8,
-      tailWidth: 2,
+      headHeight: SPECTRAL_LINE_ZOOM_NODE_SETTINGS.SHIFT_ARROW_HEAD_HEIGHT,
+      headWidth: SPECTRAL_LINE_ZOOM_NODE_SETTINGS.SHIFT_ARROW_HEAD_WIDTH,
+      tailWidth: SPECTRAL_LINE_ZOOM_NODE_SETTINGS.SHIFT_ARROW_TAIL_WIDTH,
       stroke: null,
     });
     shiftArrow.y = arrowY;
@@ -152,7 +159,10 @@ export class SpectralLineZoomNode extends Node {
     }
 
     const shiftValueProperty = new DerivedProperty([radialVelocityProperty], (velocity) =>
-      formatSigned(dopplerShift(line.restWavelength, velocity), 2),
+      formatSigned(
+        dopplerShift(line.restWavelength, velocity),
+        SPECTRAL_LINE_ZOOM_NODE_SETTINGS.SHIFT_VALUE_PROPERTY_DIGITS,
+      ),
     );
     const shiftStringProperty = new PatternStringProperty(common.shiftPatternStringProperty, {
       value: shiftValueProperty,
@@ -178,7 +188,7 @@ export class SpectralLineZoomNode extends Node {
 
     const placeReadouts = (): void => {
       shiftText.centerX = LABEL_COLUMN + width / 2;
-      shiftText.top = tickTop + 14;
+      shiftText.top = tickTop + SPECTRAL_LINE_ZOOM_NODE_SETTINGS.PLACE_READOUTS_TOP_OFFSET;
       magnificationText.centerX = LABEL_COLUMN + width / 2;
       magnificationText.top = shiftText.bottom + 1;
     };
@@ -230,7 +240,7 @@ export class SpectralLineZoomNode extends Node {
       magnificationText,
     ];
     title.left = LABEL_COLUMN;
-    title.bottom = labTop - 4;
+    title.bottom = labTop - SPECTRAL_LINE_ZOOM_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
 
     if (providedOptions?.nodeOptions) {
       this.mutate(providedOptions.nodeOptions);

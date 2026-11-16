@@ -1,3 +1,4 @@
+import { FULL_SPECTRUM_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * FullSpectrumNode.ts
  *
@@ -33,8 +34,8 @@ const LINE_LABELS: readonly (readonly [number, string])[] = [
   [656.28, "Hα"],
 ];
 
-const LABEL_COLUMN = 36;
-const TICK_SPACING_NM = 50;
+const LABEL_COLUMN: number = FULL_SPECTRUM_NODE_SETTINGS.LABEL_COLUMN;
+const TICK_SPACING_NM: number = FULL_SPECTRUM_NODE_SETTINGS.TICK_SPACING_NM;
 
 export class FullSpectrumNode extends Node {
   private readonly starStrip: SpectrumStripNode;
@@ -46,7 +47,7 @@ export class FullSpectrumNode extends Node {
   public constructor(radialVelocityProperty: TReadOnlyProperty<number>, width: number, options?: NodeOptions) {
     super();
     const common = StringManager.getInstance().getCommonStrings();
-    const stripHeight = 18;
+    const stripHeight: number = FULL_SPECTRUM_NODE_SETTINGS.STRIP_HEIGHT;
     const { min, max } = FULL_SPECTRUM_RANGE_NM;
     const xOf = (wavelength: number): number => LABEL_COLUMN + ((wavelength - min) / (max - min)) * width;
 
@@ -58,7 +59,7 @@ export class FullSpectrumNode extends Node {
       top: 0,
     });
 
-    const lineLabelTop = 20;
+    const lineLabelTop: number = FULL_SPECTRUM_NODE_SETTINGS.LINE_LABEL_TOP;
     const labTop = lineLabelTop + 14;
     const starTop = labTop + stripHeight + 3;
 
@@ -88,12 +89,12 @@ export class FullSpectrumNode extends Node {
     const labelOptions = {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.mutedTextColorProperty,
-      maxWidth: LABEL_COLUMN - 4,
+      maxWidth: LABEL_COLUMN - FULL_SPECTRUM_NODE_SETTINGS.LABEL_OPTIONS_MAX_WIDTH_OFFSET,
     };
     const labLabel = new Text(common.labSpectrumStringProperty, labelOptions);
     const starLabel = new Text(common.starSpectrumStringProperty, labelOptions);
-    labLabel.rightCenter = labFrame.leftCenter.plusXY(-4, 0);
-    starLabel.rightCenter = starFrame.leftCenter.plusXY(-4, 0);
+    labLabel.rightCenter = labFrame.leftCenter.plusXY(FULL_SPECTRUM_NODE_SETTINGS.LAB_LABEL_X_OFFSET, 0);
+    starLabel.rightCenter = starFrame.leftCenter.plusXY(FULL_SPECTRUM_NODE_SETTINGS.STAR_LABEL_X_OFFSET, 0);
 
     const lineLabels = LINE_LABELS.map(
       ([wavelength, label]) =>
@@ -113,7 +114,7 @@ export class FullSpectrumNode extends Node {
       );
       return new Rectangle(xOf(line.restWavelength) - boxWidth / 2, labTop - 2, boxWidth, 2 * stripHeight + 7, {
         stroke: StellarWobbleColors.profileColorProperty,
-        lineWidth: 1.5,
+        lineWidth: FULL_SPECTRUM_NODE_SETTINGS.ZOOM_BOXES_LINE_WIDTH,
       });
     });
 
@@ -132,7 +133,7 @@ export class FullSpectrumNode extends Node {
           font: FONTS.SMALL,
           fill: StellarWobbleColors.mutedTextColorProperty,
           centerX: x,
-          top: axisTop + 5,
+          top: axisTop + FULL_SPECTRUM_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET,
         }),
       );
     }

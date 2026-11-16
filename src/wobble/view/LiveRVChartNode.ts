@@ -1,3 +1,4 @@
+import { LIVE_RV_CHART_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * LiveRVChartNode.ts
  *
@@ -24,7 +25,7 @@ import StellarWobbleColors from "../../StellarWobbleColors.js";
 import { DAY_S, FONTS, TRACE_ORBITS } from "../../StellarWobbleConstants.js";
 
 /** Fraction of the y range left above the curve's peak. */
-const HEADROOM = 1.15;
+const HEADROOM: number = LIVE_RV_CHART_NODE_SETTINGS.HEADROOM;
 
 export class LiveRVChartNode extends Node {
   public constructor(system: OrbitalSystem, width: number, height: number, titleProperty: TReadOnlyProperty<string>) {
@@ -44,23 +45,23 @@ export class LiveRVChartNode extends Node {
     // Tinted halves: above zero the star moves away (red), below toward us (blue).
     const awayTint = new Rectangle(0, 0, width, height / 2, {
       fill: StellarWobbleColors.redshiftColorProperty,
-      opacity: 0.08,
+      opacity: LIVE_RV_CHART_NODE_SETTINGS.AWAY_TINT_OPACITY,
     });
     const towardTint = new Rectangle(0, height / 2, width, height / 2, {
       fill: StellarWobbleColors.blueshiftColorProperty,
-      opacity: 0.08,
+      opacity: LIVE_RV_CHART_NODE_SETTINGS.TOWARD_TINT_OPACITY,
     });
     const tintLabelOptions = { font: FONTS.SMALL, maxWidth: width / 2 };
     const awayLabel = new Text(common.movingAwayStringProperty, {
       ...tintLabelOptions,
       fill: StellarWobbleColors.redshiftColorProperty,
-      left: 4,
-      top: 2,
+      left: LIVE_RV_CHART_NODE_SETTINGS.AWAY_LABEL_LEFT,
+      top: LIVE_RV_CHART_NODE_SETTINGS.AWAY_LABEL_TOP,
     });
     const towardLabel = new Text(common.movingTowardStringProperty, {
       ...tintLabelOptions,
       fill: StellarWobbleColors.blueshiftColorProperty,
-      left: 4,
+      left: LIVE_RV_CHART_NODE_SETTINGS.TOWARD_LABEL_LEFT,
       bottom: height - 2,
     });
     const zeroLine = new Line(0, height / 2, width, height / 2, {
@@ -69,9 +70,9 @@ export class LiveRVChartNode extends Node {
 
     const tracePlot = new LinePlot(transform, [], {
       stroke: StellarWobbleColors.rvCurveColorProperty,
-      lineWidth: 2.5,
+      lineWidth: LIVE_RV_CHART_NODE_SETTINGS.TRACE_PLOT_LINE_WIDTH,
     });
-    const currentPoint = new Circle(5, {
+    const currentPoint = new Circle(LIVE_RV_CHART_NODE_SETTINGS.CURRENT_POINT_RADIUS, {
       fill: StellarWobbleColors.rvCurveColorProperty,
       stroke: StellarWobbleColors.chartBackgroundColorProperty,
     });
@@ -86,7 +87,7 @@ export class LiveRVChartNode extends Node {
     });
     title.boundsProperty.link(() => {
       title.centerX = width / 2;
-      title.bottom = -6;
+      title.bottom = LIVE_RV_CHART_NODE_SETTINGS.BOTTOM_BOTTOM;
     });
 
     let periodDays = 1;

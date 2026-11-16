@@ -1,3 +1,4 @@
+import { VIEWING_ANGLE_MODEL_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ViewingAngleModel.ts
  *
@@ -15,10 +16,10 @@ import { minimumPlanetMass } from "../../common/model/orbitPhysics.js";
 import { JUPITER_MASS_KG, SUN_MASS_KG } from "../../StellarWobbleConstants.js";
 
 /** Initial inclination, degrees. */
-const INITIAL_INCLINATION = 60;
+const INITIAL_INCLINATION: number = VIEWING_ANGLE_MODEL_SETTINGS.INITIAL_INCLINATION;
 
 /** Initial Earth direction, degrees (toward model −y, as on the Wobble screen). */
-const INITIAL_EARTH_AZIMUTH = 270;
+const INITIAL_EARTH_AZIMUTH: number = VIEWING_ANGLE_MODEL_SETTINGS.INITIAL_EARTH_AZIMUTH;
 
 export class ViewingAngleModel implements TModel {
   public readonly system = new OrbitalSystem({

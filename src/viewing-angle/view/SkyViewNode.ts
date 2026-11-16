@@ -1,3 +1,4 @@
+import { SKY_VIEW_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * SkyViewNode.ts
  *
@@ -23,7 +24,7 @@ import StellarWobbleColors from "../../StellarWobbleColors.js";
 import { FONTS } from "../../StellarWobbleConstants.js";
 
 const DEG = Math.PI / 180;
-const ORBIT_SAMPLES = 72;
+const ORBIT_SAMPLES: number = SKY_VIEW_NODE_SETTINGS.ORBIT_SAMPLES;
 
 export class SkyViewNode extends Node {
   public constructor(system: OrbitalSystem, size: number) {
@@ -40,13 +41,22 @@ export class SkyViewNode extends Node {
     const title = new Text(strings.skyViewTitleStringProperty, {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.textColorProperty,
-      maxWidth: size - 12,
-      left: 6,
-      top: 4,
+      maxWidth: size - SKY_VIEW_NODE_SETTINGS.TITLE_MAX_WIDTH_OFFSET,
+      left: SKY_VIEW_NODE_SETTINGS.TITLE_LEFT,
+      top: SKY_VIEW_NODE_SETTINGS.TITLE_TOP,
     });
-    const planetOrbit = new Path(null, { stroke: StellarWobbleColors.orbitPathColorProperty, lineDash: [3, 3] });
+    const planetOrbit = new Path(null, {
+      stroke: StellarWobbleColors.orbitPathColorProperty,
+      lineDash: [
+        SKY_VIEW_NODE_SETTINGS.PLANET_ORBIT_LINE_DASH_DASH,
+        SKY_VIEW_NODE_SETTINGS.PLANET_ORBIT_LINE_DASH_DASH,
+      ],
+    });
     const starOrbit = new Path(null, { stroke: StellarWobbleColors.starOrbitPathColorProperty, lineDash: [2, 2] });
-    const planet = new Circle(4, { fill: StellarWobbleColors.planetColorProperty, opacity: 0.6 });
+    const planet = new Circle(SKY_VIEW_NODE_SETTINGS.PLANET_RADIUS, {
+      fill: StellarWobbleColors.planetColorProperty,
+      opacity: SKY_VIEW_NODE_SETTINGS.PLANET_OPACITY,
+    });
     const star = new StarNode(system.starMassProperty, 8);
     const bodies = new Node({ children: [planet, star] });
 

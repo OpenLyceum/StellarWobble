@@ -10,12 +10,13 @@ import { ScreenSummaryContent } from "scenerystack/sim";
 import { dopplerShift, H_ALPHA } from "../../common/model/stellarSpectrum.js";
 import { formatSignificant, toPlainText } from "../../common/view/chartUtils.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import { DOPPLER_SCREEN_SUMMARY_CONTENT_SETTINGS } from "../../StellarWobbleConstants.js";
 import type { DopplerModel } from "../model/DopplerModel.js";
 
 /** Plain-text speech of a velocity in m/s with units ("100 kilometers per second" is read from "100 km/s"). */
 function speakVelocity(velocity: number, planetSpeeds: boolean, kms: string, ms: string): string {
   const value = planetSpeeds ? velocity : velocity / 1000;
-  return `${toPlainText(formatSignificant(value, 3))} ${planetSpeeds ? ms : kms}`;
+  return `${toPlainText(formatSignificant(value, DOPPLER_SCREEN_SUMMARY_CONTENT_SETTINGS.SPEAK_VELOCITY_DIGITS))} ${planetSpeeds ? ms : kms}`;
 }
 
 export class DopplerScreenSummaryContent extends ScreenSummaryContent {
@@ -56,7 +57,12 @@ export class DopplerScreenSummaryContent extends ScreenSummaryContent {
         sideways: velocityProperty(model.sidewaysVelocityProperty),
         shift: shiftProperty,
         delta: new DerivedProperty([model.radialVelocityProperty], (velocity) =>
-          toPlainText(formatSignificant(dopplerShift(H_ALPHA.restWavelength, velocity), 2)),
+          toPlainText(
+            formatSignificant(
+              dopplerShift(H_ALPHA.restWavelength, velocity),
+              DOPPLER_SCREEN_SUMMARY_CONTENT_SETTINGS.FORMAT_SIGNIFICANT_DIGITS,
+            ),
+          ),
         ),
       }),
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,

@@ -1,3 +1,4 @@
+import { DOPPLER_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * DopplerScreenView.ts
  *
@@ -47,9 +48,9 @@ import { WaveViewNode } from "./WaveViewNode.js";
 
 export type DopplerScreenViewOptions = ScreenViewOptions;
 
-const WAVE_VIEW_WIDTH = 560;
-const WAVE_VIEW_HEIGHT = 250;
-const ZOOM_WIDTH = 230;
+const WAVE_VIEW_WIDTH: number = DOPPLER_SCREEN_VIEW_SETTINGS.WAVE_VIEW_WIDTH;
+const WAVE_VIEW_HEIGHT: number = DOPPLER_SCREEN_VIEW_SETTINGS.WAVE_VIEW_HEIGHT;
+const ZOOM_WIDTH: number = DOPPLER_SCREEN_VIEW_SETTINGS.ZOOM_WIDTH;
 const FRAME_DT = 1 / 30;
 
 export class DopplerScreenView extends ScreenView {
@@ -79,7 +80,7 @@ export class DopplerScreenView extends ScreenView {
     // ── Spectra ───────────────────────────────────────────────────────────────
     const fullSpectrum = new FullSpectrumNode(model.radialVelocityProperty, WAVE_VIEW_WIDTH - 36);
     fullSpectrum.left = this.waveView.left;
-    fullSpectrum.top = this.waveView.bottom + 10;
+    fullSpectrum.top = this.waveView.bottom + DOPPLER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
 
     const zoomBeta = new SpectralLineZoomNode(H_BETA, model.radialVelocityProperty, model.magnificationProperty, {
       width: ZOOM_WIDTH,
@@ -87,12 +88,19 @@ export class DopplerScreenView extends ScreenView {
     const zoomAlpha = new SpectralLineZoomNode(H_ALPHA, model.radialVelocityProperty, model.magnificationProperty, {
       width: ZOOM_WIDTH,
     });
-    const zooms = new HBox({ spacing: 24, align: "top", children: [zoomBeta, zoomAlpha] });
+    const zooms = new HBox({
+      spacing: DOPPLER_SCREEN_VIEW_SETTINGS.ZOOMS_SPACING,
+      align: "top",
+      children: [zoomBeta, zoomAlpha],
+    });
     zooms.left = this.waveView.left;
     zooms.top = fullSpectrum.bottom + 8;
 
     // ── Controls ──────────────────────────────────────────────────────────────
-    const kmsControlOptions = { unitsProperty: units.kilometersPerSecondStringProperty, delta: 10 };
+    const kmsControlOptions = {
+      unitsProperty: units.kilometersPerSecondStringProperty,
+      delta: DOPPLER_SCREEN_VIEW_SETTINGS.KMS_CONTROL_OPTIONS_DELTA,
+    };
     const msControlOptions = { unitsProperty: units.metersPerSecondStringProperty, delta: 1 };
     const radialKms = createNumberControl(
       strings.radialVelocityStringProperty,
@@ -120,12 +128,12 @@ export class DopplerScreenView extends ScreenView {
     );
     const kmsVisibleProperty = DerivedProperty.not(model.planetSpeedsProperty);
     const kmsControls = new VBox({
-      spacing: 8,
+      spacing: DOPPLER_SCREEN_VIEW_SETTINGS.KMS_CONTROLS_SPACING,
       children: [radialKms, sidewaysKms],
       visibleProperty: kmsVisibleProperty,
     });
     const msControls = new VBox({
-      spacing: 8,
+      spacing: DOPPLER_SCREEN_VIEW_SETTINGS.MS_CONTROLS_SPACING,
       children: [radialMs, sidewaysMs],
       visibleProperty: model.planetSpeedsProperty,
     });
@@ -144,7 +152,7 @@ export class DopplerScreenView extends ScreenView {
 
     const controlPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 10,
+        spacing: DOPPLER_SCREEN_VIEW_SETTINGS.CONTROL_PANEL_SPACING,
         align: "left",
         children: [
           new Node({ children: [kmsControls, msControls] }),
@@ -154,7 +162,7 @@ export class DopplerScreenView extends ScreenView {
           componentsCheckbox,
         ],
       }),
-      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+      { minWidth: CONTROL_PANEL_WIDTH + DOPPLER_SCREEN_VIEW_SETTINGS.CONTROL_PANEL_MIN_WIDTH_OFFSET },
     );
 
     // ── Readouts ──────────────────────────────────────────────────────────────
@@ -169,7 +177,13 @@ export class DopplerScreenView extends ScreenView {
         ],
         (velocity, planetSpeeds, pattern, kms, ms) =>
           pattern
-            .replace("{{value}}", formatSigned(planetSpeeds ? velocity : velocity / 1000, 3))
+            .replace(
+              "{{value}}",
+              formatSigned(
+                planetSpeeds ? velocity : velocity / 1000,
+                DOPPLER_SCREEN_VIEW_SETTINGS.VELOCITY_TEXT_DIGITS,
+              ),
+            )
             .replace("{{units}}", planetSpeeds ? ms : kms),
       );
     const radialReadout = new RichText(
@@ -215,7 +229,10 @@ export class DopplerScreenView extends ScreenView {
     const equationValues = new RichText(
       new PatternStringProperty(strings.equationValuesPatternStringProperty, {
         shift: new DerivedProperty([model.radialVelocityProperty], (velocity) =>
-          formatSigned(dopplerShift(H_ALPHA.restWavelength, velocity), 2),
+          formatSigned(
+            dopplerShift(H_ALPHA.restWavelength, velocity),
+            DOPPLER_SCREEN_VIEW_SETTINGS.EQUATION_VALUES_DIGITS,
+          ),
         ),
         rest: String(H_ALPHA.restWavelength),
         velocity: new DerivedProperty([model.radialVelocityProperty], (velocity) =>
@@ -243,12 +260,12 @@ export class DopplerScreenView extends ScreenView {
     const explanationLabel = new Text(common.explanationButtonStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.textColorProperty,
-      maxWidth: CONTROL_PANEL_WIDTH - 40,
+      maxWidth: CONTROL_PANEL_WIDTH - DOPPLER_SCREEN_VIEW_SETTINGS.EXPLANATION_LABEL_MAX_WIDTH_OFFSET,
     });
 
     const readoutPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 6,
+        spacing: DOPPLER_SCREEN_VIEW_SETTINGS.READOUT_PANEL_SPACING,
         align: "left",
         children: [
           shiftDescription,
@@ -256,13 +273,20 @@ export class DopplerScreenView extends ScreenView {
           sidewaysReadout,
           equation,
           equationValues,
-          new HBox({ spacing: 8, children: [explanationButton, explanationLabel] }),
+          new HBox({
+            spacing: DOPPLER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_READOUT_PANEL_SPACING,
+            children: [explanationButton, explanationLabel],
+          }),
         ],
       }),
-      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+      { minWidth: CONTROL_PANEL_WIDTH + DOPPLER_SCREEN_VIEW_SETTINGS.READOUT_PANEL_MIN_WIDTH_OFFSET },
     );
 
-    const rightColumn = new VBox({ spacing: 10, align: "left", children: [controlPanel, readoutPanel] });
+    const rightColumn = new VBox({
+      spacing: DOPPLER_SCREEN_VIEW_SETTINGS.RIGHT_COLUMN_SPACING,
+      align: "left",
+      children: [controlPanel, readoutPanel],
+    });
     rightColumn.right = bounds.maxX - SCREEN_VIEW_MARGIN;
     rightColumn.top = bounds.minY + SCREEN_VIEW_MARGIN;
 
@@ -285,7 +309,7 @@ export class DopplerScreenView extends ScreenView {
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    timeControlNode.right = resetAllButton.left - 30;
+    timeControlNode.right = resetAllButton.left - DOPPLER_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
     timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.waveView, fullSpectrum, zooms, rightColumn, timeControlNode, resetAllButton];

@@ -1,3 +1,4 @@
+import { MYSTERY_TARGET_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * PlanetSignal.ts
  *
@@ -46,7 +47,7 @@ function logUniform(min: number, max: number): number {
  * kept only if its K is comfortably measurable.
  */
 export function randomMysterySignal(): PlanetSignal {
-  for (let attempt = 0; attempt < 1000; attempt++) {
+  for (let attempt = 0; attempt < MYSTERY_TARGET_SETTINGS.MAX_DRAW_ATTEMPTS; attempt++) {
     const starMass = 0.7 + 0.6 * dotRandom.nextDouble();
     const planetMass = logUniform(0.1, 10);
     const period = logUniform(2, 400);

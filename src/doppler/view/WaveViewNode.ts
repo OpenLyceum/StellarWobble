@@ -1,3 +1,4 @@
+import { WAVE_VIEW_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * WaveViewNode.ts
  *
@@ -31,9 +32,9 @@ import {
 import type { DopplerModel } from "../model/DopplerModel.js";
 
 /** Length of a velocity arrow at the maximum slider value, px. */
-const MAX_ARROW_LENGTH = 110;
-const BACKGROUND_STAR_COUNT = 70;
-const STAR_RADIUS = 16;
+const MAX_ARROW_LENGTH: number = WAVE_VIEW_NODE_SETTINGS.MAX_ARROW_LENGTH;
+const BACKGROUND_STAR_COUNT: number = WAVE_VIEW_NODE_SETTINGS.BACKGROUND_STAR_COUNT;
+const STAR_RADIUS: number = WAVE_VIEW_NODE_SETTINGS.STAR_RADIUS;
 
 type Wavefront = { center: Vector2; age: number };
 
@@ -78,7 +79,7 @@ export class WaveViewNode extends Node {
 
     this.wavesPath = new Path(null, {
       stroke: StellarWobbleColors.wavefrontColorProperty,
-      lineWidth: 1.5,
+      lineWidth: WAVE_VIEW_NODE_SETTINGS.WAVES_PATH_LINE_WIDTH,
       visibleProperty: this.showWavesProperty,
     });
 
@@ -88,35 +89,41 @@ export class WaveViewNode extends Node {
     const earthArrow = new ArrowNode(width / 2, height - 46, width / 2, height - 14, {
       fill: StellarWobbleColors.earthColorProperty,
       stroke: null,
-      headHeight: 10,
-      headWidth: 14,
-      tailWidth: 4,
+      headHeight: WAVE_VIEW_NODE_SETTINGS.EARTH_ARROW_HEAD_HEIGHT,
+      headWidth: WAVE_VIEW_NODE_SETTINGS.EARTH_ARROW_HEAD_WIDTH,
+      tailWidth: WAVE_VIEW_NODE_SETTINGS.EARTH_ARROW_TAIL_WIDTH,
     });
     const earthLabel = new Text(common.toEarthStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.earthColorProperty,
-      maxWidth: 120,
+      maxWidth: WAVE_VIEW_NODE_SETTINGS.EARTH_LABEL_MAX_WIDTH,
     });
     earthLabel.boundsProperty.link(() => {
-      earthLabel.left = width / 2 + 10;
-      earthLabel.centerY = height - 28;
+      earthLabel.left = width / 2 + WAVE_VIEW_NODE_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
+      earthLabel.centerY = height - WAVE_VIEW_NODE_SETTINGS.CONSTRUCTOR_CENTER_Y_OFFSET;
     });
     const lineOfSight = new Line(this.starCenter.x, this.starCenter.y, width / 2, height - 46, {
       stroke: StellarWobbleColors.earthColorProperty,
-      lineDash: [2, 5],
+      lineDash: [2, WAVE_VIEW_NODE_SETTINGS.LINE_OF_SIGHT_LINE_DASH_DASH],
       lineWidth: 1,
     });
 
     const note = new Text(strings.waveNoteStringProperty, {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.mutedTextColorProperty,
-      maxWidth: width - 16,
-      left: 8,
-      top: 6,
+      maxWidth: width - WAVE_VIEW_NODE_SETTINGS.NOTE_MAX_WIDTH_OFFSET,
+      left: WAVE_VIEW_NODE_SETTINGS.NOTE_LEFT,
+      top: WAVE_VIEW_NODE_SETTINGS.NOTE_TOP,
     });
 
     // ── Velocity arrows ──────────────────────────────────────────────────────────
-    const arrowOptions = { headHeight: 12, headWidth: 14, tailWidth: 4, stroke: "black", lineWidth: 0.5 };
+    const arrowOptions = {
+      headHeight: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_HEIGHT,
+      headWidth: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_WIDTH,
+      tailWidth: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_TAIL_WIDTH,
+      stroke: "black",
+      lineWidth: WAVE_VIEW_NODE_SETTINGS.ARROW_OPTIONS_LINE_WIDTH,
+    };
     const velocityArrow = new ArrowNode(0, 0, 1, 0, {
       ...arrowOptions,
       fill: StellarWobbleColors.velocityColorProperty,

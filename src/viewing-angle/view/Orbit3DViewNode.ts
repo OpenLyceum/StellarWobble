@@ -1,3 +1,4 @@
+import { ORBIT3_D_VIEW_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * Orbit3DViewNode.ts
  *
@@ -29,25 +30,28 @@ import { FONTS } from "../../StellarWobbleConstants.js";
 const DEG = Math.PI / 180;
 
 /** Drawn planet-orbit radius, px. */
-const PLANET_ORBIT_RADIUS = 115;
+const PLANET_ORBIT_RADIUS: number = ORBIT3_D_VIEW_NODE_SETTINGS.PLANET_ORBIT_RADIUS;
 
 /** Largest drawn radius of the star's own orbit, px. */
-const MAX_STAR_ORBIT_RADIUS = 30;
+const MAX_STAR_ORBIT_RADIUS: number = ORBIT3_D_VIEW_NODE_SETTINGS.MAX_STAR_ORBIT_RADIUS;
 
 /** Length of the Earth arrow and of the star's velocity arrow, px. */
-const EARTH_ARROW_LENGTH = 150;
-const VELOCITY_ARROW_LENGTH = 60;
+const EARTH_ARROW_LENGTH: number = ORBIT3_D_VIEW_NODE_SETTINGS.EARTH_ARROW_LENGTH;
+const VELOCITY_ARROW_LENGTH: number = ORBIT3_D_VIEW_NODE_SETTINGS.VELOCITY_ARROW_LENGTH;
 
-const ORBIT_SAMPLES = 90;
+const ORBIT_SAMPLES: number = ORBIT3_D_VIEW_NODE_SETTINGS.ORBIT_SAMPLES;
 
 /** Camera elevation range (degrees above the orbital plane) and keyboard step. */
-const ELEVATION_RANGE = new Range(-85, 85);
-const KEYBOARD_STEP_DEG = 5;
-const DRAG_DEG_PER_PX = 0.5;
+const ELEVATION_RANGE = new Range(
+  ORBIT3_D_VIEW_NODE_SETTINGS.ELEVATION_RANGE_MIN,
+  ORBIT3_D_VIEW_NODE_SETTINGS.ELEVATION_RANGE_MAX,
+);
+const KEYBOARD_STEP_DEG: number = ORBIT3_D_VIEW_NODE_SETTINGS.KEYBOARD_STEP_DEG;
+const DRAG_DEG_PER_PX: number = ORBIT3_D_VIEW_NODE_SETTINGS.DRAG_DEG_PER_PX;
 
 /** Initial camera: 25° above the orbital plane, side-on to the initial Earth direction (−y), so the Earth arrow lies across the view. */
-const INITIAL_ELEVATION = 25;
-const INITIAL_AZIMUTH = 90;
+const INITIAL_ELEVATION: number = ORBIT3_D_VIEW_NODE_SETTINGS.INITIAL_ELEVATION;
+const INITIAL_AZIMUTH: number = ORBIT3_D_VIEW_NODE_SETTINGS.INITIAL_AZIMUTH;
 
 /** Projected point: screen offset from the view centre (y down) and depth (toward the camera > 0). */
 type Projected = { point: Vector2; depth: number };
@@ -74,47 +78,75 @@ export class Orbit3DViewNode extends Node {
     const title = new Text(strings.view3DTitleStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.textColorProperty,
-      maxWidth: width - 16,
-      left: 8,
-      top: 6,
+      maxWidth: width - ORBIT3_D_VIEW_NODE_SETTINGS.TITLE_MAX_WIDTH_OFFSET,
+      left: ORBIT3_D_VIEW_NODE_SETTINGS.TITLE_LEFT,
+      top: ORBIT3_D_VIEW_NODE_SETTINGS.TITLE_TOP,
     });
     const notToScale = new Text(common.notToScaleStringProperty, {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.mutedTextColorProperty,
       maxWidth: width / 2,
-      left: 8,
-      top: 26,
+      left: ORBIT3_D_VIEW_NODE_SETTINGS.NOT_TO_SCALE_LEFT,
+      top: ORBIT3_D_VIEW_NODE_SETTINGS.NOT_TO_SCALE_TOP,
     });
 
-    const planeFill = new Path(null, { fill: StellarWobbleColors.orbitPathColorProperty, opacity: 0.12 });
-    const planetOrbit = new Path(null, { stroke: StellarWobbleColors.orbitPathColorProperty, lineDash: [4, 4] });
-    const starOrbit = new Path(null, { stroke: StellarWobbleColors.starOrbitPathColorProperty, lineDash: [2, 3] });
-    const normalLine = new Line(0, 0, 0, 0, { stroke: StellarWobbleColors.orbitPathColorProperty, lineDash: [1, 4] });
-    const barycenter = new Path(new Shape().moveTo(-5, -5).lineTo(5, 5).moveTo(-5, 5).lineTo(5, -5), {
-      stroke: StellarWobbleColors.barycenterColorProperty,
-      lineWidth: 2,
+    const planeFill = new Path(null, {
+      fill: StellarWobbleColors.orbitPathColorProperty,
+      opacity: ORBIT3_D_VIEW_NODE_SETTINGS.PLANE_FILL_OPACITY,
     });
+    const planetOrbit = new Path(null, {
+      stroke: StellarWobbleColors.orbitPathColorProperty,
+      lineDash: [
+        ORBIT3_D_VIEW_NODE_SETTINGS.PLANET_ORBIT_LINE_DASH_DASH,
+        ORBIT3_D_VIEW_NODE_SETTINGS.PLANET_ORBIT_LINE_DASH_DASH,
+      ],
+    });
+    const starOrbit = new Path(null, {
+      stroke: StellarWobbleColors.starOrbitPathColorProperty,
+      lineDash: [2, ORBIT3_D_VIEW_NODE_SETTINGS.STAR_ORBIT_LINE_DASH_DASH],
+    });
+    const normalLine = new Line(0, 0, 0, 0, {
+      stroke: StellarWobbleColors.orbitPathColorProperty,
+      lineDash: [1, ORBIT3_D_VIEW_NODE_SETTINGS.NORMAL_LINE_LINE_DASH_DASH],
+    });
+    const barycenter = new Path(
+      new Shape()
+        .moveTo(ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_X, ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_Y)
+        .lineTo(ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_Y_SEGMENT_2)
+        .moveTo(ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_X, ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_X_MOVE_TO_Y)
+        .lineTo(ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_X_SEGMENT_2, ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_Y),
+      {
+        stroke: StellarWobbleColors.barycenterColorProperty,
+        lineWidth: ORBIT3_D_VIEW_NODE_SETTINGS.BARYCENTER_LINE_WIDTH,
+      },
+    );
     const star = new StarNode(system.starMassProperty, 13);
-    const planet = new Circle(6, {
+    const planet = new Circle(ORBIT3_D_VIEW_NODE_SETTINGS.PLANET_RADIUS, {
       fill: StellarWobbleColors.planetColorProperty,
       stroke: StellarWobbleColors.textColorProperty,
-      lineWidth: 0.5,
+      lineWidth: ORBIT3_D_VIEW_NODE_SETTINGS.PLANET_LINE_WIDTH,
     });
 
     const earthArrow = new ArrowNode(0, 0, 1, 0, {
       fill: StellarWobbleColors.earthColorProperty,
       stroke: null,
-      headHeight: 12,
-      headWidth: 14,
-      tailWidth: 4,
+      headHeight: ORBIT3_D_VIEW_NODE_SETTINGS.EARTH_ARROW_HEAD_HEIGHT,
+      headWidth: ORBIT3_D_VIEW_NODE_SETTINGS.EARTH_ARROW_HEAD_WIDTH,
+      tailWidth: ORBIT3_D_VIEW_NODE_SETTINGS.EARTH_ARROW_TAIL_WIDTH,
     });
     const earthLabel = new Text(common.toEarthStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.earthColorProperty,
-      maxWidth: 90,
+      maxWidth: ORBIT3_D_VIEW_NODE_SETTINGS.EARTH_LABEL_MAX_WIDTH,
     });
 
-    const arrowOptions = { headHeight: 10, headWidth: 12, tailWidth: 3.5, stroke: "black", lineWidth: 0.5 };
+    const arrowOptions = {
+      headHeight: ORBIT3_D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_HEIGHT,
+      headWidth: ORBIT3_D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_HEAD_WIDTH,
+      tailWidth: ORBIT3_D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_TAIL_WIDTH,
+      stroke: "black",
+      lineWidth: ORBIT3_D_VIEW_NODE_SETTINGS.ARROW_OPTIONS_LINE_WIDTH,
+    };
     const velocityArrow = new ArrowNode(0, 0, 1, 0, {
       ...arrowOptions,
       fill: StellarWobbleColors.velocityColorProperty,
@@ -191,7 +223,10 @@ export class Orbit3DViewNode extends Node {
       const earthTip = project(toEarth.timesScalar(EARTH_ARROW_LENGTH)).point;
       earthArrow.setTailAndTip(center.x, center.y, earthTip.x, earthTip.y);
       const outward = earthTip.minus(center);
-      const labelOffset = outward.magnitude > 1 ? outward.normalized().timesScalar(18) : new Vector2(0, -18);
+      const labelOffset =
+        outward.magnitude > 1
+          ? outward.normalized().timesScalar(18)
+          : new Vector2(0, ORBIT3_D_VIEW_NODE_SETTINGS.LABEL_OFFSET_Y);
       earthLabel.center = earthTip.plus(labelOffset);
 
       // Star velocity and its line-of-sight part.

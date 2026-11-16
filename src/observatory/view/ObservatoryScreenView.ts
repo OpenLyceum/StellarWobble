@@ -1,3 +1,4 @@
+import { OBSERVATORY_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ObservatoryScreenView.ts
  *
@@ -56,8 +57,8 @@ import { PeriodogramNode } from "./PeriodogramNode.js";
 
 export type ObservatoryScreenViewOptions = ScreenViewOptions;
 
-const CHART_WIDTH = 610;
-const CHART_HEIGHT = 330;
+const CHART_WIDTH: number = OBSERVATORY_SCREEN_VIEW_SETTINGS.CHART_WIDTH;
+const CHART_HEIGHT: number = OBSERVATORY_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
 
 /** Targets whose planet also transits: their answer points to Transit Hunter. */
 const TRANSITING_TARGETS: readonly ObservatoryTarget[] = [ObservatoryTarget.HD_189733, ObservatoryTarget.HD_209458];
@@ -92,8 +93,8 @@ export class ObservatoryScreenView extends ScreenView {
 
     // ── Chart ─────────────────────────────────────────────────────────────────
     const chart = new ObservatoryChartNode(model, CHART_WIDTH, CHART_HEIGHT);
-    chart.left = bounds.minX + SCREEN_VIEW_MARGIN + 50;
-    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
+    chart.left = bounds.minX + SCREEN_VIEW_MARGIN + OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
+    chart.top = bounds.minY + SCREEN_VIEW_MARGIN + OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
     const periodogram = new PeriodogramNode(model, CHART_WIDTH, CHART_HEIGHT);
     periodogram.translation = chart.translation;
     model.showPeriodogramProperty.link((show) => {
@@ -116,7 +117,11 @@ export class ObservatoryScreenView extends ScreenView {
     ].map((item) => ({
       value: item.value,
       createNode: () =>
-        new Text(item.string, { font: FONTS.LABEL, fill: LIGHT_SURFACE_TEXT_FILL, maxWidth: CONTROL_PANEL_WIDTH - 60 }),
+        new Text(item.string, {
+          font: FONTS.LABEL,
+          fill: LIGHT_SURFACE_TEXT_FILL,
+          maxWidth: CONTROL_PANEL_WIDTH - OBSERVATORY_SCREEN_VIEW_SETTINGS.TARGET_ITEMS_MAX_WIDTH_OFFSET,
+        }),
     }));
     const comboListParent = new Node();
     const targetComboBox = new ComboBox(model.targetProperty, targetItems, comboListParent, {
@@ -126,7 +131,9 @@ export class ObservatoryScreenView extends ScreenView {
     const newMysteryButton = pushButton(strings.newMysteryStringProperty, () => model.newMysteryStar());
     const starMassText = new RichText(
       new PatternStringProperty(strings.starMassPatternStringProperty, {
-        value: new DerivedProperty([model.signalProperty], (signal) => formatSignificant(signal.starMass, 3)),
+        value: new DerivedProperty([model.signalProperty], (signal) =>
+          formatSignificant(signal.starMass, OBSERVATORY_SCREEN_VIEW_SETTINGS.STAR_MASS_FORMAT_SIGNIFICANT_DIGITS),
+        ),
       }),
       { font: FONTS.SMALL, fill: StellarWobbleColors.mutedTextColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
     );
@@ -139,13 +146,13 @@ export class ObservatoryScreenView extends ScreenView {
           new Text(new PatternStringProperty(strings.precisionPatternStringProperty, { value: precision }), {
             font: FONTS.LABEL,
             fill: StellarWobbleColors.textColorProperty,
-            maxWidth: 60,
+            maxWidth: OBSERVATORY_SCREEN_VIEW_SETTINGS.PRECISION_RADIOS_MAX_WIDTH,
           }),
       })),
       {
         orientation: "horizontal",
-        spacing: 12,
-        radioButtonOptions: { radius: 7 },
+        spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.PRECISION_RADIOS_SPACING,
+        radioButtonOptions: { radius: OBSERVATORY_SCREEN_VIEW_SETTINGS.PRECISION_RADIOS_RADIUS },
         accessibleName: a11y.controls.precisionStringProperty,
       },
     );
@@ -156,7 +163,7 @@ export class ObservatoryScreenView extends ScreenView {
       {
         unitsProperty: units.dayAbbreviationStringProperty,
         logarithmic: true,
-        significantFigures: 2,
+        significantFigures: OBSERVATORY_SCREEN_VIEW_SETTINGS.CADENCE_CONTROL_SIGNIFICANT_FIGURES,
         accessibleName: a11y.controls.cadenceStringProperty,
       },
     );
@@ -172,7 +179,7 @@ export class ObservatoryScreenView extends ScreenView {
         count: model.measurementCountProperty,
         span: new DerivedProperty([model.measurementCountProperty], () => {
           const last = model.measurements[model.measurements.length - 1];
-          return formatSignificant(last ? last.time : 0, 3);
+          return formatSignificant(last ? last.time : 0, OBSERVATORY_SCREEN_VIEW_SETTINGS.MEASUREMENTS_TEXT_DIGITS);
         }),
       }),
       { font: FONTS.SMALL, fill: StellarWobbleColors.mutedTextColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
@@ -180,7 +187,7 @@ export class ObservatoryScreenView extends ScreenView {
 
     const observingPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 8,
+        spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.OBSERVING_PANEL_SPACING,
         align: "left",
         children: [
           label(strings.targetStringProperty),
@@ -191,12 +198,15 @@ export class ObservatoryScreenView extends ScreenView {
           precisionRadios,
           cadenceControl,
           jitterCheckbox,
-          new HBox({ spacing: 8, children: [observeOneButton, observeTenButton] }),
+          new HBox({
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.OBSERVING_PANEL_SPACING,
+            children: [observeOneButton, observeTenButton],
+          }),
           clearButton,
           measurementsText,
         ],
       }),
-      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+      { minWidth: CONTROL_PANEL_WIDTH + OBSERVATORY_SCREEN_VIEW_SETTINGS.OBSERVING_PANEL_MIN_WIDTH_OFFSET },
     );
     observingPanel.right = bounds.maxX - SCREEN_VIEW_MARGIN;
     observingPanel.top = bounds.minY + SCREEN_VIEW_MARGIN;
@@ -212,7 +222,7 @@ export class ObservatoryScreenView extends ScreenView {
       {
         unitsProperty: units.daysStringProperty,
         logarithmic: true,
-        significantFigures: 5,
+        significantFigures: OBSERVATORY_SCREEN_VIEW_SETTINGS.PERIOD_CONTROL_SIGNIFICANT_FIGURES,
         delta: FIT_PERIOD_STEP_DECADES,
         accessibleName: a11y.controls.fitPeriodStringProperty,
       },
@@ -229,8 +239,8 @@ export class ObservatoryScreenView extends ScreenView {
       },
     );
     const phaseControl = createNumberControl(strings.fitPhaseStringProperty, model.fitPhaseProperty, new Range(0, 1), {
-      significantFigures: 2,
-      delta: 0.01,
+      significantFigures: OBSERVATORY_SCREEN_VIEW_SETTINGS.PHASE_CONTROL_SIGNIFICANT_FIGURES,
+      delta: OBSERVATORY_SCREEN_VIEW_SETTINGS.PHASE_CONTROL_DELTA,
       accessibleName: a11y.controls.fitPhaseStringProperty,
     });
     const foldCheckbox = createCheckbox(model.foldProperty, strings.foldDataStringProperty);
@@ -239,10 +249,12 @@ export class ObservatoryScreenView extends ScreenView {
     const residualText = new Text(
       new PatternStringProperty(strings.residualPatternStringProperty, {
         value: new DerivedProperty([model.residualProperty], (residual) =>
-          residual === null ? "—" : formatSignificant(residual, 3),
+          residual === null ? "—" : formatSignificant(residual, OBSERVATORY_SCREEN_VIEW_SETTINGS.RESIDUAL_TEXT_DIGITS),
         ),
         ratio: new DerivedProperty([model.normalizedResidualProperty], (ratio) =>
-          ratio === null ? "—" : formatSignificant(ratio, 2),
+          ratio === null
+            ? "—"
+            : formatSignificant(ratio, OBSERVATORY_SCREEN_VIEW_SETTINGS.RESIDUAL_TEXT_DIGITS_SEGMENT_2),
         ),
       }),
       { font: FONTS.READOUT, fill: StellarWobbleColors.fitCurveColorProperty, maxWidth: CHART_WIDTH },
@@ -250,16 +262,23 @@ export class ObservatoryScreenView extends ScreenView {
 
     const fitPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 8,
+        spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.FIT_PANEL_SPACING,
         align: "left",
         children: [
           new Text(strings.fitTitleStringProperty, {
             font: FONTS.TITLE,
             fill: StellarWobbleColors.fitCurveColorProperty,
-            maxWidth: 300,
+            maxWidth: OBSERVATORY_SCREEN_VIEW_SETTINGS.FIT_PANEL_MAX_WIDTH,
           }),
-          new HBox({ spacing: 18, align: "top", children: [periodControl, amplitudeControl, phaseControl] }),
-          new HBox({ spacing: 18, children: [foldCheckbox, showModelCheckbox, periodogramCheckbox] }),
+          new HBox({
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_FIT_PANEL_SPACING,
+            align: "top",
+            children: [periodControl, amplitudeControl, phaseControl],
+          }),
+          new HBox({
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_FIT_PANEL_SPACING,
+            children: [foldCheckbox, showModelCheckbox, periodogramCheckbox],
+          }),
           residualText,
         ],
       }),
@@ -294,8 +313,14 @@ export class ObservatoryScreenView extends ScreenView {
         const signal = model.signalProperty.value;
         const lines = [
           strings.answerPatternStringProperty.value
-            .replace("{{period}}", formatSignificant(signal.period, 4))
-            .replace("{{amplitude}}", formatSignificant(signal.amplitude, 3))
+            .replace(
+              "{{period}}",
+              formatSignificant(signal.period, OBSERVATORY_SCREEN_VIEW_SETTINGS.PERIOD_FORMAT_SIGNIFICANT_DIGITS),
+            )
+            .replace(
+              "{{amplitude}}",
+              formatSignificant(signal.amplitude, OBSERVATORY_SCREEN_VIEW_SETTINGS.AMPLITUDE_FORMAT_SIGNIFICANT_DIGITS),
+            )
             .replace("{{mass}}", formatPlanetMass(signalMinimumMass(signal))),
         ];
         if (signal.amplitude < model.precisionProperty.value / 3) {
@@ -327,17 +352,26 @@ export class ObservatoryScreenView extends ScreenView {
     );
     const resultPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 7,
+        spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.RESULT_PANEL_SPACING,
         align: "left",
         children: [
           inferredMassText,
           equation,
           revealButton,
           answerText,
-          new HBox({ spacing: 8, children: [explanationButton, label(common.explanationButtonStringProperty, 150)] }),
+          new HBox({
+            spacing: OBSERVATORY_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RESULT_PANEL_SPACING,
+            children: [
+              explanationButton,
+              label(
+                common.explanationButtonStringProperty,
+                OBSERVATORY_SCREEN_VIEW_SETTINGS.EXPLANATION_BUTTON_LABEL_MAX_WIDTH,
+              ),
+            ],
+          }),
         ],
       }),
-      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+      { minWidth: CONTROL_PANEL_WIDTH + OBSERVATORY_SCREEN_VIEW_SETTINGS.RESULT_PANEL_MIN_WIDTH_OFFSET },
     );
     resultPanel.right = observingPanel.right;
     resultPanel.top = observingPanel.bottom + 8;

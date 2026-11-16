@@ -1,3 +1,4 @@
+import { DOPPLER_MODEL_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * DopplerModel.ts
  *
@@ -33,11 +34,15 @@ export class DopplerModel implements TModel {
   public readonly planetSpeedsProperty = new BooleanProperty(false);
 
   /** Fast-star scale: radial and sideways velocity, km/s. */
-  public readonly radialVelocityKmsProperty = new NumberProperty(100, { range: STAR_SPEED_RANGE_KMS });
+  public readonly radialVelocityKmsProperty = new NumberProperty(DOPPLER_MODEL_SETTINGS.RADIAL_VELOCITY_KMS_DEFAULT, {
+    range: STAR_SPEED_RANGE_KMS,
+  });
   public readonly sidewaysVelocityKmsProperty = new NumberProperty(0, { range: STAR_SPEED_RANGE_KMS });
 
   /** Planet-sized scale: radial and sideways velocity, m/s. */
-  public readonly radialVelocityMsProperty = new NumberProperty(30, { range: WOBBLE_SPEED_RANGE_MS });
+  public readonly radialVelocityMsProperty = new NumberProperty(DOPPLER_MODEL_SETTINGS.RADIAL_VELOCITY_MS_DEFAULT, {
+    range: WOBBLE_SPEED_RANGE_MS,
+  });
   public readonly sidewaysVelocityMsProperty = new NumberProperty(0, { range: WOBBLE_SPEED_RANGE_MS });
 
   /** The active radial velocity, m/s (positive = away from Earth). */

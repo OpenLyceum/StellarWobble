@@ -1,3 +1,4 @@
+import { OBSERVATORY_MODEL_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ObservatoryModel.ts
  *
@@ -59,10 +60,10 @@ export type Measurement = {
 };
 
 /** Largest random shift of the time of night, days. */
-const TIME_OF_NIGHT_JITTER = 0.2;
+const TIME_OF_NIGHT_JITTER: number = OBSERVATORY_MODEL_SETTINGS.TIME_OF_NIGHT_JITTER;
 
 /** Chance that clouds cost a night. */
-const CLOUD_PROBABILITY = 0.2;
+const CLOUD_PROBABILITY: number = OBSERVATORY_MODEL_SETTINGS.CLOUD_PROBABILITY;
 
 export class ObservatoryModel implements TModel {
   public readonly targetProperty = new EnumerationProperty(ObservatoryTarget.MYSTERY);
@@ -71,14 +72,20 @@ export class ObservatoryModel implements TModel {
   public readonly signalProperty: Property<PlanetSignal>;
 
   /** Spectrograph precision (1σ noise of one measurement), m/s. */
-  public readonly precisionProperty = new NumberProperty(3, { validValues: [...INSTRUMENT_PRECISIONS_MS] });
+  public readonly precisionProperty = new NumberProperty(OBSERVATORY_MODEL_SETTINGS.PRECISION_DEFAULT, {
+    validValues: [...INSTRUMENT_PRECISIONS_MS],
+  });
 
   /** Days between observing nights. */
   public readonly cadenceProperty = new NumberProperty(1, { range: CADENCE_RANGE_DAYS });
 
   /** The user's model: period (days), amplitude (m/s), phase (0–1). */
-  public readonly fitPeriodProperty = new NumberProperty(10, { range: FIT_PERIOD_RANGE_DAYS });
-  public readonly fitAmplitudeProperty = new NumberProperty(20, { range: FIT_AMPLITUDE_RANGE_MS });
+  public readonly fitPeriodProperty = new NumberProperty(OBSERVATORY_MODEL_SETTINGS.FIT_PERIOD_DEFAULT, {
+    range: FIT_PERIOD_RANGE_DAYS,
+  });
+  public readonly fitAmplitudeProperty = new NumberProperty(OBSERVATORY_MODEL_SETTINGS.FIT_AMPLITUDE_DEFAULT, {
+    range: FIT_AMPLITUDE_RANGE_MS,
+  });
   public readonly fitPhaseProperty = new NumberProperty(0, { range: new Range(0, 1) });
 
   /** Plot the data folded on the fitted period (phase on the x axis). */

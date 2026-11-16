@@ -1,3 +1,4 @@
+import { PHASE_RV_CHART_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * PhaseRVChartNode.ts
  *
@@ -21,8 +22,8 @@ import StellarWobbleColors from "../../StellarWobbleColors.js";
 import { FONTS } from "../../StellarWobbleConstants.js";
 
 const DEG = Math.PI / 180;
-const SAMPLES = 120;
-const HEADROOM = 1.15;
+const SAMPLES: number = PHASE_RV_CHART_NODE_SETTINGS.SAMPLES;
+const HEADROOM: number = PHASE_RV_CHART_NODE_SETTINGS.HEADROOM;
 
 export class PhaseRVChartNode extends Node {
   public constructor(system: OrbitalSystem, width: number, height: number, titleProperty: TReadOnlyProperty<string>) {
@@ -43,26 +44,32 @@ export class PhaseRVChartNode extends Node {
 
     const awayTint = new Rectangle(0, 0, width, height / 2, {
       fill: StellarWobbleColors.redshiftColorProperty,
-      opacity: 0.08,
+      opacity: PHASE_RV_CHART_NODE_SETTINGS.AWAY_TINT_OPACITY,
     });
     const towardTint = new Rectangle(0, height / 2, width, height / 2, {
       fill: StellarWobbleColors.blueshiftColorProperty,
-      opacity: 0.08,
+      opacity: PHASE_RV_CHART_NODE_SETTINGS.TOWARD_TINT_OPACITY,
     });
     const zeroLine = new Line(0, height / 2, width, height / 2, {
       stroke: StellarWobbleColors.chartZeroLineColorProperty,
     });
     const ghostPlot = new LinePlot(transform, [], {
       stroke: StellarWobbleColors.ghostCurveColorProperty,
-      lineWidth: 2,
-      lineDash: [6, 4],
+      lineWidth: PHASE_RV_CHART_NODE_SETTINGS.GHOST_PLOT_LINE_WIDTH,
+      lineDash: [
+        PHASE_RV_CHART_NODE_SETTINGS.GHOST_PLOT_LINE_DASH_DASH,
+        PHASE_RV_CHART_NODE_SETTINGS.CONSTRUCTOR_GHOST_PLOT_LINE_DASH_DASH,
+      ],
     });
     const curvePlot = new LinePlot(transform, [], {
       stroke: StellarWobbleColors.rvCurveColorProperty,
-      lineWidth: 2.5,
+      lineWidth: PHASE_RV_CHART_NODE_SETTINGS.CURVE_PLOT_LINE_WIDTH,
     });
-    const cursor = new Line(0, 0, 0, height, { stroke: StellarWobbleColors.cursorColorProperty, opacity: 0.6 });
-    const cursorDot = new Circle(5, {
+    const cursor = new Line(0, 0, 0, height, {
+      stroke: StellarWobbleColors.cursorColorProperty,
+      opacity: PHASE_RV_CHART_NODE_SETTINGS.CURSOR_OPACITY,
+    });
+    const cursorDot = new Circle(PHASE_RV_CHART_NODE_SETTINGS.CURSOR_DOT_RADIUS, {
       fill: StellarWobbleColors.rvCurveColorProperty,
       stroke: StellarWobbleColors.chartBackgroundColorProperty,
     });
@@ -76,14 +83,21 @@ export class PhaseRVChartNode extends Node {
     });
     title.boundsProperty.link(() => {
       title.centerX = width / 2;
-      title.bottom = -6;
+      title.bottom = PHASE_RV_CHART_NODE_SETTINGS.BOTTOM_BOTTOM;
     });
 
     // Legend for the ghost curve.
     const legend = new HBox({
-      spacing: 5,
+      spacing: PHASE_RV_CHART_NODE_SETTINGS.LEGEND_SPACING,
       children: [
-        new Line(0, 0, 22, 0, { stroke: StellarWobbleColors.ghostCurveColorProperty, lineWidth: 2, lineDash: [6, 4] }),
+        new Line(0, 0, PHASE_RV_CHART_NODE_SETTINGS.LEGEND_END_X, 0, {
+          stroke: StellarWobbleColors.ghostCurveColorProperty,
+          lineWidth: PHASE_RV_CHART_NODE_SETTINGS.LEGEND_LINE_WIDTH,
+          lineDash: [
+            PHASE_RV_CHART_NODE_SETTINGS.LEGEND_LINE_DASH_DASH,
+            PHASE_RV_CHART_NODE_SETTINGS.CONSTRUCTOR_LEGEND_LINE_DASH_DASH,
+          ],
+        }),
         new Text(strings.edgeOnCurveStringProperty, {
           font: FONTS.SMALL,
           fill: StellarWobbleColors.mutedTextColorProperty,
@@ -92,8 +106,8 @@ export class PhaseRVChartNode extends Node {
       ],
     });
     legend.boundsProperty.link(() => {
-      legend.right = width - 4;
-      legend.top = 3;
+      legend.right = width - PHASE_RV_CHART_NODE_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
+      legend.top = PHASE_RV_CHART_NODE_SETTINGS.TOP_TOP;
     });
     chart.overlayLayer.addChild(legend);
 

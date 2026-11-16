@@ -1,3 +1,4 @@
+import { CHART_FRAME_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ChartFrameNode.ts
  *
@@ -109,9 +110,9 @@ export class ChartFrameNode extends Node {
     });
     const placeAxisLabels = (): void => {
       xAxisLabel.centerX = options.viewWidth / 2;
-      xAxisLabel.top = options.viewHeight + 20;
+      xAxisLabel.top = options.viewHeight + CHART_FRAME_NODE_SETTINGS.PLACE_AXIS_LABELS_TOP_OFFSET;
       yAxisLabel.centerY = options.viewHeight / 2;
-      yAxisLabel.right = -32;
+      yAxisLabel.right = CHART_FRAME_NODE_SETTINGS.RIGHT_RIGHT;
     };
     xAxisLabel.boundsProperty.lazyLink(placeAxisLabels);
     yAxisLabel.boundsProperty.lazyLink(placeAxisLabels);

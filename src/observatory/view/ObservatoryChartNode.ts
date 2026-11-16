@@ -1,3 +1,4 @@
+import { OBSERVATORY_CHART_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ObservatoryChartNode.ts
  *
@@ -32,36 +33,36 @@ import { signalVelocity } from "../model/PlanetSignal.js";
 import { panTimeWindow, zoomTimeWindow } from "./timeWindow.js";
 
 /** Smallest time span shown, days. */
-const MIN_TIME_SPAN = 10;
+const MIN_TIME_SPAN: number = OBSERVATORY_CHART_NODE_SETTINGS.MIN_TIME_SPAN;
 
 /** Smallest velocity half-range shown, m/s. */
-const MIN_HALF_RANGE = 5;
+const MIN_HALF_RANGE: number = OBSERVATORY_CHART_NODE_SETTINGS.MIN_HALF_RANGE;
 
-const POINT_RADIUS = 3;
-const ERROR_CAP = 3;
+const POINT_RADIUS: number = OBSERVATORY_CHART_NODE_SETTINGS.POINT_RADIUS;
+const ERROR_CAP: number = OBSERVATORY_CHART_NODE_SETTINGS.ERROR_CAP;
 
 /** Model-curve samples per cycle, and the limits on the total. */
-const SAMPLES_PER_CYCLE = 40;
-const MIN_SAMPLES = 200;
-const MAX_SAMPLES = 5000;
+const SAMPLES_PER_CYCLE: number = OBSERVATORY_CHART_NODE_SETTINGS.SAMPLES_PER_CYCLE;
+const MIN_SAMPLES: number = OBSERVATORY_CHART_NODE_SETTINGS.MIN_SAMPLES;
+const MAX_SAMPLES: number = OBSERVATORY_CHART_NODE_SETTINGS.MAX_SAMPLES;
 
 /** Narrowest time window the user can zoom in to, days. */
 const MIN_WINDOW_SPAN = 1;
 
 /** Zoom factor of one press of a zoom button. */
-const BUTTON_ZOOM_FACTOR = 2;
+const BUTTON_ZOOM_FACTOR: number = OBSERVATORY_CHART_NODE_SETTINGS.BUTTON_ZOOM_FACTOR;
 
 /** Fraction of the window that one press of a scroll button moves it (the buttons repeat when held). */
-const BUTTON_SCROLL_FRACTION = 0.2;
+const BUTTON_SCROLL_FRACTION: number = OBSERVATORY_CHART_NODE_SETTINGS.BUTTON_SCROLL_FRACTION;
 
 /** Zoom per pixel of vertical wheel motion: the window scales by exp(deltaY × this). */
-const WHEEL_ZOOM_PER_PIXEL = 0.002;
+const WHEEL_ZOOM_PER_PIXEL: number = OBSERVATORY_CHART_NODE_SETTINGS.WHEEL_ZOOM_PER_PIXEL;
 
 /** Wheel deltas in lines (Firefox) are converted to pixels with this factor. */
-const PIXELS_PER_WHEEL_LINE = 25;
+const PIXELS_PER_WHEEL_LINE: number = OBSERVATORY_CHART_NODE_SETTINGS.PIXELS_PER_WHEEL_LINE;
 
 /** Height of the zoom and scroll buttons. */
-const BUTTON_SIZE = 26;
+const BUTTON_SIZE: number = OBSERVATORY_CHART_NODE_SETTINGS.BUTTON_SIZE;
 
 export class ObservatoryChartNode extends Node {
   /** The zoom and scroll buttons, in focus order, for the screen's pdomOrder. */
@@ -98,29 +99,32 @@ export class ObservatoryChartNode extends Node {
     });
     const answerPlot = new LinePlot(transform, [], {
       stroke: StellarWobbleColors.answerCurveColorProperty,
-      lineWidth: 2,
-      lineDash: [6, 4],
+      lineWidth: OBSERVATORY_CHART_NODE_SETTINGS.ANSWER_PLOT_LINE_WIDTH,
+      lineDash: [
+        OBSERVATORY_CHART_NODE_SETTINGS.ANSWER_PLOT_LINE_DASH_DASH,
+        OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_ANSWER_PLOT_LINE_DASH_DASH,
+      ],
     });
     const fitPlot = new LinePlot(transform, [], {
       stroke: StellarWobbleColors.fitCurveColorProperty,
-      lineWidth: 2.5,
+      lineWidth: OBSERVATORY_CHART_NODE_SETTINGS.FIT_PLOT_LINE_WIDTH,
     });
     const errorBars = new Path(null, { stroke: StellarWobbleColors.measurementColorProperty, lineWidth: 1 });
     const points = new Path(null, {
       fill: StellarWobbleColors.measurementColorProperty,
       stroke: StellarWobbleColors.chartBackgroundColorProperty,
-      lineWidth: 0.5,
+      lineWidth: OBSERVATORY_CHART_NODE_SETTINGS.POINTS_LINE_WIDTH,
     });
     chart.plotLayer.children = [zeroLine, answerPlot, fitPlot, errorBars, points];
 
     const noData = new Text(strings.noDataStringProperty, {
       font: FONTS.LABEL,
       fill: StellarWobbleColors.mutedTextColorProperty,
-      maxWidth: width - 20,
+      maxWidth: width - OBSERVATORY_CHART_NODE_SETTINGS.NO_DATA_MAX_WIDTH_OFFSET,
     });
     noData.boundsProperty.link(() => {
       noData.centerX = width / 2;
-      noData.bottom = height / 2 - 10;
+      noData.bottom = height / 2 - OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_BOTTOM_OFFSET;
     });
     chart.overlayLayer.addChild(noData);
 
@@ -131,7 +135,7 @@ export class ObservatoryChartNode extends Node {
     });
     title.boundsProperty.link(() => {
       title.centerX = width / 2;
-      title.bottom = -6;
+      title.bottom = OBSERVATORY_CHART_NODE_SETTINGS.BOTTOM_BOTTOM;
     });
 
     /** Sets the ranges to fit the data and curves; returns the x range (days, or phase 0–1 when folded). */
@@ -344,10 +348,10 @@ export class ObservatoryChartNode extends Node {
       maxWidth: width,
     });
     const controls = new VBox({
-      spacing: 4,
+      spacing: OBSERVATORY_CHART_NODE_SETTINGS.CONTROLS_SPACING,
       children: [
         new HBox({
-          spacing: 6,
+          spacing: OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_CONTROLS_SPACING,
           children: [scrollEarlierButton, zoomOutButton, zoomInButton, scrollLaterButton, showAllButton],
         }),
         hint,
@@ -355,7 +359,7 @@ export class ObservatoryChartNode extends Node {
     });
     controls.boundsProperty.link(() => {
       controls.centerX = width / 2;
-      controls.top = chart.bottom + 6;
+      controls.top = chart.bottom + OBSERVATORY_CHART_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
     });
     this.timeControls = [scrollEarlierButton, zoomOutButton, zoomInButton, scrollLaterButton, showAllButton];
 

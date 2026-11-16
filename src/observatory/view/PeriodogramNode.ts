@@ -1,3 +1,4 @@
+import { PERIODOGRAM_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * PeriodogramNode.ts
  *
@@ -29,10 +30,10 @@ const PERIOD_TICKS = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000];
 const POWER_TICKS = [0, 0.25, 0.5, 0.75, 1];
 
 /** A click picks the highest peak within this many pixels of it. */
-const CLICK_PICK_PIXELS = 8;
+const CLICK_PICK_PIXELS: number = PERIODOGRAM_NODE_SETTINGS.CLICK_PICK_PIXELS;
 
 /** Height of the button below the plot. */
-const BUTTON_HEIGHT = 26;
+const BUTTON_HEIGHT: number = PERIODOGRAM_NODE_SETTINGS.BUTTON_HEIGHT;
 
 export class PeriodogramNode extends Node {
   /** The button below the plot, for the screen's pdomOrder. */
@@ -67,19 +68,19 @@ export class PeriodogramNode extends Node {
           font: FONTS.TICK_LABEL,
           fill: StellarWobbleColors.textColorProperty,
           centerX: x,
-          top: height + 6,
+          top: height + PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_TOP_OFFSET,
         }),
       );
     }
     for (const power of POWER_TICKS) {
       const y = powerToY(power);
       gridShape.moveTo(0, y).lineTo(width, y);
-      tickShape.moveTo(-5, y).lineTo(0, y);
+      tickShape.moveTo(PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_X, y).lineTo(0, y);
       tickLabels.addChild(
         new Text(formatTickValue(power, String(power).split(".")[1]?.length ?? 0), {
           font: FONTS.TICK_LABEL,
           fill: StellarWobbleColors.textColorProperty,
-          right: -7,
+          right: PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_RIGHT,
           centerY: y,
         }),
       );
@@ -104,7 +105,7 @@ export class PeriodogramNode extends Node {
     });
     yAxisLabel.boundsProperty.link(() => {
       yAxisLabel.centerY = height / 2;
-      yAxisLabel.right = -32;
+      yAxisLabel.right = PERIODOGRAM_NODE_SETTINGS.RIGHT_RIGHT;
     });
     const title = new Text(strings.periodogramTitleStringProperty, {
       font: FONTS.TITLE,
@@ -113,24 +114,27 @@ export class PeriodogramNode extends Node {
     });
     title.boundsProperty.link(() => {
       title.centerX = width / 2;
-      title.bottom = -6;
+      title.bottom = PERIODOGRAM_NODE_SETTINGS.BOTTOM_BOTTOM;
     });
 
     // ── Curve and markers ─────────────────────────────────────────────────────
     const curve = new Path(null, {
       stroke: StellarWobbleColors.measurementColorProperty,
-      lineWidth: 1.5,
+      lineWidth: PERIODOGRAM_NODE_SETTINGS.CURVE_LINE_WIDTH,
       pickable: false,
     });
     const fitLine = new Line(0, 0, 0, height, {
       stroke: StellarWobbleColors.fitCurveColorProperty,
-      lineWidth: 2,
+      lineWidth: PERIODOGRAM_NODE_SETTINGS.FIT_LINE_LINE_WIDTH,
       pickable: false,
     });
     const answerLine = new Line(0, 0, 0, height, {
       stroke: StellarWobbleColors.answerCurveColorProperty,
-      lineWidth: 2,
-      lineDash: [6, 4],
+      lineWidth: PERIODOGRAM_NODE_SETTINGS.ANSWER_LINE_LINE_WIDTH,
+      lineDash: [
+        PERIODOGRAM_NODE_SETTINGS.ANSWER_LINE_LINE_DASH_DASH,
+        PERIODOGRAM_NODE_SETTINGS.CONSTRUCTOR_ANSWER_LINE_LINE_DASH_DASH,
+      ],
       pickable: false,
     });
     const plotLayer = new Node({
@@ -142,7 +146,12 @@ export class PeriodogramNode extends Node {
       new PatternStringProperty(strings.periodogramNeedDataPatternStringProperty, {
         count: PERIODOGRAM_MIN_MEASUREMENTS,
       }),
-      { font: FONTS.LABEL, fill: StellarWobbleColors.mutedTextColorProperty, maxWidth: width - 20, pickable: false },
+      {
+        font: FONTS.LABEL,
+        fill: StellarWobbleColors.mutedTextColorProperty,
+        maxWidth: width - PERIODOGRAM_NODE_SETTINGS.MESSAGE_MAX_WIDTH_OFFSET,
+        pickable: false,
+      },
     );
     message.boundsProperty.link(() => {
       message.centerX = width / 2;
@@ -170,14 +179,14 @@ export class PeriodogramNode extends Node {
     const hint = new Text(strings.periodogramHintStringProperty, {
       font: FONTS.SMALL,
       fill: StellarWobbleColors.mutedTextColorProperty,
-      maxWidth: width - 220,
+      maxWidth: width - PERIODOGRAM_NODE_SETTINGS.HINT_MAX_WIDTH_OFFSET,
     });
     const placeControls = (): void => {
       const top = height + 44;
       const total = this.usePeakButton.width + 12 + hint.width;
       this.usePeakButton.left = width / 2 - total / 2;
       this.usePeakButton.top = top;
-      hint.left = this.usePeakButton.right + 12;
+      hint.left = this.usePeakButton.right + PERIODOGRAM_NODE_SETTINGS.PLACE_CONTROLS_LEFT_OFFSET;
       hint.centerY = this.usePeakButton.centerY;
     };
     this.usePeakButton.boundsProperty.lazyLink(placeControls);

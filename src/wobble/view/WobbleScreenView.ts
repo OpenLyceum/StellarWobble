@@ -1,3 +1,4 @@
+import { WOBBLE_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * WobbleScreenView.ts
  *
@@ -49,10 +50,10 @@ import { WobbleScreenSummaryContent } from "./WobbleScreenSummaryContent.js";
 
 export type WobbleScreenViewOptions = ScreenViewOptions;
 
-const TOP_VIEW_SIZE = 340;
-const CHART_WIDTH = 260;
-const CHART_HEIGHT = 250;
-const ZOOM_WIDTH = 290;
+const TOP_VIEW_SIZE: number = WOBBLE_SCREEN_VIEW_SETTINGS.TOP_VIEW_SIZE;
+const CHART_WIDTH: number = WOBBLE_SCREEN_VIEW_SETTINGS.CHART_WIDTH;
+const CHART_HEIGHT: number = WOBBLE_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
+const ZOOM_WIDTH: number = WOBBLE_SCREEN_VIEW_SETTINGS.ZOOM_WIDTH;
 
 export class WobbleScreenView extends ScreenView {
   private readonly topView: TopViewNode;
@@ -86,11 +87,11 @@ export class WobbleScreenView extends ScreenView {
       width: ZOOM_WIDTH,
     });
     zoom.left = this.topView.left;
-    zoom.top = this.topView.bottom + 10;
+    zoom.top = this.topView.bottom + WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
 
     // ── Chart ─────────────────────────────────────────────────────────────────
     const chart = new LiveRVChartNode(system, CHART_WIDTH, CHART_HEIGHT, strings.chartTitleStringProperty);
-    chart.left = this.topView.right + 20;
+    chart.left = this.topView.right + WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
     chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
 
     // ── Readouts ──────────────────────────────────────────────────────────────
@@ -123,25 +124,25 @@ export class WobbleScreenView extends ScreenView {
       a11y.controls.explanationStringProperty,
     );
     const explanationRow = new HBox({
-      spacing: 8,
+      spacing: WOBBLE_SCREEN_VIEW_SETTINGS.EXPLANATION_ROW_SPACING,
       children: [
         explanationButton,
         new Text(common.explanationButtonStringProperty, {
           font: FONTS.LABEL,
           fill: StellarWobbleColors.textColorProperty,
-          maxWidth: CHART_WIDTH - 40,
+          maxWidth: CHART_WIDTH - WOBBLE_SCREEN_VIEW_SETTINGS.EXPLANATION_ROW_MAX_WIDTH_OFFSET,
         }),
       ],
     });
     const readoutPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 6,
+        spacing: WOBBLE_SCREEN_VIEW_SETTINGS.READOUT_PANEL_SPACING,
         align: "left",
         children: [periodReadout, planetSpeedReadout, starSpeedReadout, equation, explanationRow],
       }),
-      { minWidth: CHART_WIDTH + 70 },
+      { minWidth: CHART_WIDTH + WOBBLE_SCREEN_VIEW_SETTINGS.READOUT_PANEL_MIN_WIDTH_OFFSET },
     );
-    readoutPanel.left = this.topView.right + 20;
+    readoutPanel.left = this.topView.right + WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
     readoutPanel.top = chart.bottom + 20;
 
     // ── Controls ──────────────────────────────────────────────────────────────
@@ -171,8 +172,8 @@ export class WobbleScreenView extends ScreenView {
       STAR_MASS_RANGE,
       {
         unitsProperty: units.solarMassesStringProperty,
-        significantFigures: 2,
-        delta: 0.05,
+        significantFigures: WOBBLE_SCREEN_VIEW_SETTINGS.STAR_MASS_CONTROL_SIGNIFICANT_FIGURES,
+        delta: WOBBLE_SCREEN_VIEW_SETTINGS.STAR_MASS_CONTROL_DELTA,
         accessibleName: a11y.controls.starMassStringProperty,
       },
     );
@@ -181,11 +182,11 @@ export class WobbleScreenView extends ScreenView {
 
     const controlPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 12,
+        spacing: WOBBLE_SCREEN_VIEW_SETTINGS.CONTROL_PANEL_SPACING,
         align: "left",
         children: [planetMassControl, distanceControl, starMassControl, telescopeCheckbox, velocityCheckbox],
       }),
-      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+      { minWidth: CONTROL_PANEL_WIDTH + WOBBLE_SCREEN_VIEW_SETTINGS.CONTROL_PANEL_MIN_WIDTH_OFFSET },
     );
     controlPanel.right = bounds.maxX - SCREEN_VIEW_MARGIN;
     controlPanel.top = bounds.minY + SCREEN_VIEW_MARGIN;
@@ -212,7 +213,7 @@ export class WobbleScreenView extends ScreenView {
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    timeControlNode.right = resetAllButton.left - 30;
+    timeControlNode.right = resetAllButton.left - WOBBLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
     timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.topView, zoom, chart, readoutPanel, controlPanel, timeControlNode, resetAllButton];

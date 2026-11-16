@@ -1,3 +1,4 @@
+import { FORMATTERS_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * formatters.ts
  *
@@ -11,7 +12,7 @@ import { StringManager } from "../../i18n/StringManager.js";
 import { DAY_S, EARTH_MASS_KG, JUPITER_MASS_KG } from "../../StellarWobbleConstants.js";
 import { formatSignificant } from "./chartUtils.js";
 
-const DAYS_PER_YEAR = 365.25;
+const DAYS_PER_YEAR: number = FORMATTERS_SETTINGS.DAYS_PER_YEAR;
 
 function valueWithUnits(value: string, units: string): string {
   return StringUtils.fillIn(StringManager.getInstance().getUnits().valueUnitsPatternStringProperty.value, {
@@ -25,12 +26,15 @@ export function formatPeriod(periodS: number): string {
   const units = StringManager.getInstance().getUnits();
   const days = periodS / DAY_S;
   return days < 2 * DAYS_PER_YEAR
-    ? valueWithUnits(formatSignificant(days, 3), units.daysStringProperty.value)
-    : valueWithUnits(formatSignificant(days / DAYS_PER_YEAR, 3), units.yearsStringProperty.value);
+    ? valueWithUnits(formatSignificant(days, FORMATTERS_SETTINGS.FORMAT_PERIOD_DIGITS), units.daysStringProperty.value)
+    : valueWithUnits(
+        formatSignificant(days / DAYS_PER_YEAR, FORMATTERS_SETTINGS.FORMAT_PERIOD_DIGITS),
+        units.yearsStringProperty.value,
+      );
 }
 
 /** A speed (m/s) in m/s below 1 km/s, otherwise in km/s. */
-export function formatSpeed(speed: number, digits = 3): string {
+export function formatSpeed(speed: number, digits: number = FORMATTERS_SETTINGS.DEFAULT_DIGITS): string {
   const units = StringManager.getInstance().getUnits();
   return Math.abs(speed) < 1000
     ? valueWithUnits(formatSignificant(speed, digits), units.metersPerSecondStringProperty.value)
@@ -42,10 +46,16 @@ export function formatPlanetMass(massJupiter: number): string {
   const units = StringManager.getInstance().getUnits();
   return massJupiter < 0.1
     ? valueWithUnits(
-        formatSignificant((massJupiter * JUPITER_MASS_KG) / EARTH_MASS_KG, 3),
+        formatSignificant(
+          (massJupiter * JUPITER_MASS_KG) / EARTH_MASS_KG,
+          FORMATTERS_SETTINGS.FORMAT_PLANET_MASS_DIGITS,
+        ),
         units.earthMassesStringProperty.value,
       )
-    : valueWithUnits(formatSignificant(massJupiter, 3), units.jupiterMassesStringProperty.value);
+    : valueWithUnits(
+        formatSignificant(massJupiter, FORMATTERS_SETTINGS.FORMAT_PLANET_MASS_DIGITS),
+        units.jupiterMassesStringProperty.value,
+      );
 }
 
 /** The smallest of 1, 2 or 5 × 10ⁿ that is at least `value` (for chart ranges). */

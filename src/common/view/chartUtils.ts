@@ -1,3 +1,4 @@
+import { CHART_UTILS_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * chartUtils.ts
  *
@@ -55,7 +56,7 @@ export const formatTickValue = (value: number, decimalPlaces: number): string =>
  * smaller is written in scientific notation with a superscript exponent
  * (rich text).
  */
-export const formatSignificant = (value: number, digits = 3): string => {
+export const formatSignificant = (value: number, digits: number = CHART_UTILS_SETTINGS.DEFAULT_DIGITS): string => {
   if (!Number.isFinite(value)) {
     return "—";
   }
@@ -72,7 +73,7 @@ export const formatSignificant = (value: number, digits = 3): string => {
 };
 
 /** Format with an explicit sign (+ or −), for velocities and shifts. */
-export const formatSigned = (value: number, digits = 3): string => {
+export const formatSigned = (value: number, digits: number = CHART_UTILS_SETTINGS.DEFAULT_DIGITS): string => {
   const text = formatSignificant(value, digits);
   return value > 0 ? `+${text}` : text;
 };

@@ -1,3 +1,4 @@
+import { SPECTRUM_STRIP_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * SpectrumStripNode.ts
  *
@@ -17,7 +18,7 @@ import { CanvasNode, type CanvasNodeOptions } from "scenerystack/scenery";
 import { VisibleColor } from "scenerystack/scenery-phet";
 
 /** Display gamma: VisibleColor values are already encoded, so scale them by brightness^(1/γ). */
-const DISPLAY_GAMMA = 2.2;
+const DISPLAY_GAMMA: number = SPECTRUM_STRIP_NODE_SETTINGS.DISPLAY_GAMMA;
 
 export class SpectrumStripNode extends CanvasNode {
   private readonly stripWidth: number;

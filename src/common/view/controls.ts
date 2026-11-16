@@ -1,3 +1,4 @@
+import { CONTROLS_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * controls.ts
  *
@@ -47,7 +48,7 @@ export type CreateNumberControlOptions = {
   numberControlOptions?: NumberControlOptions;
 };
 
-const DIALOG_TITLE_FONT = new PhetFont({ size: 20, weight: "bold" });
+const DIALOG_TITLE_FONT = new PhetFont({ size: CONTROLS_SETTINGS.DIALOG_TITLE_FONT_SIZE, weight: "bold" });
 
 /** Rounds a value to `significantFigures`. */
 const roundToFigures = (value: number, significantFigures: number): number =>
@@ -115,7 +116,11 @@ export function createNumberControl(
       {
         delta,
         accessibleName: options.accessibleName ?? titleProperty,
-        titleNodeOptions: { fill: StellarWobbleColors.textColorProperty, font: FONTS.LABEL, maxWidth: 130 },
+        titleNodeOptions: {
+          fill: StellarWobbleColors.textColorProperty,
+          font: FONTS.LABEL,
+          maxWidth: CONTROLS_SETTINGS.CREATE_NUMBER_CONTROL_MAX_WIDTH,
+        },
         numberDisplayOptions: {
           useRichText: true,
           textOptions: { fill: StellarWobbleColors.controlSurfaceTextColorProperty, font: FONTS.LABEL },
@@ -124,7 +129,7 @@ export function createNumberControl(
           numberFormatterDependencies: unitsProperty
             ? [unitsProperty, units.valueUnitsPatternStringProperty]
             : [units.valueUnitsPatternStringProperty],
-          maxWidth: 110,
+          maxWidth: CONTROLS_SETTINGS.CREATE_NUMBER_CONTROL_MAX_WIDTH_VARIANT_2,
         },
       },
       options.numberControlOptions,
@@ -140,7 +145,11 @@ export function createCheckbox(
 ): Checkbox {
   return new Checkbox(
     property,
-    new Text(labelProperty, { font: FONTS.LABEL, fill: StellarWobbleColors.textColorProperty, maxWidth: 180 }),
+    new Text(labelProperty, {
+      font: FONTS.LABEL,
+      fill: StellarWobbleColors.textColorProperty,
+      maxWidth: CONTROLS_SETTINGS.CREATE_CHECKBOX_MAX_WIDTH,
+    }),
     combineOptions<CheckboxOptions>({ accessibleName: labelProperty }, STELLAR_WOBBLE_CHECKBOX_OPTIONS, options),
   );
 }
@@ -158,18 +167,34 @@ export function createExplanationButton(
   const textFill = StellarWobbleColors.controlSurfaceTextColorProperty;
   return new InfoButton({
     iconFill: StellarWobbleColors.accentColorProperty,
-    scale: 0.6,
+    scale: CONTROLS_SETTINGS.CREATE_EXPLANATION_BUTTON_SCALE,
     accessibleName: accessibleNameProperty,
     listener: () => {
       if (!dialog) {
         const paragraphs = paragraphProperties.map(
           (paragraph) =>
-            new RichText(paragraph, { font: FONTS.EXPLANATION, fill: textFill, lineWrap: 600, leading: 3 }),
+            new RichText(paragraph, {
+              font: FONTS.EXPLANATION,
+              fill: textFill,
+              lineWrap: CONTROLS_SETTINGS.PARAGRAPHS_LINE_WRAP,
+              leading: 3,
+            }),
         );
-        dialog = new Dialog(new VBox({ align: "left", spacing: 14, children: paragraphs }), {
-          title: new Text(titleProperty, { font: DIALOG_TITLE_FONT, fill: textFill, maxWidth: 600 }),
-          fill: StellarWobbleColors.controlSurfaceColorProperty,
-        });
+        dialog = new Dialog(
+          new VBox({
+            align: "left",
+            spacing: CONTROLS_SETTINGS.CREATE_EXPLANATION_BUTTON_SPACING,
+            children: paragraphs,
+          }),
+          {
+            title: new Text(titleProperty, {
+              font: DIALOG_TITLE_FONT,
+              fill: textFill,
+              maxWidth: CONTROLS_SETTINGS.CREATE_EXPLANATION_BUTTON_MAX_WIDTH,
+            }),
+            fill: StellarWobbleColors.controlSurfaceColorProperty,
+          },
+        );
       }
       dialog.show();
     },
@@ -177,7 +202,10 @@ export function createExplanationButton(
 }
 
 /** Rich text visible only while the "Show equations" preference is on. */
-export function createEquationNode(equationProperty: TReadOnlyProperty<string>, maxWidth = 220): Node {
+export function createEquationNode(
+  equationProperty: TReadOnlyProperty<string>,
+  maxWidth: number = CONTROLS_SETTINGS.DEFAULT_MAX_WIDTH,
+): Node {
   return new RichText(equationProperty, {
     font: FONTS.READOUT,
     fill: StellarWobbleColors.accentColorProperty,

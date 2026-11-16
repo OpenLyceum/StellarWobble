@@ -1,3 +1,4 @@
+import { VIEWING_ANGLE_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ViewingAngleScreenView.ts
  *
@@ -46,15 +47,15 @@ import { ViewingAngleScreenSummaryContent } from "./ViewingAngleScreenSummaryCon
 
 export type ViewingAngleScreenViewOptions = ScreenViewOptions;
 
-const VIEW_3D_WIDTH = 390;
-const VIEW_3D_HEIGHT = 330;
-const SKY_VIEW_SIZE = 185;
-const CHART_WIDTH = 270;
-const CHART_HEIGHT = 200;
-const READOUT_WIDTH = 300;
+const VIEW_3D_WIDTH: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.VIEW_3_D_WIDTH;
+const VIEW_3D_HEIGHT: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.VIEW_3_D_HEIGHT;
+const SKY_VIEW_SIZE: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.SKY_VIEW_SIZE;
+const CHART_WIDTH: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CHART_WIDTH;
+const CHART_HEIGHT: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
+const READOUT_WIDTH: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.READOUT_WIDTH;
 
 /** Below this inclination (degrees) the face-on warning is shown. */
-const FACE_ON_WARNING_INCLINATION = 3;
+const FACE_ON_WARNING_INCLINATION: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.FACE_ON_WARNING_INCLINATION;
 
 export class ViewingAngleScreenView extends ScreenView {
   private readonly orbitView: Orbit3DViewNode;
@@ -83,11 +84,11 @@ export class ViewingAngleScreenView extends ScreenView {
 
     const skyView = new SkyViewNode(system, SKY_VIEW_SIZE);
     skyView.left = this.orbitView.left;
-    skyView.top = this.orbitView.bottom + 10;
+    skyView.top = this.orbitView.bottom + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_TOP_OFFSET;
 
     // ── Chart ─────────────────────────────────────────────────────────────────
     const chart = new PhaseRVChartNode(system, CHART_WIDTH, CHART_HEIGHT, strings.chartTitleStringProperty);
-    chart.left = this.orbitView.right + 20;
+    chart.left = this.orbitView.right + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_LEFT_OFFSET;
     chart.top = bounds.minY + SCREEN_VIEW_MARGIN + 22;
 
     // ── Readouts ──────────────────────────────────────────────────────────────
@@ -142,19 +143,19 @@ export class ViewingAngleScreenView extends ScreenView {
       a11y.controls.explanationStringProperty,
     );
     const explanationRow = new HBox({
-      spacing: 8,
+      spacing: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.EXPLANATION_ROW_SPACING,
       children: [
         explanationButton,
         new Text(common.explanationButtonStringProperty, {
           font: FONTS.LABEL,
           fill: StellarWobbleColors.textColorProperty,
-          maxWidth: READOUT_WIDTH - 40,
+          maxWidth: READOUT_WIDTH - VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.EXPLANATION_ROW_MAX_WIDTH_OFFSET,
         }),
       ],
     });
     const readoutPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 6,
+        spacing: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.READOUT_PANEL_SPACING,
         align: "left",
         children: [
           measuredReadout,
@@ -166,14 +167,18 @@ export class ViewingAngleScreenView extends ScreenView {
           explanationRow,
         ],
       }),
-      { minWidth: READOUT_WIDTH + 24 },
+      { minWidth: READOUT_WIDTH + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.READOUT_PANEL_MIN_WIDTH_OFFSET },
     );
     readoutPanel.left = skyView.right + 15;
     readoutPanel.top = chart.bottom + 50;
 
     // ── Controls ──────────────────────────────────────────────────────────────
     const tickLabel = (label: TReadOnlyProperty<string>): Text =>
-      new Text(label, { font: FONTS.SMALL, fill: StellarWobbleColors.textColorProperty, maxWidth: 60 });
+      new Text(label, {
+        font: FONTS.SMALL,
+        fill: StellarWobbleColors.textColorProperty,
+        maxWidth: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.TICK_LABEL_MAX_WIDTH,
+      });
     const inclinationControl = createNumberControl(
       strings.inclinationStringProperty,
       system.inclinationProperty,
@@ -181,7 +186,7 @@ export class ViewingAngleScreenView extends ScreenView {
       {
         unitsProperty: units.degreesStringProperty,
         compactUnits: true,
-        significantFigures: 2,
+        significantFigures: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.INCLINATION_CONTROL_SIGNIFICANT_FIGURES,
         delta: 1,
         accessibleName: a11y.controls.inclinationStringProperty,
         numberControlOptions: {
@@ -202,8 +207,8 @@ export class ViewingAngleScreenView extends ScreenView {
       {
         unitsProperty: units.degreesStringProperty,
         compactUnits: true,
-        significantFigures: 3,
-        delta: 5,
+        significantFigures: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.AZIMUTH_CONTROL_SIGNIFICANT_FIGURES,
+        delta: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.AZIMUTH_CONTROL_DELTA,
         accessibleName: a11y.controls.earthAzimuthStringProperty,
       },
     );
@@ -222,11 +227,11 @@ export class ViewingAngleScreenView extends ScreenView {
     });
     const controlPanel = new StellarWobblePanel(
       new VBox({
-        spacing: 14,
+        spacing: VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONTROL_PANEL_SPACING,
         align: "left",
         children: [inclinationControl, azimuthControl, planetMassControl, resetViewButton],
       }),
-      { minWidth: CONTROL_PANEL_WIDTH + 24 },
+      { minWidth: CONTROL_PANEL_WIDTH + VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONTROL_PANEL_MIN_WIDTH_OFFSET },
     );
     controlPanel.right = bounds.maxX - SCREEN_VIEW_MARGIN;
     controlPanel.top = bounds.minY + SCREEN_VIEW_MARGIN;
@@ -253,7 +258,7 @@ export class ViewingAngleScreenView extends ScreenView {
       right: bounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: bounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    timeControlNode.right = resetAllButton.left - 30;
+    timeControlNode.right = resetAllButton.left - VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.CONSTRUCTOR_RIGHT_OFFSET;
     timeControlNode.bottom = resetAllButton.bottom;
 
     this.children = [this.orbitView, skyView, chart, readoutPanel, controlPanel, timeControlNode, resetAllButton];

@@ -1,3 +1,4 @@
+import { PERIODOGRAM_NUMERICS } from "../../StellarWobbleConstants.js";
 /**
  * periodogram.ts
  *
@@ -86,7 +87,7 @@ function prepare(points: readonly PeriodogramPoint[]): Prepared | null {
 function powerFromSums(yc: number, ys: number, cc: number, ss: number, cs: number, totalSquares: number): number {
   const det = cc * ss - cs * cs;
   let explained: number;
-  if (det > 1e-12 * cc * ss) {
+  if (det > PERIODOGRAM_NUMERICS.MIN_RELATIVE_DETERMINANT * cc * ss) {
     // Normal equations [cc cs; cs ss][a b]ᵀ = [yc ys]ᵀ; the fit removes a·yc + b·ys.
     const a = (yc * ss - ys * cs) / det;
     const b = (ys * cc - yc * cs) / det;
@@ -137,8 +138,8 @@ export function lombScargle(points: readonly PeriodogramPoint[], options: Period
   const baseline = Math.max(last - first, options.minPeriod);
   const minFrequency = 1 / options.maxPeriod;
   const maxFrequency = 1 / options.minPeriod;
-  const maxCount = options.maxFrequencies ?? 40_000;
-  const idealStep = 1 / ((options.oversampling ?? 5) * baseline);
+  const maxCount = options.maxFrequencies ?? PERIODOGRAM_NUMERICS.MAX_FREQUENCIES;
+  const idealStep = 1 / ((options.oversampling ?? PERIODOGRAM_NUMERICS.OVERSAMPLING) * baseline);
   const count = Math.max(2, Math.min(maxCount, Math.floor((maxFrequency - minFrequency) / idealStep) + 1));
   const step = (maxFrequency - minFrequency) / (count - 1);
 
@@ -220,7 +221,7 @@ export function refinePeakPeriod(points: readonly PeriodogramPoint[], periodogra
   let x2 = low + ratio * (high - low);
   let p1 = powerAt(prepared, x1);
   let p2 = powerAt(prepared, x2);
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < PERIODOGRAM_NUMERICS.PEAK_ITERATIONS; i++) {
     if (p1 < p2) {
       low = x1;
       x1 = x2;
