@@ -68,7 +68,6 @@ Standard fleet pattern:
 
 ## Compliance carve-outs
 
-- `.github/workflows/ci.yml`: `unused-mode: advisory` until both Knip default and production baselines are reviewed and cleared ([Baton/doc/knip.md](https://github.com/OpenLyceum/Baton/blob/main/doc/knip.md)).
 - **Hardcoded colors (computed spectrum colours).** `SpectrumStripNode.paintCanvas` builds an `rgb(...)` fill per pixel
   column from `VisibleColor.wavelengthToColor` scaled by brightness. These are physical colours of
   light, not theme colours, so they do not belong in `StellarWobbleColors.ts`. LightAndAtoms does the
