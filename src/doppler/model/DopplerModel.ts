@@ -28,7 +28,7 @@ import {
 
 export class DopplerModel implements TModel {
   /** Animation clock for the wave picture (starts playing). */
-  public readonly timer = new TimeModel(true);
+  public readonly timer = new TimeModel({ initiallyPlaying: true });
 
   /** Use planet-sized speeds (m/s) instead of a fast-moving star (km/s). */
   public readonly planetSpeedsProperty = new BooleanProperty(false);

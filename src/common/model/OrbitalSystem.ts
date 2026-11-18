@@ -77,7 +77,7 @@ export class OrbitalSystem {
   public readonly earthAzimuthProperty: NumberProperty;
 
   /** Play/pause clock (starts playing). */
-  public readonly timer = new TimeModel(true);
+  public readonly timer = new TimeModel({ initiallyPlaying: true });
 
   public readonly timeSpeedProperty = new EnumerationProperty(TimeSpeed.NORMAL);
 
