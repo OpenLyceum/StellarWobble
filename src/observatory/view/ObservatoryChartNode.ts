@@ -262,6 +262,8 @@ export class ObservatoryChartNode extends Node {
     // Drag and wheel over the plot. The wheel is handled here so it does not also pan the whole sim.
     const dragArea = new Rectangle(0, 0, width, height, { fill: "rgba(0,0,0,0)", cursor: "ew-resize" });
     let lastDragX = 0;
+    // Pointer-only: drag-to-scroll the time axis. The scroll earlier/later, zoom and Show all
+    // buttons below the chart do the same from the keyboard.
     dragArea.addInputListener(
       new DragListener({
         start: (event) => {
