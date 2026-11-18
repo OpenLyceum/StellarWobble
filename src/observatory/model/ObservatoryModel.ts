@@ -49,6 +49,30 @@ import { ObservatoryTarget } from "./ObservatoryTarget.js";
 import { type PlanetSignal, randomMysterySignal, referenceSignal, signalVelocity } from "./PlanetSignal.js";
 import { lombScargle, type Periodogram, peakIndex, refinePeakPeriod } from "./periodogram.js";
 
+/** RMS residual (m/s) and the same scatter in units of each error bar. */
+type Residuals = {
+  readonly rms: number;
+  readonly normalized: number;
+};
+
+/** Residuals of a fit against the measurements, or null with no data. */
+function residualsOf(measurements: readonly Measurement[], fit: Omit<PlanetSignal, "starMass">): Residuals | null {
+  if (measurements.length === 0) {
+    return null;
+  }
+  let sum = 0;
+  let normalizedSum = 0;
+  for (const measurement of measurements) {
+    const difference = measurement.velocity - signalVelocity(fit, measurement.time);
+    sum += difference * difference;
+    normalizedSum += (difference / measurement.uncertainty) ** 2;
+  }
+  return {
+    rms: Math.sqrt(sum / measurements.length),
+    normalized: Math.sqrt(normalizedSum / measurements.length),
+  };
+}
+
 /** One radial-velocity measurement. */
 export type Measurement = {
   /** Time, days since the first night. */
@@ -110,16 +134,23 @@ export class ObservatoryModel implements TModel {
   public readonly measurementsChangedEmitter = new Emitter();
 
   /** Number of measurements (for readouts and descriptions). */
-  public readonly measurementCountProperty = new NumberProperty(0);
+  private readonly _measurementCountProperty = new NumberProperty(0);
+  public readonly measurementCountProperty: TReadOnlyProperty<number> = this._measurementCountProperty;
+
+  /** A copy of {@link measurements}, republished once per observing batch or clear. */
+  private readonly measurementsSnapshotProperty = new Property<readonly Measurement[]>([]);
+
+  /** Both residuals of the user's model against the measurements, computed together (null with no data). */
+  private readonly residualsProperty: TReadOnlyProperty<Residuals | null>;
 
   /** Root-mean-square difference between the measurements and the user's model, m/s (null with no data). */
-  public readonly residualProperty = new Property<number | null>(null);
+  public readonly residualProperty: TReadOnlyProperty<number | null>;
 
   /**
    * The same scatter in units of each measurement's error bar, √(mean (residual/σ)²):
    * about 1 when the model fits to within the noise (null with no data).
    */
-  public readonly normalizedResidualProperty = new Property<number | null>(null);
+  public readonly normalizedResidualProperty: TReadOnlyProperty<number | null>;
 
   /** Minimum planet mass from the user's model, Jupiter masses. */
   public readonly inferredMassProperty: TReadOnlyProperty<number>;
@@ -146,11 +177,16 @@ export class ObservatoryModel implements TModel {
       this.revealProperty.value = false;
     });
 
-    const updateResidual = (): void => this.updateResidual();
-    this.fitPeriodProperty.lazyLink(updateResidual);
-    this.fitAmplitudeProperty.lazyLink(updateResidual);
-    this.fitPhaseProperty.lazyLink(updateResidual);
-    this.measurementsChangedEmitter.addListener(updateResidual);
+    this.residualsProperty = new DerivedProperty(
+      [this.measurementsSnapshotProperty, this.fitPeriodProperty, this.fitAmplitudeProperty, this.fitPhaseProperty],
+      (measurements, period, amplitude, phase) => residualsOf(measurements, { period, amplitude, phase }),
+    );
+    this.residualProperty = new DerivedProperty([this.residualsProperty], (residuals) => residuals?.rms ?? null);
+    this.normalizedResidualProperty = new DerivedProperty(
+      [this.residualsProperty],
+      (residuals) => residuals?.normalized ?? null,
+    );
+
     this.measurementsChangedEmitter.addListener(() => {
       this.cachedPeriodogram = undefined;
     });
@@ -189,7 +225,8 @@ export class ObservatoryModel implements TModel {
     if (this.measurements.length > MAX_MEASUREMENTS) {
       this.measurements.splice(0, this.measurements.length - MAX_MEASUREMENTS);
     }
-    this.measurementCountProperty.value = this.measurements.length;
+    this._measurementCountProperty.value = this.measurements.length;
+    this.measurementsSnapshotProperty.value = this.measurements.slice();
     this.measurementsChangedEmitter.emit();
   }
 
@@ -197,7 +234,8 @@ export class ObservatoryModel implements TModel {
   public clearData(): void {
     this.measurements.length = 0;
     this.nextNight = 0;
-    this.measurementCountProperty.value = 0;
+    this._measurementCountProperty.value = 0;
+    this.measurementsSnapshotProperty.value = [];
     this.measurementsChangedEmitter.emit();
   }
 
@@ -262,23 +300,6 @@ export class ObservatoryModel implements TModel {
     if (period !== null) {
       this.fitPeriodProperty.value = period;
     }
-  }
-
-  private updateResidual(): void {
-    if (this.measurements.length === 0) {
-      this.residualProperty.value = null;
-      this.normalizedResidualProperty.value = null;
-      return;
-    }
-    let sum = 0;
-    let normalizedSum = 0;
-    for (const measurement of this.measurements) {
-      const difference = measurement.velocity - this.fitVelocity(measurement.time);
-      sum += difference * difference;
-      normalizedSum += (difference / measurement.uncertainty) ** 2;
-    }
-    this.residualProperty.value = Math.sqrt(sum / this.measurements.length);
-    this.normalizedResidualProperty.value = Math.sqrt(normalizedSum / this.measurements.length);
   }
 
   public reset(): void {
