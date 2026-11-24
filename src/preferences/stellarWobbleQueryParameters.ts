@@ -18,7 +18,9 @@ const stellarWobbleQueryParameters = QueryStringMachine.getAll({
    * default because the sim is pitched at introductory astronomy.
    */
   showEquations: {
-    type: "flag",
+    type: "custom",
+    defaultValue: false,
+    parse: (value: string | null): boolean => value === null || value === "true",
     public: true,
   },
 });
