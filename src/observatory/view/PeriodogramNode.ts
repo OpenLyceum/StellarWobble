@@ -1,3 +1,4 @@
+import { roundSymmetric } from "scenerystack/dot";
 import { PERIODOGRAM_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * PeriodogramNode.ts
@@ -206,7 +207,7 @@ export class PeriodogramNode extends Node {
       const columns = new Float64Array(Math.ceil(width) + 1).fill(-1);
       const { frequencies, power } = periodogram;
       for (let k = 0; k < frequencies.length; k++) {
-        const column = Math.round(periodToX(1 / (frequencies[k] ?? 1)));
+        const column = roundSymmetric(periodToX(1 / (frequencies[k] ?? 1)));
         if (column >= 0 && column < columns.length) {
           columns[column] = Math.max(columns[column] ?? -1, power[k] ?? 0);
         }

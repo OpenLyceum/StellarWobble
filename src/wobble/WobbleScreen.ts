@@ -8,18 +8,20 @@
  * Registered in the screens array in src/main.ts. Its home-screen and navigation-bar
  * icons come from createWobbleIcon() in src/common/StellarWobbleScreenIcons.ts.
  */
+
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
 import type { ScreenOptions } from "scenerystack/sim";
 import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createWobbleIcon } from "../common/StellarWobbleScreenIcons.js";
+import type { StellarWobblePreferencesModel } from "../preferences/StellarWobblePreferencesModel.js";
 import StellarWobbleColors from "../StellarWobbleColors.js";
 import { WobbleModel } from "./model/WobbleModel.js";
 import { WobbleKeyboardHelpContent } from "./view/WobbleKeyboardHelpContent.js";
 import { WobbleScreenView } from "./view/WobbleScreenView.js";
 
 // Require tandem to be explicit — accidental omission would break PhET-iO.
-type WobbleScreenOptions = ScreenOptions & { tandem: Tandem };
+type WobbleScreenOptions = ScreenOptions & { tandem: Tandem; preferences: StellarWobblePreferencesModel };
 
 export class WobbleScreen extends Screen<WobbleModel, WobbleScreenView> {
   public constructor(options: WobbleScreenOptions) {
@@ -28,7 +30,7 @@ export class WobbleScreen extends Screen<WobbleModel, WobbleScreenView> {
       () => new WobbleModel(),
       // View factory — receives the model instance
       (model) =>
-        new WobbleScreenView(model, {
+        new WobbleScreenView(model, options.preferences, {
           tandem: options.tandem.createTandem("view"),
         }),
       optionize<WobbleScreenOptions, EmptySelfOptions, ScreenOptions>()(

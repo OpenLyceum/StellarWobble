@@ -1,3 +1,4 @@
+import type { StellarWobblePreferencesModel } from "../../preferences/StellarWobblePreferencesModel.js";
 import { DOPPLER_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * DopplerScreenView.ts
@@ -56,7 +57,11 @@ const FRAME_DT = 1 / 30;
 export class DopplerScreenView extends ScreenView {
   private readonly waveView: WaveViewNode;
 
-  public constructor(model: DopplerModel, providedOptions?: DopplerScreenViewOptions) {
+  public constructor(
+    model: DopplerModel,
+    preferences: StellarWobblePreferencesModel,
+    providedOptions?: DopplerScreenViewOptions,
+  ) {
     const options = optionize<DopplerScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new DopplerScreenSummaryContent(model),
@@ -225,7 +230,11 @@ export class DopplerScreenView extends ScreenView {
             : StellarWobbleColors.transverseColorProperty;
     });
 
-    const equation = createEquationNode(strings.equationStringProperty, CONTROL_PANEL_WIDTH);
+    const equation = createEquationNode(
+      preferences.showEquationsProperty,
+      strings.equationStringProperty,
+      CONTROL_PANEL_WIDTH,
+    );
     const equationValues = new RichText(
       new PatternStringProperty(strings.equationValuesPatternStringProperty, {
         shift: new DerivedProperty([model.radialVelocityProperty], (velocity) =>

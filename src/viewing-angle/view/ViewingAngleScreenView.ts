@@ -1,3 +1,4 @@
+import type { StellarWobblePreferencesModel } from "../../preferences/StellarWobblePreferencesModel.js";
 import { VIEWING_ANGLE_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ViewingAngleScreenView.ts
@@ -60,7 +61,11 @@ const FACE_ON_WARNING_INCLINATION: number = VIEWING_ANGLE_SCREEN_VIEW_SETTINGS.F
 export class ViewingAngleScreenView extends ScreenView {
   private readonly orbitView: Orbit3DViewNode;
 
-  public constructor(model: ViewingAngleModel, providedOptions?: ViewingAngleScreenViewOptions) {
+  public constructor(
+    model: ViewingAngleModel,
+    preferences: StellarWobblePreferencesModel,
+    providedOptions?: ViewingAngleScreenViewOptions,
+  ) {
     const options = optionize<ViewingAngleScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new ViewingAngleScreenSummaryContent(model),
@@ -131,7 +136,11 @@ export class ViewingAngleScreenView extends ScreenView {
         (inclination) => inclination < FACE_ON_WARNING_INCLINATION,
       ),
     });
-    const equation = createEquationNode(strings.equationStringProperty, READOUT_WIDTH);
+    const equation = createEquationNode(
+      preferences.showEquationsProperty,
+      strings.equationStringProperty,
+      READOUT_WIDTH,
+    );
     const explanationButton = createExplanationButton(
       strings.explanationTitleStringProperty,
       [

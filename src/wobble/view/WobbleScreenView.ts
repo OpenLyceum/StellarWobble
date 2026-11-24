@@ -1,3 +1,4 @@
+import type { StellarWobblePreferencesModel } from "../../preferences/StellarWobblePreferencesModel.js";
 import { WOBBLE_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * WobbleScreenView.ts
@@ -58,7 +59,11 @@ const ZOOM_WIDTH: number = WOBBLE_SCREEN_VIEW_SETTINGS.ZOOM_WIDTH;
 export class WobbleScreenView extends ScreenView {
   private readonly topView: TopViewNode;
 
-  public constructor(model: WobbleModel, providedOptions?: WobbleScreenViewOptions) {
+  public constructor(
+    model: WobbleModel,
+    preferences: StellarWobblePreferencesModel,
+    providedOptions?: WobbleScreenViewOptions,
+  ) {
     const options = optionize<WobbleScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new WobbleScreenSummaryContent(model),
@@ -112,7 +117,7 @@ export class WobbleScreenView extends ScreenView {
     const starSpeedReadout = readout(strings.starSpeedPatternStringProperty, () =>
       formatSpeed(system.starSpeedProperty.value),
     );
-    const equation = createEquationNode(strings.equationStringProperty, CHART_WIDTH);
+    const equation = createEquationNode(preferences.showEquationsProperty, strings.equationStringProperty, CHART_WIDTH);
     const explanationButton = createExplanationButton(
       strings.explanationTitleStringProperty,
       [

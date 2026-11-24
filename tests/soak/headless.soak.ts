@@ -16,6 +16,7 @@ import { Tandem } from "scenerystack/tandem";
 import { DopplerScreen } from "../../src/doppler/DopplerScreen.js";
 import { StringManager } from "../../src/i18n/StringManager.js";
 import { ObservatoryScreen } from "../../src/observatory/ObservatoryScreen.js";
+import { StellarWobblePreferencesModel } from "../../src/preferences/StellarWobblePreferencesModel.js";
 import StellarWobbleColors from "../../src/StellarWobbleColors.js";
 import { ViewingAngleScreen } from "../../src/viewing-angle/ViewingAngleScreen.js";
 import { WobbleScreen } from "../../src/wobble/WobbleScreen.js";
@@ -24,23 +25,28 @@ import { describeHeadlessSoak } from "../helpers/headlessSoak.js";
 function buildSim() {
   const stringManager = StringManager.getInstance();
 
+  const simPreferences = new StellarWobblePreferencesModel(Tandem.ROOT.createTandem("preferences"));
   const screens = [
     new DopplerScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().dopplerStringProperty,
       tandem: Tandem.ROOT.createTandem("dopplerScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
     new WobbleScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().wobbleStringProperty,
       tandem: Tandem.ROOT.createTandem("wobbleScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
     new ViewingAngleScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().viewingAngleStringProperty,
       tandem: Tandem.ROOT.createTandem("viewingAngleScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
     new ObservatoryScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().observatoryStringProperty,
       tandem: Tandem.ROOT.createTandem("observatoryScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,

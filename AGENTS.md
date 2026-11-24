@@ -51,7 +51,7 @@ Physics and data: [`doc/model.md`](doc/model.md). Architecture and decisions:
 | `src/observatory/model/periodogram.ts` | Lomb–Scargle periodogram (rotation recurrence) and golden-section peak refinement |
 | `src/observatory/view/PeriodogramNode.ts` | Periodogram chart drawn in place of the measurements; click a peak or "Use highest peak" |
 | `src/observatory/view/timeWindow.ts` | Zoom and scroll limits of the Observatory chart's time axis (view state lives in `ObservatoryChartNode`, null = show all) |
-| `src/preferences/StellarWobblePreferencesModel.ts` | `stellarWobblePreferences` singleton: Show equations (`?showEquations`) |
+| `src/preferences/StellarWobblePreferencesModel.ts` | Show equations (`?showEquations`) |
 
 ## Accessibility
 
@@ -81,3 +81,7 @@ npm run lint && npm run check && npm run build && npm test
 
 For screenshots, run the dev server with `npx vite --port <free port>`. Screen models are reachable
 from the console as `phet.joist.sim.screens[i].model` (with `?screens=n`, at index 0).
+
+## Testing
+
+See the shared Vitest setup (`vitest.config.ts`, `tests/setup.ts`) and `tests/memory-leak.test.ts` for disposal coverage. Add sim-specific unit tests under `tests/` as physics and UI logic land.
