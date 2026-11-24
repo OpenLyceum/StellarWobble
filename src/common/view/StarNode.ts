@@ -7,9 +7,12 @@ import { STAR_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
  */
 
 import type { TReadOnlyProperty } from "scenerystack/axon";
+import { combineOptions, type StrictOmit } from "scenerystack/phet-core";
 import { Circle, Color, Node, type NodeOptions, RadialGradient } from "scenerystack/scenery";
 import { starTemperature } from "../model/starAppearance.js";
 import { blackbodyColor } from "./blackbodyColor.js";
+
+export type StarNodeOptions = StrictOmit<NodeOptions, "children">;
 
 export class StarNode extends Node {
   private readonly disposeStarNode: () => void;
@@ -18,11 +21,15 @@ export class StarNode extends Node {
    * @param starMassProperty - star mass, solar masses (sets the colour); a fixed number for a fixed star
    * @param radius - display radius, px
    */
-  public constructor(starMassProperty: TReadOnlyProperty<number> | number, radius: number, options?: NodeOptions) {
+  public constructor(
+    starMassProperty: TReadOnlyProperty<number> | number,
+    radius: number,
+    providedOptions?: StarNodeOptions,
+  ) {
     const glow = new Circle(radius * 1.9);
     // A thin darker rim keeps the pale disc visible on the light projector background.
     const disc = new Circle(radius, { lineWidth: radius * STAR_NODE_SETTINGS.DISC_LINE_WIDTH_FACTOR });
-    super({ children: [glow, disc], ...options });
+    super(combineOptions<NodeOptions>({}, providedOptions, { children: [glow, disc] }));
 
     const update = (mass: number): void => {
       const color = blackbodyColor(starTemperature(mass));

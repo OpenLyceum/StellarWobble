@@ -14,11 +14,14 @@ import { SPECTRUM_STRIP_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
 
 import { Multilink, type TReadOnlyProperty, type UnknownMultilink } from "scenerystack/axon";
 import { Bounds2 } from "scenerystack/dot";
+import { combineOptions, type StrictOmit } from "scenerystack/phet-core";
 import { CanvasNode, type CanvasNodeOptions } from "scenerystack/scenery";
 import { VisibleColor } from "scenerystack/scenery-phet";
 
 /** Display gamma: VisibleColor values are already encoded, so scale them by brightness^(1/γ). */
 const DISPLAY_GAMMA: number = SPECTRUM_STRIP_NODE_SETTINGS.DISPLAY_GAMMA;
+
+export type SpectrumStripNodeOptions = StrictOmit<CanvasNodeOptions, "canvasBounds">;
 
 export class SpectrumStripNode extends CanvasNode {
   private readonly stripWidth: number;
@@ -44,9 +47,9 @@ export class SpectrumStripNode extends CanvasNode {
     maxWavelength: number,
     intensity: (wavelength: number) => number,
     dependencies: readonly TReadOnlyProperty<unknown>[],
-    options?: CanvasNodeOptions,
+    providedOptions?: SpectrumStripNodeOptions,
   ) {
-    super({ canvasBounds: new Bounds2(0, 0, width, height), ...options });
+    super(combineOptions<CanvasNodeOptions>({}, providedOptions, { canvasBounds: new Bounds2(0, 0, width, height) }));
 
     this.stripWidth = width;
     this.stripHeight = height;
