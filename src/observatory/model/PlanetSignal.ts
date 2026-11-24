@@ -7,7 +7,7 @@ import { MYSTERY_TARGET_SETTINGS } from "../../StellarWobbleConstants.js";
  * and φ (phase) in 0–1. Also builds the signals of the Observatory targets.
  */
 
-import { dotRandom } from "scenerystack/dot";
+import { dotRandom, roundSymmetric } from "scenerystack/dot";
 import { minimumPlanetMass, semiAmplitudeFromPeriod } from "../../common/model/orbitPhysics.js";
 import { DAY_S, JUPITER_MASS_KG, SUN_MASS_KG } from "../../StellarWobbleConstants.js";
 import { ObservatoryTarget } from "./ObservatoryTarget.js";
@@ -60,7 +60,7 @@ export function randomMysterySignal(): PlanetSignal {
     );
     if (amplitude >= MYSTERY_AMPLITUDE_RANGE.min && amplitude <= MYSTERY_AMPLITUDE_RANGE.max) {
       return {
-        starMass: Math.round(starMass * 100) / 100,
+        starMass: roundSymmetric(starMass * 100) / 100,
         period: period,
         amplitude: amplitude,
         phase: dotRandom.nextDouble(),

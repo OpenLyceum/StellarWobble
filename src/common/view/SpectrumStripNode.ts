@@ -13,7 +13,7 @@ import { SPECTRUM_STRIP_NODE_SETTINGS } from "../../StellarWobbleConstants.js";
  */
 
 import { Multilink, type TReadOnlyProperty, type UnknownMultilink } from "scenerystack/axon";
-import { Bounds2 } from "scenerystack/dot";
+import { Bounds2, roundSymmetric } from "scenerystack/dot";
 import { combineOptions, type StrictOmit } from "scenerystack/phet-core";
 import { CanvasNode, type CanvasNodeOptions } from "scenerystack/scenery";
 import { VisibleColor } from "scenerystack/scenery-phet";
@@ -80,7 +80,7 @@ export class SpectrumStripNode extends CanvasNode {
       const value = Math.min(1, Math.max(0, this.intensity(this.columnWavelength(column))));
       const brightness = value ** (1 / DISPLAY_GAMMA);
       if (brightness > 0.01) {
-        context.fillStyle = `rgb(${Math.round(r * brightness)},${Math.round(g * brightness)},${Math.round(b * brightness)})`;
+        context.fillStyle = `rgb(${roundSymmetric(r * brightness)},${roundSymmetric(g * brightness)},${roundSymmetric(b * brightness)})`;
         // Overlap by a pixel fraction so antialiasing leaves no seams between columns.
         context.fillRect(column, 0, 1.5, this.stripHeight);
       }
