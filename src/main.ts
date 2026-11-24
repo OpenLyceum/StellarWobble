@@ -24,7 +24,7 @@ import { Tandem } from "scenerystack/tandem";
 import { DopplerScreen } from "./doppler/DopplerScreen.js";
 import { StringManager } from "./i18n/StringManager.js";
 import { ObservatoryScreen } from "./observatory/ObservatoryScreen.js";
-import { stellarWobblePreferences } from "./preferences/StellarWobblePreferencesModel.js";
+import { StellarWobblePreferencesModel } from "./preferences/StellarWobblePreferencesModel.js";
 import { StellarWobblePreferencesNode } from "./preferences/StellarWobblePreferencesNode.js";
 import StellarWobbleColors from "./StellarWobbleColors.js";
 import { ViewingAngleScreen } from "./viewing-angle/ViewingAngleScreen.js";
@@ -33,23 +33,28 @@ import { WobbleScreen } from "./wobble/WobbleScreen.js";
 onReadyToLaunch(() => {
   const stringManager = StringManager.getInstance();
 
+  const simPreferences = new StellarWobblePreferencesModel(Tandem.ROOT.createTandem("preferences"));
   const screens = [
     new DopplerScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().dopplerStringProperty,
       tandem: Tandem.ROOT.createTandem("dopplerScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
     new WobbleScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().wobbleStringProperty,
       tandem: Tandem.ROOT.createTandem("wobbleScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
     new ViewingAngleScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().viewingAngleStringProperty,
       tandem: Tandem.ROOT.createTandem("viewingAngleScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
     }),
     new ObservatoryScreen({
+      preferences: simPreferences,
       name: stringManager.getScreenNames().observatoryStringProperty,
       tandem: Tandem.ROOT.createTandem("observatoryScreen"),
       backgroundColorProperty: StellarWobbleColors.backgroundColorProperty,
@@ -67,7 +72,7 @@ onReadyToLaunch(() => {
       simulationOptions: {
         customPreferences: [
           {
-            createContent: (tandem: Tandem) => new StellarWobblePreferencesNode(stellarWobblePreferences, tandem),
+            createContent: (tandem: Tandem) => new StellarWobblePreferencesNode(simPreferences, tandem),
           },
         ],
       },

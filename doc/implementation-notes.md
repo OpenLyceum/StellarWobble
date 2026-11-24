@@ -53,8 +53,8 @@ src/
 - **The periodogram is cached and drawn per pixel column.** `ObservatoryModel.periodogram()` computes
   it on first use after the data change (rotation recurrence, no trig in the inner loop), and
   `PeriodogramNode` draws the highest power in each pixel column so no narrow peak disappears.
-- **Preferences are a module-level singleton** (`stellarWobblePreferences`). `main.ts` passes it to
-  the Preferences dialog and the views read it through `createEquationNode`.
+- `main.ts` passes one preferences model to the Preferences dialog and each screen. The views pass
+  its Show equations property to `createEquationNode`.
 
 ## Testing
 

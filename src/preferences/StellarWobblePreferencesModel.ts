@@ -5,11 +5,11 @@
  * Simulation. Each preference Property takes its initial value from the
  * corresponding query parameter in stellarWobbleQueryParameters.
  *
- * A single instance is shared by every screen (see {@link stellarWobblePreferences}).
+ * main.ts shares one instance with the dialog and screens.
  */
 
 import { BooleanProperty } from "scenerystack/axon";
-import { Tandem } from "scenerystack/tandem";
+import type { Tandem } from "scenerystack/tandem";
 import StellarWobbleNamespace from "../StellarWobbleNamespace.js";
 import stellarWobbleQueryParameters from "./stellarWobbleQueryParameters.js";
 
@@ -28,8 +28,5 @@ export class StellarWobblePreferencesModel {
     this.showEquationsProperty.reset();
   }
 }
-
-/** The sim-wide preferences, shared by main.ts (the Preferences dialog) and the screen views. */
-export const stellarWobblePreferences = new StellarWobblePreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
 StellarWobbleNamespace.register("StellarWobblePreferencesModel", StellarWobblePreferencesModel);

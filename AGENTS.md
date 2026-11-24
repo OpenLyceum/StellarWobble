@@ -51,7 +51,7 @@ Physics and data: [`doc/model.md`](doc/model.md). Architecture and decisions:
 | `src/observatory/model/periodogram.ts` | Lomb–Scargle periodogram (rotation recurrence) and golden-section peak refinement |
 | `src/observatory/view/PeriodogramNode.ts` | Periodogram chart drawn in place of the measurements; click a peak or "Use highest peak" |
 | `src/observatory/view/timeWindow.ts` | Zoom and scroll limits of the Observatory chart's time axis (view state lives in `ObservatoryChartNode`, null = show all) |
-| `src/preferences/StellarWobblePreferencesModel.ts` | `stellarWobblePreferences` singleton: Show equations (`?showEquations`) |
+| `src/preferences/StellarWobblePreferencesModel.ts` | Show equations (`?showEquations`) |
 
 ## Accessibility
 

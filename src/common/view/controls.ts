@@ -22,7 +22,6 @@ import { InfoButton, NumberControl, type NumberControlOptions, PhetFont } from "
 import { Dialog } from "scenerystack/sim";
 import { Checkbox, type CheckboxOptions } from "scenerystack/sun";
 import { StringManager } from "../../i18n/StringManager.js";
-import { stellarWobblePreferences } from "../../preferences/StellarWobblePreferencesModel.js";
 import StellarWobbleColors from "../../StellarWobbleColors.js";
 import { FONTS } from "../../StellarWobbleConstants.js";
 import {
@@ -203,6 +202,7 @@ export function createExplanationButton(
 
 /** Rich text visible only while the "Show equations" preference is on. */
 export function createEquationNode(
+  showEquationsProperty: TReadOnlyProperty<boolean>,
   equationProperty: TReadOnlyProperty<string>,
   maxWidth: number = CONTROLS_SETTINGS.DEFAULT_MAX_WIDTH,
 ): Node {
@@ -210,6 +210,6 @@ export function createEquationNode(
     font: FONTS.READOUT,
     fill: StellarWobbleColors.accentColorProperty,
     maxWidth: maxWidth,
-    visibleProperty: stellarWobblePreferences.showEquationsProperty,
+    visibleProperty: showEquationsProperty,
   });
 }

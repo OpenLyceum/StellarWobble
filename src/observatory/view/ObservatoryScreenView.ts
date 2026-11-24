@@ -1,3 +1,4 @@
+import type { StellarWobblePreferencesModel } from "../../preferences/StellarWobblePreferencesModel.js";
 import { OBSERVATORY_SCREEN_VIEW_SETTINGS } from "../../StellarWobbleConstants.js";
 /**
  * ObservatoryScreenView.ts
@@ -64,7 +65,11 @@ const CHART_HEIGHT: number = OBSERVATORY_SCREEN_VIEW_SETTINGS.CHART_HEIGHT;
 const TRANSITING_TARGETS: readonly ObservatoryTarget[] = [ObservatoryTarget.HD_189733, ObservatoryTarget.HD_209458];
 
 export class ObservatoryScreenView extends ScreenView {
-  public constructor(model: ObservatoryModel, providedOptions?: ObservatoryScreenViewOptions) {
+  public constructor(
+    model: ObservatoryModel,
+    preferences: StellarWobblePreferencesModel,
+    providedOptions?: ObservatoryScreenViewOptions,
+  ) {
     const options = optionize<ObservatoryScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       {
         screenSummaryContent: new ObservatoryScreenSummaryContent(model),
@@ -295,7 +300,11 @@ export class ObservatoryScreenView extends ScreenView {
       }),
       { font: FONTS.READOUT, fill: StellarWobbleColors.fitCurveColorProperty, maxWidth: CONTROL_PANEL_WIDTH },
     );
-    const equation = createEquationNode(strings.equationStringProperty, CONTROL_PANEL_WIDTH);
+    const equation = createEquationNode(
+      preferences.showEquationsProperty,
+      strings.equationStringProperty,
+      CONTROL_PANEL_WIDTH,
+    );
     const revealButton = pushButton(strings.revealStringProperty, () => {
       model.revealProperty.value = true;
     });
